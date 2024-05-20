@@ -1,3 +1,4 @@
+create database DiamondValuation;
 --Create Role table have id : int + name : nvarchar + description : nvarchar
 
 CREATE TABLE tblRole (
@@ -40,7 +41,7 @@ CREATE TABLE tblShape (
     name NVARCHAR(20) NOT NULL,
     image NVARCHAR(255)
 );
---Create table tblDiamond + id: int + proportions: nvarchar + diamondOrigin: nvarchar + caratWeight: float + measurements: nvarchar + polish: nvarchar + flourescence: nvarchar + color: int + cut: int + shapeId: int + clarity: nvarchar + symmetry: nvarchar
+--Create table tblDiamond + id: int + proportions: nvarchar + diamondOrigin: nvarchar + caratWeight: float + measurements: nvarchar + polish: nvarchar + fluorescence: nvarchar + color: int + cut: int + shapeId: int + clarity: nvarchar + symmetry: nvarchar
 CREATE TABLE tblDiamond (
     id INT PRIMARY KEY IDENTITY(1,1),
     proportions NVARCHAR(255) NOT NULL,
@@ -48,7 +49,7 @@ CREATE TABLE tblDiamond (
     caratWeight FLOAT NOT NULL,
     measurements NVARCHAR(255) NOT NULL,
     polish NVARCHAR(255) NOT NULL,
-    flourescence NVARCHAR(255) NOT NULL,
+    fluorescence NVARCHAR(255) NOT NULL,
     color INT NOT NULL,
     cut INT NOT NULL,
     shapeId INT NOT NULL,
@@ -70,13 +71,13 @@ INSERT INTO tblShape (name, image) VALUES ('Cushion', 'https://www.bluenile.com/
 
 
 --Import some data to tblDiamond 
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 1, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 2, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 3, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 4, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 5, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 6, 'VVS1', 'Excellent');
-INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 7, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 1, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 2, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 3, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 4, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 5, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 6, 'VVS1', 'Excellent');
+INSERT INTO tblDiamond (proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, shapeId, clarity, symmetry) VALUES ('Ideal', 'Russia', 1.5, '6.5x6.5x4.5', 'Excellent', 'None', 1, 1, 7, 'VVS1', 'Excellent');
 
 
 --Create table tblRequest have + id: int + note: nvarchar + createdDate: date + updatedDate: date + diamondId: int + userId: int + processId: int
