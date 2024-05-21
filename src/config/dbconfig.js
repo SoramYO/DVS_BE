@@ -1,12 +1,8 @@
 const config = {
-    user: 'sa', // sql user
-    password: '12345', //sql user password
-    server: 'localhost', // if it does not work try- localhost
-    database: 'DVS',
-    options: {
-        trustedconnection: true,
-        enableArithAbort: true,
-    },
+    user: 'diamond', // sql user
+    password: 'Sql12345', //sql user password
+    server: 'diamond1234.database.windows.net', // if it does not work try- localhost
+    database: 'DiamondValuation',
     port: 1433
 }
 

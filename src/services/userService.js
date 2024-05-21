@@ -8,14 +8,15 @@ const e = require('express');
 
 
 
-let handleUserLogin = (email, password) => {
+let handleUserLogin = (username, password) => {
     return new Promise(async (resolve, reject) => {
         try {
             let userData = {};
             var pool = await connectDB;
-            let isExist = await checkUserEmail(email);
+            let isExist = await checkUserEmail(username);
             if (isExist) {
-                let user = await pool.request().query("SELECT * FROM tblUser WHERE email = '" + email + "'");
+                let user = await pool.request()
+                    .query("SELECT username, password, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = '" + username + "'");
                 userData = user.recordset[0];
                 if (user.recordset.length > 0) {
                     //compare password
@@ -23,7 +24,7 @@ let handleUserLogin = (email, password) => {
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'OK';
-                        const { password, ...userWithoutPassword } = user.recordset[0];
+                        const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
                         userData.user = userWithoutPassword;
                     } else {
                         userData.errCode = 1;
@@ -46,11 +47,11 @@ let handleUserLogin = (email, password) => {
 };
 
 
-let checkUserEmail = (email) => {
+let checkUserEmail = (username) => {
     return new Promise(async (resolve, reject) => {
         try {
             var pool = await connectDB;
-            let user = await pool.request().query("SELECT * FROM tblUser WHERE email = '" + email + "'");
+            let user = await pool.request().query("SELECT * FROM Account WHERE username = '" + username + "'");
             if (user.recordset.length > 0) {
                 resolve(true);
             } else {
@@ -62,23 +63,25 @@ let checkUserEmail = (email) => {
     });
 };
 
-let handleUserRegister = (email, password, fullName, phone, address) => {
+let handleUserRegister = (username, password, firstName, lastName) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
             const hashedPassword = await bcrypt.hash(password, 10); // Hash the password using bcrypt
 
             const request = pool.request();
-            request.input('email', sql.VarChar, email);
-            request.input('password', sql.VarChar, hashedPassword);
-            request.input('fullName', sql.VarChar, fullName);
-            request.input('phone', sql.Int, phone);
-            request.input('address', sql.VarChar, address);
+            request.input('username', sql.NVarChar, username);
+            request.input('password', sql.NVarChar, hashedPassword);
+            request.input('firstName', sql.NVarChar, firstName);
+            request.input('lastName', sql.NVarChar, lastName);
+            request.input('roleId', sql.Int, 1);
+            request.input('status', sql.Int, 1);
+            request.input('createdAt', sql.DateTime, new Date());
 
             const result = await request.query(`
-        INSERT INTO tblUser (email, password, fullName, phone, address)
-        VALUES (@email, @password, @fullName, @phone, @address);
-      `);
+        INSERT INTO Account (username, password, firstName, lastName, roleId, status, createdAt)
+        VALUES (@username, @password, @firstName, @lastName, @roleId, @status, @createdAt)
+        `);
 
             resolve({ errCode: 0, message: 'Register success' });
         } catch (error) {

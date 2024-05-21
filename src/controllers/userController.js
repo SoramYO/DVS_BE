@@ -1,16 +1,16 @@
 var userService = require('../services/userService');
 
 let handleLogin = async (req, res) => {
-    let email = req.body.email;
+    let username = req.body.username;
     let password = req.body.password;
     //check email exist
-    if (!email || !password) {
-        return res.status(500).json({
+    if (!username || !password) {
+        return res.status(400).json({
             errCode: 1,
             message: 'Missing INPUT PARAMETER! Please check again!'
         })
     }
-    let userData = await userService.handleUserLogin(email, password);
+    let userData = await userService.handleUserLogin(username, password);
     //compare password
     //return user info
     //access_token:JWT (Json Web Token)
@@ -21,19 +21,19 @@ let handleLogin = async (req, res) => {
     })
 }
 let handleRegister = async (req, res) => {
-    let email = req.body.email;
+    let username = req.body.username;
     let password = req.body.password;
-    let fullName = req.body.fullName;
-    let phone = req.body.phone;
-    let address = req.body.address;
+    let firstName = req.body.firstName;
+    let lastName = req.body.lastName;
+
     //check email exist
-    if (!email || !password || !fullName) {
-        return res.status(500).json({
+    if (!username || !password || !firstName || !lastName) {
+        return res.status(400).json({
             errCode: 1,
             message: 'Missing INPUT PARAMETER! Please check again!'
         })
     }
-    let message = await userService.handleUserRegister(email, password, fullName, phone, address);
+    let message = await userService.handleUserRegister(username, password, firstName, lastName);
     return res.status(200).json(message)
 }
 
