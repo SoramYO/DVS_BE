@@ -92,68 +92,57 @@ let hashUserPassword = (password) => {
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-
             const pool = await connectDB;
-            const hashedPassword = await hashUserPassword(data.password)
-            const request = pool.request();
-            let users = await pool.request().query("SELECT username, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE ac.id = " + data.id);
-            if (users.recordset.length > 0) {
-                if (users.recordset.password !== data.password) {
-                    request.input('password', sql.NVarChar, hashedPassword);
-                } else {
-                    const hashedOldPassword = await hashUserPassword(users.recordset.password)
-                    request.input('password', sql.NVarChar, hashedOldPassword);
-                }
-                if (users.recordset.firstName !== data.firstName) {
-                    request.input('firstName', sql.NVarChar, data.firstName);
-                } else {
-                    request.input('firstName', sql.NVarChar, users.recordset.firstName);
-                }
-                if (users.recordset.lastName !== data.lastName) {
-                    request.input('lastName', sql.NVarChar, data.lastName);
-                } else {
-                    request.input('lastName', sql.NVarChar, users.recordset.lastName);
-                }
-                if (users.recordset.email !== data.email) {
-                    request.input('email', sql.NVarChar, data.email);
-                } else {
-                    request.input('email', sql.NVarChar, users.recordset.email);
-                }
-                if (users.recordset.phone !== data.phone) {
-                    request.input('phone', sql.NVarChar, data.phone);
-                } else {
-                    request.input('phone', sql.NVarChar, users.recordset.phone);
-                }
-                if (users.recordset.status !== data.status) {
-                    request.input('status', sql.Int, data.status);
-                } else {
-                    request.input('status', sql.Int, users.recordset.status);
-                }
-                if (users.recordset.role !== data.role) {
-                    request.input('roleId', sql.Int, data.roleId);
-                } else {
-                    request.input('roleId', sql.Int, users.recordset.roleId);
-                }
+            const hashedPassword = data.password ? await hashUserPassword(data.password) : null;
 
-                await request.query(`
-        UPDATE Account SET password = @password, firstName = @firstName, lastName = @lastName, email = @email, phone = @phone, status = @status, roleId = @roleId
-        WHERE id = ${data.id}
-        `);
-                resolve({
-                    errCode: 0,
-                    message: 'Update user success'
-                });
-            } else {
-                resolve({
+            // Truy xuất dữ liệu hiện tại của người dùng
+            const request = pool.request();
+            request.input('username', sql.NVarChar, data.username);
+
+            let currentUserResult = await request.query(`SELECT * FROM Account WHERE username = @username`);
+            let currentUser = currentUserResult.recordset[0];
+
+            if (!currentUser) {
+                return reject({
                     errCode: 1,
                     message: 'User not found'
                 });
             }
+
+            // Kết hợp dữ liệu mới với dữ liệu hiện tại
+            const updatedData = {
+                password: hashedPassword || currentUser.password,
+                firstName: data.firstName || currentUser.firstName,
+                lastName: data.lastName || currentUser.lastName,
+                email: data.email || currentUser.email,
+                phone: data.phone || currentUser.phone,
+                status: data.status !== undefined ? data.status : currentUser.status,
+                roleId: data.roleId || currentUser.roleId
+            };
+
+            request.input('password', sql.NVarChar, updatedData.password);
+            request.input('firstName', sql.NVarChar, updatedData.firstName);
+            request.input('lastName', sql.NVarChar, updatedData.lastName);
+            request.input('email', sql.NVarChar, updatedData.email);
+            request.input('phone', sql.NVarChar, updatedData.phone);
+            request.input('status', sql.Int, updatedData.status);
+            request.input('roleId', sql.Int, updatedData.roleId);
+
+            await request.query(`
+                UPDATE Account 
+                SET password = @password, firstName = @firstName, lastName = @lastName, email = @email, phone = @phone, status = @status, roleId = @roleId
+                WHERE username = @username
+            `);
+            resolve({
+                errCode: 0,
+                message: 'Update user success'
+            });
         } catch (error) {
             reject(error);
         }
     });
-}
+};
+
 
 
 
