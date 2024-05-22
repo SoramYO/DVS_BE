@@ -13,7 +13,7 @@ let handleUserLogin = (username, password) => {
         try {
             let userData = {};
             var pool = await connectDB;
-            let isExist = await checkUserEmail(username);
+            let isExist = await checkUserName(username);
             if (isExist) {
                 let user = await pool.request()
                     .query("SELECT username, password, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = '" + username + "'");
@@ -47,11 +47,11 @@ let handleUserLogin = (username, password) => {
 };
 
 
-let checkUserEmail = (username) => {
+let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
         try {
             var pool = await connectDB;
-            let user = await pool.request().query("SELECT * FROM Account WHERE username = '" + username + "'");
+            let user = await pool.request().query("SELECT username FROM Account WHERE username = '" + username + "'");
             if (user.recordset.length > 0) {
                 resolve(true);
             } else {
@@ -85,7 +85,7 @@ let handleUserRegister = (username, password, firstName, lastName) => {
 
             resolve({ errCode: 0, message: 'Register success' });
         } catch (error) {
-            let isExist = await checkUserEmail(email);
+            let isExist = await checkUserName(email);
             if (isExist) {
                 resolve({ errCode: 1, message: 'Email exist try another email!' });
             } else {
@@ -109,9 +109,21 @@ let compareUserPassword = (password, user) => {
         }
     })
 }
+let hashUserPassword = (password) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let hashPassword = await bcrypt.hashSync(password, salt);
+            resolve(hashPassword);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 
 module.exports = {
     handleUserLogin: handleUserLogin,
-    checkUserEmail: checkUserEmail,
-    handleUserRegister: handleUserRegister
+    checkUserName: checkUserName,
+    handleUserRegister: handleUserRegister,
+    hashUserPassword: hashUserPassword
 }
