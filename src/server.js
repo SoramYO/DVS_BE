@@ -1,22 +1,25 @@
-var express = require('express');
-var initWebRoutes = require('./routes/web');
-var bodyParser = require('body-parser');
-var cors = require('cors');
-require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
+const initWebRoutes = require('./routes/web');
+const { dbConnect } = require('./config/connectDb');
 
-var app = express();
+dotenv.config();
+
+const PORT = process.env.PORT || 8080;
+const app = express();
+
 var router = express.Router();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/api', router);
+app.use(cookieParser());
 
 initWebRoutes(app);
 
-
-let port = process.env.PORT || 8090;
-
-app.listen(port);
-
-console.log('Diamond API is runnning at ' + port);
+app.listen(PORT);
+console.log('Diamond API is runnning at ' + PORT);

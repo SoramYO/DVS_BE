@@ -66,50 +66,39 @@ let checkUserName = (username) => {
 let handleUserRegister = (username, password, firstName, lastName) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
-            const hashedPassword = await bcrypt.hash(password, 10); // Hash the password using bcrypt
+            let isExist = await checkUserName(username);
+            if (isExist) {
+                resolve({ errCode: 1, message: 'Email exist try another email!' });
+            } else if (!password || password.length < 6) {
+                resolve({
+                    errCode: 3,
+                    message: 'Password must be at least 6 characters long.'
+                });
+            } else {
+                const pool = await connectDB;
+                const hashedPassword = await bcrypt.hash(password, 10); // Hash the password using bcrypt
 
-            const request = pool.request();
-            request.input('username', sql.NVarChar, username);
-            request.input('password', sql.NVarChar, hashedPassword);
-            request.input('firstName', sql.NVarChar, firstName);
-            request.input('lastName', sql.NVarChar, lastName);
-            request.input('roleId', sql.Int, 1);
-            request.input('status', sql.Int, 1);
-            request.input('createdAt', sql.DateTime, new Date());
+                const request = pool.request();
+                request.input('username', sql.NVarChar, username);
+                request.input('password', sql.NVarChar, hashedPassword);
+                request.input('firstName', sql.NVarChar, firstName);
+                request.input('lastName', sql.NVarChar, lastName);
+                request.input('roleId', sql.Int, 1);
+                request.input('status', sql.Int, 1);
+                request.input('createdAt', sql.DateTime, new Date());
 
-            const result = await request.query(`
+                const result = await request.query(`
         INSERT INTO Account (username, password, firstName, lastName, roleId, status, createdAt)
         VALUES (@username, @password, @firstName, @lastName, @roleId, @status, @createdAt)
         `);
 
-            resolve({ errCode: 0, message: 'Register success' });
-        } catch (error) {
-            let isExist = await checkUserName(email);
-            if (isExist) {
-                resolve({ errCode: 1, message: 'Email exist try another email!' });
-            } else {
-                reject(error);
-            }
-        }
-    });
-};
-
-let compareUserPassword = (password, user) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            let same = await bcrypt.compare(password, user.password);
-            if (same) {
-                resolve(user);
-            } else {
-                resolve(null);
+                resolve({ errCode: 0, message: 'Register success' });
             }
         } catch (error) {
             reject(error);
         }
-    })
-}
+    });
+};
 
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {

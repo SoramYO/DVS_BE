@@ -1,6 +1,6 @@
 var userService = require('../services/userService');
 require('dotenv').config();
-
+const jwt = require('jsonwebtoken');
 let handleLogin = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
@@ -15,17 +15,16 @@ let handleLogin = async (req, res) => {
     //compare password
     //return user info
     //access_token:JWT (Json Web Token)
+    const accessToken = jwt.sign({ id: userData.user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
     return res.status(200).json({
         errCode: userData.errCode,
         message: userData.errMessage,
         user: userData.user ? userData.user : {},
-        accessToken: userData.accessToken
     })
 }
 let handleRegister = async (req, res) => {
     let { username, password, firstName, lastName } = req.body;
-
-    //check email exist
     if (!username || !password || !firstName || !lastName) {
         return res.status(400).json({
             errCode: 1,
