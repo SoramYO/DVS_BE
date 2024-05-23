@@ -3,6 +3,8 @@ var { connectDB, sql } = require('../config/connectDb');
 const salt = bcrypt.genSaltSync(10);
 var config = require('../config/dbconfig');
 const e = require('express');
+var Account = require('../models/Account');
+const connectMdb = require('../config/connectMdb');
 
 let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
@@ -19,25 +21,37 @@ let checkUserName = (username) => {
         }
     });
 };
-
-let getAllUsers = (id) => {
+let getUserById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            var pool = await connectDB;
-            let users = '';
-            if (id === 'ALL') {
-                users = await pool.request().query("SELECT username, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id");
-            }
-            if (id !== 'ALL') {
-                users = await pool.request().query("SELECT username, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE ac.id = " + id);
-            }
-            resolve(users.recordset);
-            console.log(users.recordset);
+            const pool = await connectDB;
+            const user = await pool.request().query(`
+          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          FROM Account as ac
+          JOIN Role as r ON ac.roleId = r.id
+          WHERE ac.id = ${id}
+        `);
+            resolve(user.recordset);
         } catch (error) {
             reject(error);
         }
     });
-}
+};
+const getAllUsers = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const users = await pool.request().query(`
+          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          FROM Account as ac
+          JOIN Role as r ON ac.roleId = r.id
+        `);
+            resolve(users.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
 let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -48,28 +62,37 @@ let createNewUser = (data) => {
                     message: 'Email exist try another email!'
                 });
             } else {
-                const pool = await connectDB;
-                const hashedPassword = await hashUserPassword(data.password)
-                const request = pool.request();
-                request.input('username', sql.NVarChar, data.username);
-                request.input('password', sql.NVarChar, hashedPassword);
-                request.input('firstName', sql.NVarChar, data.firstName);
-                request.input('lastName', sql.NVarChar, data.lastName);
-                request.input('email', sql.NVarChar, data.email);
-                request.input('phone', sql.NVarChar, data.phone);
-                request.input('createdAt', sql.DateTime, new Date());
-                request.input('status', sql.Int, data.status);
-                request.input('roleId', sql.Int, data.roleId);
+                const user = await Account.create(data)
+                if (!user) {
+                    return reject({
+                        errCode: 1,
+                        message: 'Create new user failed'
+                    });
+                }
 
-                await request.query(`
-        INSERT INTO Account (username, password, firstName, lastName, email, phone, createdAt, status, roleId)
-        VALUES (@username, @password, @firstName, @lastName, @email, @phone, @createdAt, @status, @roleId)
-        `);
 
-                resolve({
-                    errCode: 0,
-                    message: 'Create new user success'
-                });
+                //         const pool = await connectDB;
+                //         const hashedPassword = await hashUserPassword(data.password)
+                //         const request = pool.request();
+                //         request.input('username', sql.NVarChar, data.username);
+                //         request.input('password', sql.NVarChar, hashedPassword);
+                //         request.input('firstName', sql.NVarChar, data.firstName);
+                //         request.input('lastName', sql.NVarChar, data.lastName);
+                //         request.input('email', sql.NVarChar, data.email);
+                //         request.input('phone', sql.NVarChar, data.phone);
+                //         request.input('createdAt', sql.DateTime, new Date());
+                //         request.input('status', sql.Int, data.status);
+                //         request.input('roleId', sql.Int, data.roleId);
+
+                //         await request.query(`
+                // INSERT INTO Account (username, password, firstName, lastName, email, phone, createdAt, status, roleId)
+                // VALUES (@username, @password, @firstName, @lastName, @email, @phone, @createdAt, @status, @roleId)
+                // `);
+
+                //         resolve({
+                //             errCode: 0,
+                //             message: 'Create new user success'
+                //         });
             }
         } catch (error) {
             reject(error);
@@ -148,6 +171,7 @@ let updateUser = (data) => {
 
 module.exports = {
     checkUserName: checkUserName,
+    getUserById: getUserById,
     getAllUsers: getAllUsers,
     createNewUser: createNewUser,
     hashUserPassword: hashUserPassword,

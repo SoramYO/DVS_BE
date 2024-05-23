@@ -1,8 +1,11 @@
 //Create table tblProcess have id: int processStatus: nvarchar actor: nvarchar
-class tblProcess {
-    constructor(id, processStatus, actor) {
-        this.id = id;
-        this.processStatus = processStatus;
-        this.actor = actor;
-    }
-}
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+const ProcessSchema = new Schema({
+    processStatus: { type: String },
+    actor: { type: String }
+});
+
+const Process = mongoose.model('Process', ProcessSchema);
+
+module.exports = Process;

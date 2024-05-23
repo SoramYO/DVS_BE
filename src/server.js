@@ -1,4 +1,3 @@
-var tblDiamond = require('./models/tblDiamond');
 var express = require('express');
 var initWebRoutes = require('./routes/web');
 var bodyParser = require('body-parser');

@@ -1,12 +1,13 @@
 //Create table tblRequest have + id: int + note: nvarchar + createdDate: date + updatedDate: date + diamondId: int + userId: int + processId: int
-class tblRequest {
-    constructor(id, note, createdDate, updatedDate, diamondId, userId, processId) {
-        this.id = id;
-        this.note = note;
-        this.createdDate = createdDate;
-        this.updatedDate = updatedDate;
-        this.diamondId = diamondId;
-        this.userId = userId;
-        this.processId = processId;
-    }
-}
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+const RequestSchema = new Schema({
+    note: { type: String },
+    createdDate: { type: Date },
+    updatedDate: { type: Date },
+    diamondId: { type: Number },
+    userId: { type: Number },
+    processId: { type: Number }
+});
+const Request = mongoose.model('Request', RequestSchema);
+module.exports = Request;
