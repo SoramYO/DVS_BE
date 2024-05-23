@@ -6,8 +6,6 @@ const e = require('express');
 
 
 
-
-
 let handleUserLogin = (username, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -45,7 +43,6 @@ let handleUserLogin = (username, password) => {
         }
     });
 };
-
 
 let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
@@ -94,6 +91,7 @@ let handleUserRegister = (username, password, firstName, lastName) => {
         }
     });
 };
+
 let compareUserPassword = (password, user) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -109,6 +107,7 @@ let compareUserPassword = (password, user) => {
         }
     })
 }
+
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -119,11 +118,62 @@ let hashUserPassword = (password) => {
         }
     });
 }
+//query to create new request
+// -- Step 1: Insert into Diamond
+// DECLARE @NewDiamondID INT;
+
+// INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
+// OUTPUT INSERTED.id INTO @NewDiamondID
+// VALUES (N'proportions_value', N'diamondOrigin_value', caratWeight_value, N'measurements_value', N'polish_value', N'flourescence_value', N'color_value', N'cut_value', N'clarity_value', N'symmetry_value', N'shape_value');
+
+// -- Step 2: Insert into Request using the new Diamond ID
+// INSERT INTO Request (requestImage, note, createdDate, updatedDate, userId, processId, diamondId)
+// VALUES (N'requestImage_value', N'note_value', GETDATE(), GETDATE(), userId_value, processId_value, @NewDiamondID);
+
+let createNewRequest = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const request = pool.request();
+            request.input('proportions', sql.NVarChar, data.proportions);
+            request.input('diamondOrigin', sql.NVarChar, data.diamondOrigin);
+            request.input('caratWeight', sql.Float, data.caratWeight);
+            request.input('measurements', sql.NVarChar, data.measurements);
+            request.input('polish', sql.NVarChar, data.polish);
+            request.input('flourescence', sql.NVarChar, data.flourescence);
+            request.input('color', sql.NVarChar, data.color);
+            request.input('cut', sql.NVarChar, data.cut);
+            request.input('clarity', sql.NVarChar, data.clarity);
+            request.input('symmetry', sql.NVarChar, data.symmetry);
+            request.input('shape', sql.NVarChar, data.shape);
+            request.input('requestImage', sql.NVarChar, data.requestImage);
+            request.input('note', sql.NVarChar, data.note);
+            request.input('userId', sql.Int, data.userId);
+            request.input('processId', sql.Int, data.processId);
+
+            const result = await request.query(`
+                DECLARE @NewDiamondID TABLE (id INT);
+
+                INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
+                OUTPUT INSERTED.id INTO @NewDiamondID
+                VALUES (@proportions, @diamondOrigin, @caratWeight, @measurements, @polish, @flourescence, @color, @cut, @clarity, @symmetry, @shape);
+
+                INSERT INTO Request (requestImage, note, createdDate, updatedDate, userId, processId, diamondId)
+                VALUES (@requestImage, @note, GETDATE(), GETDATE(), @userId, @processId, (SELECT id FROM @NewDiamondID));
+            `);
+
+            resolve({ errCode: 0, message: 'Create new request success' });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
 
 
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserName: checkUserName,
     handleUserRegister: handleUserRegister,
-    hashUserPassword: hashUserPassword
+    hashUserPassword: hashUserPassword,
+    createNewRequest: createNewRequest
 }

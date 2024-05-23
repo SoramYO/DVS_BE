@@ -203,6 +203,54 @@ let getDiamonds = () => {
     });
 }
 
+let getRequests = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const requests = await pool.request().query(`
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id 
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, 
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape
+            FROM 
+              Request r
+            JOIN  Diamond d ON r.diamondId = d.id;
+        `);
+            resolve(requests.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+let getResults = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const results = await pool.request().query(`
+            SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued, req.id 
+            AS RequestID, req.requestImage, req.note, req.createdDate, req.updatedDate, dia.id 
+            AS DiamondID, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.flourescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape, acc.id 
+            AS AccountID, acc.username, acc.firstName, acc.lastName, acc.email, acc.phone
+            FROM 
+                Result res
+            JOIN 
+                Request req ON res.requestId = req.id
+            JOIN 
+                Diamond dia ON req.diamondId = dia.id
+            JOIN 
+                Account acc ON req.userId = acc.id
+            JOIN 
+                Role rol ON acc.roleId = rol.id
+            JOIN 
+                Process pro ON req.processId = pro.id;
+        `);
+            resolve(results.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 
 module.exports = {
     checkUserName: checkUserName,
@@ -212,5 +260,7 @@ module.exports = {
     hashUserPassword: hashUserPassword,
     updateUser: updateUser,
     deleteUser: deleteUser,
-    getDiamonds: getDiamonds
+    getDiamonds: getDiamonds,
+    getRequests: getRequests,
+    getResults: getResults
 }

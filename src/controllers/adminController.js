@@ -45,11 +45,30 @@ let handleGetDiamonds = async (req, res) => {
         diamonds
     })
 }
+let handleGetRequests = async (req, res) => {
+    let requests = await adminService.getRequests();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        requests
+    })
+}
+
+let handleGetResults = async (req, res) => {
+    let results = await adminService.getResults();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        results
+    })
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
     handleCreateNewUser: handleCreateNewUser,
     handleUpdateUser: handleUpdateUser,
     handleDeleteUser: handleDeleteUser,
-    handleGetDiamonds: handleGetDiamonds
+    handleGetDiamonds: handleGetDiamonds,
+    handleGetRequests: handleGetRequests,
+    handleGetResults: handleGetResults
 }
