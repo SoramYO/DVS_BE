@@ -1,10 +1,8 @@
 var bcrypt = require('bcryptjs');
 var { connectDB, sql } = require('../config/connectDb');
 const salt = bcrypt.genSaltSync(10);
-var config = require('../config/dbconfig');
-const e = require('express');
-
-
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 let handleUserLogin = (username, password) => {
     return new Promise(async (resolve, reject) => {
@@ -14,7 +12,8 @@ let handleUserLogin = (username, password) => {
             let isExist = await checkUserName(username);
             if (isExist) {
                 let user = await pool.request()
-                    .query("SELECT username, password, firstName, lastName, email, phone, createdAt, status, name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = '" + username + "'");
+                    .input('username', sql.NVarChar, username)
+                    .query("SELECT ac.id, username, password, firstName, lastName, email, phone, createdAt, status, roleId, r.name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = @username");
                 userData = user.recordset[0];
                 if (user.recordset.length > 0) {
                     //compare password
@@ -24,6 +23,9 @@ let handleUserLogin = (username, password) => {
                         userData.errMessage = 'OK';
                         const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
                         userData.user = userWithoutPassword;
+                        //generate token
+                        const accessToken = jwt.sign({ id: userData.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' });
+                        userData.accessToken = accessToken;
                     } else {
                         userData.errCode = 1;
                         userData.errMessage = 'Wrong password';
@@ -34,9 +36,8 @@ let handleUserLogin = (username, password) => {
                 }
             } else {
                 userData.errCode = 3;
-                userData.errMessage = 'Email not exist or password';
+                userData.errMessage = 'Username does not exist';
             }
-
             resolve(userData);
         } catch (error) {
             reject(error);
@@ -48,7 +49,9 @@ let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
         try {
             var pool = await connectDB;
-            let user = await pool.request().query("SELECT username FROM Account WHERE username = '" + username + "'");
+            let user = await pool.request()
+                .input('username', sql.NVarChar, username)
+                .query("SELECT username FROM Account WHERE username = @username");
             if (user.recordset.length > 0) {
                 resolve(true);
             } else {
@@ -118,17 +121,6 @@ let hashUserPassword = (password) => {
         }
     });
 }
-//query to create new request
-// -- Step 1: Insert into Diamond
-// DECLARE @NewDiamondID INT;
-
-// INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
-// OUTPUT INSERTED.id INTO @NewDiamondID
-// VALUES (N'proportions_value', N'diamondOrigin_value', caratWeight_value, N'measurements_value', N'polish_value', N'flourescence_value', N'color_value', N'cut_value', N'clarity_value', N'symmetry_value', N'shape_value');
-
-// -- Step 2: Insert into Request using the new Diamond ID
-// INSERT INTO Request (requestImage, note, createdDate, updatedDate, userId, processId, diamondId)
-// VALUES (N'requestImage_value', N'note_value', GETDATE(), GETDATE(), userId_value, processId_value, @NewDiamondID);
 
 let createNewRequest = (data) => {
     return new Promise(async (resolve, reject) => {

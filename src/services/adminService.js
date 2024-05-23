@@ -1,10 +1,6 @@
 var bcrypt = require('bcryptjs');
 var { connectDB, sql } = require('../config/connectDb');
 const salt = bcrypt.genSaltSync(10);
-var config = require('../config/dbconfig');
-const e = require('express');
-var Account = require('../models/Account');
-
 
 let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {

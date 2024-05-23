@@ -1,8 +1,9 @@
+require('dotenv').config();
 const config = {
-    user: 'diamond', // sql user
-    password: 'Sql12345', //sql user password
-    server: 'diamond1234.database.windows.net', // if it does not work try- localhost
-    database: 'DiamondValuation',
+    user: process.env.USER_DATABASE, // sql user
+    password: process.env.PASSWORD_DATABASE, //sql user password
+    server: process.env.SERVER_DATABASE, // if it does not work try- localhost
+    database: process.env.DATABASE,
     options: {
         encrypt: true,
         enableArithAbort: true

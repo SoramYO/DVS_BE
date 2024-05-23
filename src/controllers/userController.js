@@ -1,4 +1,5 @@
 var userService = require('../services/userService');
+require('dotenv').config();
 
 let handleLogin = async (req, res) => {
     let username = req.body.username;
@@ -17,14 +18,12 @@ let handleLogin = async (req, res) => {
     return res.status(200).json({
         errCode: userData.errCode,
         message: userData.errMessage,
-        user: userData.user ? userData.user : {}
+        user: userData.user ? userData.user : {},
+        accessToken: userData.accessToken
     })
 }
 let handleRegister = async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
-    let firstName = req.body.firstName;
-    let lastName = req.body.lastName;
+    let { username, password, firstName, lastName } = req.body;
 
     //check email exist
     if (!username || !password || !firstName || !lastName) {
