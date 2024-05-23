@@ -23,9 +23,6 @@ let handleUserLogin = (username, password) => {
                         userData.errMessage = 'OK';
                         const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
                         userData.user = userWithoutPassword;
-                        //generate token
-                        const accessToken = jwt.sign({ id: userData.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' });
-                        userData.accessToken = accessToken;
                     } else {
                         userData.errCode = 1;
                         userData.errMessage = 'Wrong password';
