@@ -15,7 +15,14 @@ var router = express.Router();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+      optionsSuccessStatus: 200,
+      methods: "GET,POST,PUT,DELETE",
+    })
+  );
 app.use('/api', router);
 app.use(cookieParser());
 

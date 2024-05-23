@@ -68,7 +68,7 @@ let createNewUser = (data) => {
                 request.input('email', sql.NVarChar, data.email);
                 request.input('phone', sql.NVarChar, data.phone);
                 request.input('createdAt', sql.DateTime, new Date());
-                request.input('status', sql.Int, data.status);
+                request.input('status', sql.Int, 1);
                 request.input('roleId', sql.Int, data.roleId);
 
                 await request.query(`
