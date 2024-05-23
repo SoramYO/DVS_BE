@@ -17,15 +17,7 @@ let handleGetUserById = async (req, res) => {
     })
 }
 let handleGetAllUsers = async (req, res) => {
-    let id = req.body.id;
-    if (!id) {
-        return res.status(400).json({
-            errCode: 1,
-            message: 'Missing required parameter!',
-            users: []
-        })
-    }
-    let users = await adminService.getAllUsers(id);
+    let users = await adminService.getAllUsers();
     return res.status(200).json({
         errCode: 0,
         message: 'OK',
