@@ -13,4 +13,16 @@ const verifyToken = (req, res, next) => {
         res.status(400).json({ message: 'Invalid Token' });
     }
 }
-module.exports = verifyToken;
+const verifyAdmin = (req, res, next) => {
+    verifyToken(req, res, () => {
+      if (req.user.role === "Admin") {
+        next();
+      } else {
+        return res.status(403).json({ message: 'You are not authorized' });
+      }
+    });
+  };
+module.exports = {
+    verifyToken: verifyToken,
+    verifyAdmin: verifyAdmin,
+};

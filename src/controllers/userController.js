@@ -15,7 +15,7 @@ let handleLogin = async (req, res) => {
     //compare password
     //return user info
     //access_token:JWT (Json Web Token)
-    const accessToken = jwt.sign({ id: userData.user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' });
+    const accessToken = jwt.sign({ id: userData.user.id, role: userData.user.role }, process.env.ACCESS_TOKEN_SECRET);
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
     return res.status(200).json({
         errCode: userData.errCode,
