@@ -41,9 +41,14 @@ let handleUpdateUser = async (req, res) => {
     let message = await adminService.updateUser(req.body);
     return res.status(200).json(message)
 }
+let handleDeleteUser = async (req, res) => {
+    let message = await adminService.deleteUser(req.body);
+    return res.status(200).json(message)
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
     handleCreateNewUser: handleCreateNewUser,
-    handleUpdateUser: handleUpdateUser
+    handleUpdateUser: handleUpdateUser,
+    handleDeleteUser: handleDeleteUser
 }

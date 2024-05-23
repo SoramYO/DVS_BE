@@ -62,37 +62,28 @@ let createNewUser = (data) => {
                     message: 'Email exist try another email!'
                 });
             } else {
-                const user = await Account.create(data)
-                if (!user) {
-                    return reject({
-                        errCode: 1,
-                        message: 'Create new user failed'
-                    });
-                }
+                const pool = await connectDB;
+                const hashedPassword = await hashUserPassword(data.password)
+                const request = pool.request();
+                request.input('username', sql.NVarChar, data.username);
+                request.input('password', sql.NVarChar, hashedPassword);
+                request.input('firstName', sql.NVarChar, data.firstName);
+                request.input('lastName', sql.NVarChar, data.lastName);
+                request.input('email', sql.NVarChar, data.email);
+                request.input('phone', sql.NVarChar, data.phone);
+                request.input('createdAt', sql.DateTime, new Date());
+                request.input('status', sql.Int, data.status);
+                request.input('roleId', sql.Int, data.roleId);
 
+                await request.query(`
+                 INSERT INTO Account (username, password, firstName, lastName, email, phone, createdAt, status, roleId)
+                 VALUES (@username, @password, @firstName, @lastName, @email, @phone, @createdAt, @status, @roleId)
+                 `);
 
-                //         const pool = await connectDB;
-                //         const hashedPassword = await hashUserPassword(data.password)
-                //         const request = pool.request();
-                //         request.input('username', sql.NVarChar, data.username);
-                //         request.input('password', sql.NVarChar, hashedPassword);
-                //         request.input('firstName', sql.NVarChar, data.firstName);
-                //         request.input('lastName', sql.NVarChar, data.lastName);
-                //         request.input('email', sql.NVarChar, data.email);
-                //         request.input('phone', sql.NVarChar, data.phone);
-                //         request.input('createdAt', sql.DateTime, new Date());
-                //         request.input('status', sql.Int, data.status);
-                //         request.input('roleId', sql.Int, data.roleId);
-
-                //         await request.query(`
-                // INSERT INTO Account (username, password, firstName, lastName, email, phone, createdAt, status, roleId)
-                // VALUES (@username, @password, @firstName, @lastName, @email, @phone, @createdAt, @status, @roleId)
-                // `);
-
-                //         resolve({
-                //             errCode: 0,
-                //             message: 'Create new user success'
-                //         });
+                resolve({
+                    errCode: 0,
+                    message: 'Create new user success'
+                });
             }
         } catch (error) {
             reject(error);
@@ -165,7 +156,43 @@ let updateUser = (data) => {
         }
     });
 };
+let deleteUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
 
+            // Truy xuất dữ liệu hiện tại của người dùng
+            const request = pool.request();
+            request.input('username', sql.NVarChar, data.username);
+
+            let currentUserResult = await request.query(`SELECT * FROM Account WHERE username = @username`);
+            let currentUser = currentUserResult.recordset[0];
+
+            if (!currentUser) {
+                return reject({
+                    errCode: 1,
+                    message: 'User not found'
+                });
+            }
+            const updatedData = {
+                status: data.status !== undefined ? data.status : currentUser.status
+            };
+
+            request.input('status', sql.Int, updatedData.status);
+            await request.query(`
+                UPDATE Account 
+                SET status = @status
+                WHERE username = @username
+            `);
+            resolve({
+                errCode: 0,
+                message: 'Delete user success'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
 
 
 
@@ -175,5 +202,6 @@ module.exports = {
     getAllUsers: getAllUsers,
     createNewUser: createNewUser,
     hashUserPassword: hashUserPassword,
-    updateUser: updateUser
+    updateUser: updateUser,
+    deleteUser: deleteUser
 }
