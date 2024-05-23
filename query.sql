@@ -17,13 +17,6 @@ CREATE TABLE Account(
 	PRIMARY KEY(id)
 )
 
-CREATE TABLE Shape(
-	id int identity(1,1),
-	name nvarchar(255) NOT NULL,
-	image nvarchar(MAX)
-	PRIMARY KEY(id)
-)
-
 CREATE TABLE Diamond(
 	id int identity(1,1),
 	proportions nvarchar(255),
@@ -36,6 +29,7 @@ CREATE TABLE Diamond(
 	cut nvarchar(255),
 	clarity nvarchar(255),
 	symmetry nvarchar(255),
+	shape nvarchar(255),
 	PRIMARY KEY(id)
 )
 
@@ -65,9 +59,6 @@ CREATE TABLE Result(
 
 ALTER TABLE Account
 ADD roleId int foreign key references Role(id)
-
-ALTER TABLE Diamond
-ADD shapeId int foreign key references Shape(id)
 
 ALTER TABLE Request
 ADD userId int foreign key references Account(id),

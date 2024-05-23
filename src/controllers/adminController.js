@@ -37,10 +37,19 @@ let handleDeleteUser = async (req, res) => {
     let message = await adminService.deleteUser(req.body);
     return res.status(200).json(message)
 }
+let handleGetDiamonds = async (req, res) => {
+    let diamonds = await adminService.getDiamonds();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        diamonds
+    })
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
     handleCreateNewUser: handleCreateNewUser,
     handleUpdateUser: handleUpdateUser,
-    handleDeleteUser: handleDeleteUser
+    handleDeleteUser: handleDeleteUser,
+    handleGetDiamonds: handleGetDiamonds
 }

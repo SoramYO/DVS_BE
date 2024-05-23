@@ -100,9 +100,6 @@ let hashUserPassword = (password) => {
         }
     });
 }
-
-
-
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -191,6 +188,20 @@ let deleteUser = (data) => {
     });
 }
 
+let getDiamonds = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const diamonds = await pool.request().query(`
+            SELECT id, proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry
+            FROM Diamond;
+        `);
+            resolve(diamonds.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
 
 
 module.exports = {
@@ -200,5 +211,6 @@ module.exports = {
     createNewUser: createNewUser,
     hashUserPassword: hashUserPassword,
     updateUser: updateUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    getDiamonds: getDiamonds
 }
