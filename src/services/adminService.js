@@ -4,7 +4,7 @@ const salt = bcrypt.genSaltSync(10);
 var config = require('../config/dbconfig');
 const e = require('express');
 var Account = require('../models/Account');
-const connectMdb = require('../config/connectMdb');
+
 
 let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
