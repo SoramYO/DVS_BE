@@ -163,22 +163,19 @@ let deleteUser = (data) => {
 
             // Truy xuất dữ liệu hiện tại của người dùng
             const request = pool.request();
-            request.input('username', sql.NVarChar, data.username);
 
+            request.input('username', sql.NVarChar, data.username);
             let currentUserResult = await request.query(`SELECT * FROM Account WHERE username = @username`);
             let currentUser = currentUserResult.recordset[0];
 
             if (!currentUser) {
-                return reject({
+                return resolve({
                     errCode: 1,
                     message: 'User not found'
                 });
             }
-            const updatedData = {
-                status: data.status !== undefined ? data.status : currentUser.status
-            };
 
-            request.input('status', sql.Int, updatedData.status);
+            request.input('status', sql.Int, 0);
             await request.query(`
                 UPDATE Account 
                 SET status = @status
