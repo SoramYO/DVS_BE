@@ -2,7 +2,7 @@ var express = require('express');
 var userController = require('../controllers/userController');
 var adminController = require('../controllers/adminController');
 var staffController = require('../controllers/staffController');
-var {verifyToken, verifyAdmin} = require('../middleware/auth');
+var { verifyToken, verifyAdmin } = require('../middleware/auth');
 let router = express.Router();
 
 let initWebRoutes = (app) => {

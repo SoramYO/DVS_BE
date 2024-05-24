@@ -156,15 +156,14 @@ let updateUser = (data) => {
         }
     });
 };
-let deleteUser = (data) => {
+let deleteUser = (data, query) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
 
             // Truy xuất dữ liệu hiện tại của người dùng
             const request = pool.request();
-
-            request.input('username', sql.NVarChar, data.username);
+            request.input('username', sql.NVarChar, query.username);
             let currentUserResult = await request.query(`SELECT * FROM Account WHERE username = @username`);
             let currentUser = currentUserResult.recordset[0];
 
@@ -175,7 +174,7 @@ let deleteUser = (data) => {
                 });
             }
 
-            request.input('status', sql.Int, 0);
+            request.input('status', sql.Int, data.status);
             await request.query(`
                 UPDATE Account 
                 SET status = @status
