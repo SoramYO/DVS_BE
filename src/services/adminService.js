@@ -41,6 +41,7 @@ const getAllUsers = () => {
           SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
           FROM Account as ac
           JOIN Role as r ON ac.roleId = r.id
+          ORDER BY ac.createdAt DESC
         `);
             resolve(users.recordset);
         } catch (error) {
