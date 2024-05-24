@@ -18,14 +18,19 @@ let handleUserLogin = (username, password) => {
                 if (user.recordset.length > 0) {
                     //compare password
                     let check = await bcrypt.compareSync(password, userData.password);
-                    if (check) {
-                        userData.errCode = 0;
-                        userData.errMessage = 'OK';
-                        const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
-                        userData.user = userWithoutPassword;
+                    if (userData.status === 0) {
+                        if (check) {
+                            userData.errCode = 0;
+                            userData.errMessage = 'OK';
+                            const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
+                            userData.user = userWithoutPassword;
+                        } else {
+                            userData.errCode = 1;
+                            userData.errMessage = 'Wrong password';
+                        }
                     } else {
-                        userData.errCode = 1;
-                        userData.errMessage = 'Wrong password';
+                        userData.errCode = 4;
+                        userData.errMessage = 'May da bi ban vinh vien va khoa mom';
                     }
                 } else {
                     userData.errCode = 2;
