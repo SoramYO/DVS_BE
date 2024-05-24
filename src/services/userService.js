@@ -18,7 +18,6 @@ let handleUserLogin = (username, password) => {
                 if (user.recordset.length > 0) {
                     //compare password
                     let check = await bcrypt.compareSync(password, userData.password);
-                    console.log(userData)
                     if (userData.status === 1) {
                         if (check) {
                             userData.errCode = 0;
