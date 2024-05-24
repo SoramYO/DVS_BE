@@ -27,7 +27,12 @@ let handleGetAllUsers = async (req, res) => {
 
 let handleCreateNewUser = async (req, res) => {
     let message = await adminService.createNewUser(req.body);
-    return res.status(201).json(message)
+    if (message.errCode !== 0) {
+        return res.status(400).json(message)
+    } else {
+        return res.status(201).json(message)
+    }
+
 }
 let handleUpdateUser = async (req, res) => {
     let message = await adminService.updateUser(req.body);
