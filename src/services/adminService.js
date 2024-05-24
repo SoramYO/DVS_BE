@@ -59,6 +59,12 @@ let createNewUser = (data) => {
                     message: 'Email exist try another email!'
                 });
             } else {
+                if (data.password.length < 6) {
+                    resolve({
+                        errCode: 2,
+                        message: 'Password must be at least 6 characters'
+                    });
+                }
                 const pool = await connectDB;
                 const hashedPassword = await hashUserPassword(data.password)
                 const request = pool.request();
