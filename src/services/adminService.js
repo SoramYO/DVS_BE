@@ -253,6 +253,26 @@ let getResults = () => {
     });
 }
 
+let getRequestById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const request = await pool.request().query(`
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id 
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, 
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape
+            FROM 
+              Request r
+            JOIN  Diamond d ON r.diamondId = d.id
+            WHERE r.id = ${id};
+        `);
+            resolve(request.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 
 module.exports = {
     checkUserName: checkUserName,
@@ -264,5 +284,6 @@ module.exports = {
     deleteUser: deleteUser,
     getDiamonds: getDiamonds,
     getRequests: getRequests,
-    getResults: getResults
+    getResults: getResults,
+    getRequestById: getRequestById
 }
