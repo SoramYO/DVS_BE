@@ -17,6 +17,7 @@ let checkUserName = (username) => {
         }
     });
 };
+
 let getUserById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -33,6 +34,7 @@ let getUserById = (id) => {
         }
     });
 };
+
 const getAllUsers = () => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -49,6 +51,7 @@ const getAllUsers = () => {
         }
     });
 };
+
 let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -93,6 +96,7 @@ let createNewUser = (data) => {
         }
     });
 }
+
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -103,6 +107,7 @@ let hashUserPassword = (password) => {
         }
     });
 }
+
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -156,6 +161,7 @@ let updateUser = (data) => {
         }
     });
 };
+
 let deleteUser = (data, query) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -210,12 +216,16 @@ let getRequests = () => {
         try {
             const pool = await connectDB;
             const requests = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id 
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, 
-            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape
-            FROM 
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+             p.id AS ProcessID, p.processStatus
+            FROM
               Request r
-            JOIN  Diamond d ON r.diamondId = d.id;
+            JOIN Diamond d ON r.diamondId = d.id
+            JOIN Account a ON r.userId = a.id
+            JOIN Process p ON r.processId = p.id;
         `);
             resolve(requests.recordset);
         } catch (error) {
@@ -258,12 +268,16 @@ let getRequestById = (id) => {
         try {
             const pool = await connectDB;
             const request = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id 
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, 
-            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape
-            FROM 
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+             p.id AS ProcessID, p.processStatus
+            FROM
               Request r
-            JOIN  Diamond d ON r.diamondId = d.id
+            JOIN Diamond d ON r.diamondId = d.id
+            JOIN Account a ON r.userId = a.id
+            JOIN Process p ON r.processId = p.id
             WHERE r.id = ${id};
         `);
             resolve(request.recordset);

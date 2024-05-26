@@ -12,7 +12,7 @@ let initWebRoutes = (app) => {
     router.post("/api/createNewRequest", verifyToken, userController.handleCreateNewRequest);
 
     //staff api
-    router.put("/api/confirmRequest", verifyToken, staffController.handleConfirmRequest);
+    router.put("/api/changeProcess", verifyToken, staffController.handleChangeProcess);
 
     //admin api
     router.get("/api/users/:id", verifyAdmin, adminController.handleGetUserById);
