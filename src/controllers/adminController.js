@@ -1,7 +1,7 @@
 var adminService = require('../services/adminService')
 
 let handleGetUserById = async (req, res) => {
-    let id = req.body.id;
+    let id = req.params.id;
     if (!id) {
         return res.status(400).json({
             errCode: 1,
@@ -68,6 +68,22 @@ let handleGetResults = async (req, res) => {
         results
     })
 }
+let handleGetRequestById = async (req, res) => {
+    let id = req.params.id;
+    if (!id) {
+        return res.status(400).json({
+            errCode: 1,
+            message: 'Missing required parameter!',
+            request: {}
+        })
+    }
+    let request = await adminService.getRequestById(id);
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        request
+    })
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -76,5 +92,6 @@ module.exports = {
     handleDeleteUser: handleDeleteUser,
     handleGetDiamonds: handleGetDiamonds,
     handleGetRequests: handleGetRequests,
-    handleGetResults: handleGetResults
+    handleGetResults: handleGetResults,
+    handleGetRequestById: handleGetRequestById
 }

@@ -1,18 +1,24 @@
 var { connectDB, sql } = require('../config/connectDb');
 
 
-let confirmRequest = (data) => {
+let changeProcess = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
-            let request = await pool.request().query(`
-            UPDATE Request
-            SET processId = 2
-            WHERE id = ${data.requestId}
-        `);
+            const request = pool.request();
+
+            request.input('processId', sql.Int, data.processId);
+            request.input('id', sql.Int, data.id);
+
+            await request.query(`
+                UPDATE Request
+                SET processId = @processId
+                WHERE id = @id
+            `);
+
             resolve({
                 errCode: 0,
-                message: 'Confirm request successful'
+                message: 'Change process successful'
             });
         } catch (error) {
             reject(error);
@@ -23,7 +29,6 @@ let confirmRequest = (data) => {
 
 
 
-
 module.exports = {
-    confirmRequest: confirmRequest
+    changeProcess: changeProcess
 }
