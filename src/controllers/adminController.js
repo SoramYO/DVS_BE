@@ -16,6 +16,7 @@ let handleGetUserById = async (req, res) => {
         user
     })
 }
+
 let handleGetAllUsers = async (req, res) => {
     let users = await adminService.getAllUsers();
     return res.status(200).json({
@@ -34,15 +35,18 @@ let handleCreateNewUser = async (req, res) => {
     }
 
 }
+
 let handleUpdateUser = async (req, res) => {
 
     let message = await adminService.updateUser(req.body);
     return res.status(200).json(message)
 }
+
 let handleDeleteUser = async (req, res) => {
     let message = await adminService.deleteUser(req.body, req.query);
     return res.status(200).json(message)
 }
+
 let handleGetDiamonds = async (req, res) => {
     let diamonds = await adminService.getDiamonds();
     return res.status(200).json({
@@ -51,6 +55,7 @@ let handleGetDiamonds = async (req, res) => {
         diamonds
     })
 }
+
 let handleGetRequests = async (req, res) => {
     let requests = await adminService.getRequests();
     return res.status(200).json({
@@ -68,6 +73,7 @@ let handleGetResults = async (req, res) => {
         results
     })
 }
+
 let handleGetRequestById = async (req, res) => {
     let id = req.params.id;
     if (!id) {
@@ -84,6 +90,7 @@ let handleGetRequestById = async (req, res) => {
         request
     })
 }
+
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,

@@ -1,6 +1,7 @@
 var userService = require('../services/userService');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+
 let handleLogin = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
@@ -34,6 +35,7 @@ let handleLogin = async (req, res) => {
     //access_token:JWT (Json Web Token)
 
 }
+
 let handleRegister = async (req, res) => {
     let { username, password, firstName, lastName } = req.body;
     if (!username || !password || !firstName || !lastName) {
@@ -55,8 +57,6 @@ let handleCreateNewRequest = async (req, res) => {
     let message = await userService.createNewRequest(data);
     return res.status(200).json(message)
 }
-
-
 
 module.exports = {
     handleLogin: handleLogin,

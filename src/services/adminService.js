@@ -17,6 +17,7 @@ let checkUserName = (username) => {
         }
     });
 };
+
 let getUserById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -33,6 +34,7 @@ let getUserById = (id) => {
         }
     });
 };
+
 const getAllUsers = () => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -49,6 +51,7 @@ const getAllUsers = () => {
         }
     });
 };
+
 let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -93,6 +96,7 @@ let createNewUser = (data) => {
         }
     });
 }
+
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -103,6 +107,7 @@ let hashUserPassword = (password) => {
         }
     });
 }
+
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -156,6 +161,7 @@ let updateUser = (data) => {
         }
     });
 };
+
 let deleteUser = (data, query) => {
     return new Promise(async (resolve, reject) => {
         try {
