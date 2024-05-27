@@ -23,7 +23,7 @@ let getUserById = (id) => {
         try {
             const pool = await connectDB;
             const user = await pool.request().query(`
-          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, ac.roleId
           FROM Account as ac
           JOIN Role as r ON ac.roleId = r.id
           WHERE ac.id = ${id}
@@ -40,7 +40,7 @@ const getAllUsers = () => {
         try {
             const pool = await connectDB;
             const users = await pool.request().query(`
-          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, name as role
           FROM Account as ac
           JOIN Role as r ON ac.roleId = r.id
           ORDER BY ac.createdAt DESC
@@ -225,7 +225,8 @@ let getRequests = () => {
               Request r
             JOIN Diamond d ON r.diamondId = d.id
             JOIN Account a ON r.userId = a.id
-            JOIN Process p ON r.processId = p.id;
+            JOIN Process p ON r.processId = p.id
+            ORDER BY r.createdDate DESC;
         `);
             resolve(requests.recordset);
         } catch (error) {
@@ -254,7 +255,8 @@ let getResults = () => {
             JOIN 
                 Role rol ON acc.roleId = rol.id
             JOIN 
-                Process pro ON req.processId = pro.id;
+                Process pro ON req.processId = pro.id
+            ORDER BY res.dateValued DESC;
         `);
             resolve(results.recordset);
         } catch (error) {
