@@ -1,6 +1,6 @@
 var adminService = require('../services/adminService')
 
-let handleGetUserById = async (req, res) => {
+let handlegetUserById = async (req, res) => {
     let id = req.params.id;
     if (!id) {
         return res.status(400).json({
@@ -93,7 +93,7 @@ let handleGetRequestById = async (req, res) => {
 
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
-    handleGetUserById: handleGetUserById,
+    handleGetUserById: handlegetUserById,
     handleCreateNewUser: handleCreateNewUser,
     handleUpdateUser: handleUpdateUser,
     handleDeleteUser: handleDeleteUser,
