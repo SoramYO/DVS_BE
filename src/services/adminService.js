@@ -17,12 +17,13 @@ let checkUserName = (username) => {
         }
     });
 };
+
 let getUserById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
             const user = await pool.request().query(`
-          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, ac.roleId
           FROM Account as ac
           JOIN Role as r ON ac.roleId = r.id
           WHERE ac.id = ${id}
@@ -33,12 +34,13 @@ let getUserById = (id) => {
         }
     });
 };
+
 const getAllUsers = () => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
             const users = await pool.request().query(`
-          SELECT username, firstName, lastName, email, phone, createdAt, status, name as role
+          SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, name as role
           FROM Account as ac
           JOIN Role as r ON ac.roleId = r.id
           ORDER BY ac.createdAt DESC
@@ -49,6 +51,7 @@ const getAllUsers = () => {
         }
     });
 };
+
 let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -93,6 +96,7 @@ let createNewUser = (data) => {
         }
     });
 }
+
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -103,6 +107,7 @@ let hashUserPassword = (password) => {
         }
     });
 }
+
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -156,6 +161,7 @@ let updateUser = (data) => {
         }
     });
 };
+
 let deleteUser = (data, query) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -210,12 +216,17 @@ let getRequests = () => {
         try {
             const pool = await connectDB;
             const requests = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id 
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, 
-            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape
-            FROM 
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+             p.id AS ProcessID, p.processStatus
+            FROM
               Request r
-            JOIN  Diamond d ON r.diamondId = d.id;
+            JOIN Diamond d ON r.diamondId = d.id
+            JOIN Account a ON r.userId = a.id
+            JOIN Process p ON r.processId = p.id
+            ORDER BY r.createdDate DESC;
         `);
             resolve(requests.recordset);
         } catch (error) {
@@ -244,7 +255,8 @@ let getResults = () => {
             JOIN 
                 Role rol ON acc.roleId = rol.id
             JOIN 
-                Process pro ON req.processId = pro.id;
+                Process pro ON req.processId = pro.id
+            ORDER BY res.dateValued DESC;
         `);
             resolve(results.recordset);
         } catch (error) {
@@ -252,6 +264,7 @@ let getResults = () => {
         }
     });
 }
+
 
 let countUser = () => {
     return new Promise(async (resolve, reject) => {
@@ -266,6 +279,31 @@ let countUser = () => {
         }
     });
 }
+
+let getRequestById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const request = await pool.request().query(`
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
+            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+             p.id AS ProcessID, p.processStatus
+            FROM
+              Request r
+            JOIN Diamond d ON r.diamondId = d.id
+            JOIN Account a ON r.userId = a.id
+            JOIN Process p ON r.processId = p.id
+            WHERE r.id = ${id};
+        `);
+            resolve(request.recordset);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 let countDiamond = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -280,6 +318,7 @@ let countDiamond = async (req, res) => {
     });
 }
 
+
 module.exports = {
     checkUserName: checkUserName,
     getUserById: getUserById,
@@ -292,5 +331,6 @@ module.exports = {
     getRequests: getRequests,
     getResults: getResults,
     countUser: countUser,
-    countDiamond: countDiamond
+    countDiamond: countDiamond,
+    getRequestById: getRequestById,
 }

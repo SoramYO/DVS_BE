@@ -12,18 +12,19 @@ let initWebRoutes = (app) => {
     router.post("/api/createNewRequest", verifyToken, userController.handleCreateNewRequest);
 
     //staff api
-    router.post("/api/confirmRequest", verifyToken, staffController.handleConfirmRequest);
+    router.put("/api/changeProcess", verifyToken, staffController.handleChangeProcess);
 
     //admin api
-    router.get("/api/users/:id", verifyAdmin, adminController.handleGetUserById);
+    router.get("/api/users/:id", adminController.handleGetUserById);
     router.get("/api/users", verifyAdmin, adminController.handleGetAllUsers);
     router.get("/api/countUser", verifyAdmin, adminController.handleCountUser);
     router.post("/api/createNewUser", verifyAdmin, adminController.handleCreateNewUser);
-    router.put("/api/updateUser", verifyAdmin, adminController.handleUpdateUser);
+    router.put("/api/editUser", verifyAdmin, adminController.handleUpdateUser);
     router.put("/api/deleteUser", verifyAdmin, adminController.handleDeleteUser);
     router.get("/api/diamonds", verifyAdmin, adminController.handleGetDiamonds);
     router.get("/api/countDiamond", verifyAdmin, adminController.handleCountDiamond);
     router.get("/api/requests", verifyAdmin, adminController.handleGetRequests);
+    router.get("/api/requests/:id", verifyAdmin, adminController.handleGetRequestById);
     router.get("/api/results", verifyAdmin, adminController.handleGetResults);
 
     return app.use("/", router);

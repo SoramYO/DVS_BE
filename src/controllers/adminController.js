@@ -1,7 +1,7 @@
 var adminService = require('../services/adminService')
 
-let handleGetUserById = async (req, res) => {
-    let id = req.body.id;
+let handlegetUserById = async (req, res) => {
+    let id = req.params.id;
     if (!id) {
         return res.status(400).json({
             errCode: 1,
@@ -16,6 +16,7 @@ let handleGetUserById = async (req, res) => {
         user
     })
 }
+
 let handleGetAllUsers = async (req, res) => {
     let users = await adminService.getAllUsers();
     return res.status(200).json({
@@ -34,15 +35,18 @@ let handleCreateNewUser = async (req, res) => {
     }
 
 }
+
 let handleUpdateUser = async (req, res) => {
 
     let message = await adminService.updateUser(req.body);
     return res.status(200).json(message)
 }
+
 let handleDeleteUser = async (req, res) => {
     let message = await adminService.deleteUser(req.body, req.query);
     return res.status(200).json(message)
 }
+
 let handleGetDiamonds = async (req, res) => {
     let diamonds = await adminService.getDiamonds();
     return res.status(200).json({
@@ -51,6 +55,7 @@ let handleGetDiamonds = async (req, res) => {
         diamonds
     })
 }
+
 let handleGetRequests = async (req, res) => {
     let requests = await adminService.getRequests();
     return res.status(200).json({
@@ -68,6 +73,7 @@ let handleGetResults = async (req, res) => {
         results
     })
 }
+
 let handleCountUser = async (req, res) => {
     let count = await adminService.countUser();
     return res.status(200).json({
@@ -84,9 +90,27 @@ let handleCountDiamond = async (req, res) => {
         count
     })
 }
+
+let handleGetRequestById = async (req, res) => {
+    let id = req.params.id;
+    if (!id) {
+        return res.status(400).json({
+            errCode: 1,
+            message: 'Missing required parameter!',
+            request: {}
+        })
+    }
+    let request = await adminService.getRequestById(id);
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        request
+    })
+}
+
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
-    handleGetUserById: handleGetUserById,
+    handleGetUserById: handlegetUserById,
     handleCreateNewUser: handleCreateNewUser,
     handleUpdateUser: handleUpdateUser,
     handleDeleteUser: handleDeleteUser,
@@ -94,5 +118,6 @@ module.exports = {
     handleGetRequests: handleGetRequests,
     handleGetResults: handleGetResults,
     handleCountUser: handleCountUser,
-    handleCountDiamond: handleCountDiamond
+    handleCountDiamond: handleCountDiamond,
+    handleGetRequestById: handleGetRequestById,
 }
