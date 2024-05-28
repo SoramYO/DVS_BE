@@ -25,6 +25,7 @@ let initWebRoutes = (app) => {
     router.get("/api/countDiamond", verifyAdmin, adminController.handleCountDiamond);
     router.get("/api/requests", verifyAdmin, adminController.handleGetRequests);
     router.get("/api/requests/:id", verifyAdmin, adminController.handleGetRequestById);
+    router.get("/api/countRequest", verifyAdmin, adminController.handleCountRequest);
     router.get("/api/results", verifyAdmin, adminController.handleGetResults);
 
     return app.use("/", router);
