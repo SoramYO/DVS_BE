@@ -274,7 +274,6 @@ let countDiamond = async (req, res) => {
             SELECT COUNT(id) AS count FROM Diamond;
         `);
             resolve(count.recordset[0]);
-
         } catch (error) {
             reject(error)
         }
