@@ -287,7 +287,7 @@ let getRequestById = (id) => {
             const request = await pool.request().query(`
             SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
             AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
-            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+            d.flourescence, d.color, d.cut, d.clarity, d.symmetry, d.shape,
              a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
              p.id AS ProcessID, p.processStatus
             FROM
