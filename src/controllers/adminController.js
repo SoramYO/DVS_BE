@@ -74,6 +74,23 @@ let handleGetResults = async (req, res) => {
     })
 }
 
+let handleCountUser = async (req, res) => {
+    let count = await adminService.countUser();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        count
+    })
+}
+let handleCountDiamond = async (req, res) => {
+    let count = await adminService.countDiamond();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        count
+    })
+}
+
 let handleGetRequestById = async (req, res) => {
     let id = req.params.id;
     if (!id) {
@@ -100,5 +117,7 @@ module.exports = {
     handleGetDiamonds: handleGetDiamonds,
     handleGetRequests: handleGetRequests,
     handleGetResults: handleGetResults,
-    handleGetRequestById: handleGetRequestById
+    handleCountUser: handleCountUser,
+    handleCountDiamond: handleCountDiamond,
+    handleGetRequestById: handleGetRequestById,
 }
