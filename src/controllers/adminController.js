@@ -68,6 +68,22 @@ let handleGetResults = async (req, res) => {
         results
     })
 }
+let handleCountUser = async (req, res) => {
+    let count = await adminService.countUser();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        count
+    })
+}
+let handleCountDiamond = async (req, res) => {
+    let count = await adminService.countDiamond();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        count
+    })
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -76,5 +92,7 @@ module.exports = {
     handleDeleteUser: handleDeleteUser,
     handleGetDiamonds: handleGetDiamonds,
     handleGetRequests: handleGetRequests,
-    handleGetResults: handleGetResults
+    handleGetResults: handleGetResults,
+    handleCountUser: handleCountUser,
+    handleCountDiamond: handleCountDiamond
 }
