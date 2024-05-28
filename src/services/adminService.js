@@ -273,7 +273,7 @@ let countUser = () => {
             const count = await pool.request().query(`
             SELECT COUNT(id) AS count FROM Account;
         `);
-            resolve(count.recordset[0]);
+            resolve(count.recordset[0].count);
         } catch (error) {
             reject(error);
         }
@@ -311,13 +311,26 @@ let countDiamond = async (req, res) => {
             const count = await pool.request().query(`
             SELECT COUNT(id) AS count FROM Diamond;
         `);
-            resolve(count.recordset[0]);
+            resolve(count.recordset[0].count);
         } catch (error) {
             reject(error)
         }
     });
 }
 
+let countRequest = async (req, res) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const count = await pool.request().query(`
+            SELECT COUNT(id) AS count FROM Request;
+        `);
+            resolve(count.recordset[0].count);
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 module.exports = {
     checkUserName: checkUserName,
@@ -333,4 +346,5 @@ module.exports = {
     countUser: countUser,
     countDiamond: countDiamond,
     getRequestById: getRequestById,
+    countRequest: countRequest,
 }

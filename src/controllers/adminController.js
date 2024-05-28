@@ -108,6 +108,15 @@ let handleGetRequestById = async (req, res) => {
     })
 }
 
+let handleCountRequest = async (req, res) => {
+    let count = await adminService.countRequest();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        count
+    })
+}
+
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -120,4 +129,5 @@ module.exports = {
     handleCountUser: handleCountUser,
     handleCountDiamond: handleCountDiamond,
     handleGetRequestById: handleGetRequestById,
+    handleCountRequest: handleCountRequest,
 }
