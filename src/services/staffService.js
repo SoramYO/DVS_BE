@@ -1,14 +1,14 @@
 var { connectDB, sql } = require('../config/connectDb');
 
 
-let changeProcess = (data) => {
+let changeProcess = (body, params) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await connectDB;
             const request = pool.request();
 
-            request.input('processId', sql.Int, data.processId);
-            request.input('id', sql.Int, data.id);
+            request.input('processId', sql.Int, body.processId);
+            request.input('id', sql.Int, params.id);
 
             await request.query(`
                 UPDATE Request

@@ -26,11 +26,11 @@ let handleUserLogin = (username, password) => {
                             userData.user = userWithoutPassword;
                         } else {
                             userData.errCode = 1;
-                            userData.errMessage = 'Wrong password';
+                            userData.errMessage = 'Username or password is incorrect';
                         }
                     } else {
                         userData.errCode = 4;
-                        userData.errMessage = 'May da bi ban vinh vien va khoa mom';
+                        userData.errMessage = 'Account has been locked';
                     }
                 } else {
                     userData.errCode = 2;
@@ -38,7 +38,7 @@ let handleUserLogin = (username, password) => {
                 }
             } else {
                 userData.errCode = 3;
-                userData.errMessage = 'Username does not exist';
+                userData.errMessage = 'Username or password is incorrect';
             }
             resolve(userData);
         } catch (error) {

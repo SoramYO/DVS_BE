@@ -7,15 +7,15 @@ let router = express.Router();
 
 let initWebRoutes = (app) => {
     //user api
-    router.post("/api/login", userController.handleLogin)
-    router.post("/api/register", userController.handleRegister)
+    router.post("/api/login", verifyToken, userController.handleLogin)
+    router.post("/api/register", verifyToken, userController.handleRegister)
     router.post("/api/createNewRequest", verifyToken, userController.handleCreateNewRequest);
 
     //staff api
-    router.put("/api/changeProcess", verifyToken, staffController.handleChangeProcess);
+    router.put("/api/changeProcess/:id", verifyToken, staffController.handleChangeProcess);
 
     //admin api
-    router.get("/api/users/:id", adminController.handleGetUserById);
+    router.get("/api/users/:id", verifyAdmin, adminController.handleGetUserById);
     router.get("/api/users", verifyAdmin, adminController.handleGetAllUsers);
     router.get("/api/countUser", verifyAdmin, adminController.handleCountUser);
     router.post("/api/createNewUser", verifyAdmin, adminController.handleCreateNewUser);
