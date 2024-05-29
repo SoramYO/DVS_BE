@@ -37,14 +37,14 @@ let handleLogin = async (req, res) => {
 }
 
 let handleRegister = async (req, res) => {
-    let { username, password, firstName, lastName } = req.body;
-    if (!username || !password || !firstName || !lastName) {
+    let { username, password, firstName, lastName, email, phone } = req.body;
+    if (!username || !password || !firstName || !lastName || !email || !phone) {
         return res.status(400).json({
             errCode: 1,
             message: 'Missing INPUT PARAMETER! Please check again!'
         })
     }
-    let message = await userService.handleUserRegister(username, password, firstName, lastName);
+    let message = await userService.handleUserRegister(username, password, firstName, lastName, email, phone);
     if (message.errCode !== 0) {
         return res.status(400).json(message)
     } else {
