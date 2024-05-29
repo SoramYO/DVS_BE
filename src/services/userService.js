@@ -65,12 +65,12 @@ let checkUserName = (username) => {
     });
 };
 
-let handleUserRegister = (username, password, firstName, lastName) => {
+let handleUserRegister = (username, password, firstName, lastName, email, phone) => {
     return new Promise(async (resolve, reject) => {
         try {
             let isExist = await checkUserName(username);
             if (isExist) {
-                resolve({ errCode: 1, message: 'Email exist try another email!' });
+                resolve({ errCode: 1, message: 'Username exist try another username!' });
             } else if (!password || password.length < 6) {
                 resolve({
                     errCode: 3,
@@ -85,13 +85,15 @@ let handleUserRegister = (username, password, firstName, lastName) => {
                 request.input('password', sql.NVarChar, hashedPassword);
                 request.input('firstName', sql.NVarChar, firstName);
                 request.input('lastName', sql.NVarChar, lastName);
+                request.input('email', sql.NVarChar, email);
+                request.input('phone', sql.NVarChar, phone);
                 request.input('roleId', sql.Int, 1);
                 request.input('status', sql.Int, 1);
                 request.input('createdAt', sql.DateTime, new Date());
 
                 const result = await request.query(`
-        INSERT INTO Account (username, password, firstName, lastName, roleId, status, createdAt)
-        VALUES (@username, @password, @firstName, @lastName, @roleId, @status, @createdAt)
+        INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status, createdAt)
+        VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status, @createdAt)
         `);
 
                 resolve({ errCode: 0, message: 'Register success' });
