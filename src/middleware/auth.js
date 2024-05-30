@@ -2,27 +2,37 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
-    const token = req.cookies.accessToken;
-    if (!token) return res.status(401).json({ message: 'Access Denied' });
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json({ message: 'Access Denied' });
 
-    try {
-        const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user = verified;
-        next();
-    } catch (error) {
-        res.status(400).json({ message: 'Invalid Token' });
-    }
+  try {
+    const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    req.user = verified;
+    next();
+  } catch (error) {
+    res.status(400).json({ message: 'Invalid Token' });
+  }
 }
 const verifyAdmin = (req, res, next) => {
-    verifyToken(req, res, () => {
-      if (req.user.role === "Admin") {
-        next();
-      } else {
-        return res.status(403).json({ message: 'You are not authorized' });
-      }
-    });
-  };
+  verifyToken(req, res, () => {
+    if (req.user.role === "Admin") {
+      next();
+    } else {
+      return res.status(403).json({ message: 'You are not authorized' });
+    }
+  });
+};
+const verifyStaff = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.user.role === "Valuation Staff" || req.user.role === "Consulting Staff") {
+      next();
+    } else {
+      return res.status(403).json({ message: 'You are not authorized' });
+    }
+  });
+};
 module.exports = {
-    verifyToken: verifyToken,
-    verifyAdmin: verifyAdmin,
+  verifyToken: verifyToken,
+  verifyAdmin: verifyAdmin,
+  verifyStaff: verifyStaff
 };
