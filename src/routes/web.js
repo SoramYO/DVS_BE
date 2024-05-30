@@ -7,8 +7,8 @@ let router = express.Router();
 
 let initWebRoutes = (app) => {
     //user api
-    router.post("/api/login", verifyToken, userController.handleLogin)
-    router.post("/api/register", verifyToken, userController.handleRegister)
+    router.post("/api/login", userController.handleLogin)
+    router.post("/api/register", userController.handleRegister)
     router.post("/api/createNewRequest", verifyToken, userController.handleCreateNewRequest);
 
     //staff api
