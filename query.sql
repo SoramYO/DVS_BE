@@ -39,7 +39,12 @@ CREATE TABLE Process(
 	actor nvarchar(255)
 	PRIMARY KEY(id)
 )
-
+CREATE TABLE Service(
+	id int identity(1,1),
+    price int NOT NULL ,
+	serviceName nvarchar(255) NOT NULL,
+	PRIMARY KEY(id)
+)
 CREATE TABLE Request(
 	id int identity(1,1),
 	requestImage nvarchar(MAX),

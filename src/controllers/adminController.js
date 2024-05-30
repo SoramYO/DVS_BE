@@ -37,7 +37,6 @@ let handleCreateNewUser = async (req, res) => {
 }
 
 let handleUpdateUser = async (req, res) => {
-
     let message = await adminService.updateUser(req.body);
     return res.status(200).json(message)
 }
@@ -117,6 +116,14 @@ let handleCountRequest = async (req, res) => {
     })
 }
 
+let handleGetProfit = async (req, res) => {
+    let profit = await adminService.getProfit();
+    return res.status(200).json({
+        errCode: 0,
+        message: 'OK',
+        profit
+    })
+}
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -130,4 +137,5 @@ module.exports = {
     handleCountDiamond: handleCountDiamond,
     handleGetRequestById: handleGetRequestById,
     handleCountRequest: handleCountRequest,
+    handleGetProfit: handleGetProfit,
 }

@@ -59,7 +59,7 @@ let createNewUser = (data) => {
             if (isExist) {
                 resolve({
                     errCode: 1,
-                    message: 'Email exist try another email!'
+                    message: 'Username exist try another username!'
                 });
             } else {
                 if (data.password.length < 6) {
@@ -114,10 +114,8 @@ let updateUser = (data) => {
             const pool = await connectDB;
             const hashedPassword = data.password ? await hashUserPassword(data.password) : null;
 
-            // Truy xuất dữ liệu hiện tại của người dùng
             const request = pool.request();
             request.input('username', sql.NVarChar, data.username);
-
             let currentUserResult = await request.query(`SELECT * FROM Account WHERE username = @username`);
             let currentUser = currentUserResult.recordset[0];
 
@@ -128,15 +126,14 @@ let updateUser = (data) => {
                 });
             }
 
-            // Kết hợp dữ liệu mới với dữ liệu hiện tại
             const updatedData = {
-                password: hashedPassword || currentUser.password,
-                firstName: data.firstName || currentUser.firstName,
-                lastName: data.lastName || currentUser.lastName,
-                email: data.email || currentUser.email,
-                phone: data.phone || currentUser.phone,
+                password: hashedPassword ? hashedPassword : currentUser.password,
                 status: data.status !== undefined ? data.status : currentUser.status,
-                roleId: data.roleId || currentUser.roleId
+                roleId: data.roleId !== undefined ? data.roleId : currentUser.roleId,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email ? data.email : '',
+                phone: data.phone ? data.phone : ''
             };
 
             request.input('password', sql.NVarChar, updatedData.password);
@@ -152,6 +149,7 @@ let updateUser = (data) => {
                 SET password = @password, firstName = @firstName, lastName = @lastName, email = @email, phone = @phone, status = @status, roleId = @roleId
                 WHERE username = @username
             `);
+
             resolve({
                 errCode: 0,
                 message: 'Update user success'
@@ -217,15 +215,16 @@ let getRequests = () => {
             const pool = await connectDB;
             const requests = await pool.request().query(`
             SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
-            d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
-             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
-             p.id AS ProcessID, p.processStatus
+            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
+            a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+            p.id AS ProcessID, p.processStatus,
+            s.id AS ServiceID, s.serviceName
             FROM
               Request r
             JOIN Diamond d ON r.diamondId = d.id
             JOIN Account a ON r.userId = a.id
             JOIN Process p ON r.processId = p.id
+            JOIN Service s ON r.serviceId = s.id
             ORDER BY r.createdDate DESC;
         `);
             resolve(requests.recordset);
@@ -240,10 +239,12 @@ let getResults = () => {
         try {
             const pool = await connectDB;
             const results = await pool.request().query(`
-            SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued, req.id 
-            AS RequestID, req.requestImage, req.note, req.createdDate, req.updatedDate, dia.id 
-            AS DiamondID, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.flourescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape, acc.id 
-            AS AccountID, acc.username, acc.firstName, acc.lastName, acc.email, acc.phone
+            SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued, 
+            req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.updatedDate,
+            dia.id AS DiamondID, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.flourescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape, 
+            acc.id AS AccountID, acc.username, acc.firstName, acc.lastName, acc.email, acc.phone,
+            pro.id AS ProcessID, pro.processStatus,
+            ser.id AS ServiceID, ser.servicePrice , ser.serviceName
             FROM 
                 Result res
             JOIN 
@@ -253,9 +254,9 @@ let getResults = () => {
             JOIN 
                 Account acc ON req.userId = acc.id
             JOIN 
-                Role rol ON acc.roleId = rol.id
-            JOIN 
                 Process pro ON req.processId = pro.id
+            JOIN
+                Service ser ON req.serviceId = ser.id
             ORDER BY res.dateValued DESC;
         `);
             resolve(results.recordset);
@@ -285,16 +286,16 @@ let getRequestById = (id) => {
         try {
             const pool = await connectDB;
             const request = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish,
-            d.flourescence, d.color, d.cut, d.clarity, d.symmetry, d.shape,
-             a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
-             p.id AS ProcessID, p.processStatus
-            FROM
-              Request r
+            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, 
+            d.id AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence, d.color, d.cut, d.clarity, d.symmetry, d.shape,
+            a.id AS UserID, a.username, a.firstName, a.lastName, a.email, a.phone,
+            p.id AS ProcessID, p.processStatus,
+            s.id AS ServiceID, s.serviceName
+            FROM Request r
             JOIN Diamond d ON r.diamondId = d.id
             JOIN Account a ON r.userId = a.id
             JOIN Process p ON r.processId = p.id
+            JOIN Service s ON r.serviceId = s.id
             WHERE r.id = ${id};
         `);
             resolve(request.recordset);
@@ -332,6 +333,26 @@ let countRequest = async (req, res) => {
     })
 }
 
+let getProfit = async (req, res) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await connectDB;
+            const profit = await pool.request().query(`
+            SELECT  SUM(servicePrice) AS profit
+            FROM
+                Result res
+            JOIN
+                Request req ON res.requestId = req.id
+            JOIN
+                Service ser ON req.serviceId = ser.id
+        `);
+            resolve(profit.recordset[0].profit);
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     checkUserName: checkUserName,
     getUserById: getUserById,
@@ -347,4 +368,5 @@ module.exports = {
     countDiamond: countDiamond,
     getRequestById: getRequestById,
     countRequest: countRequest,
+    getProfit: getProfit,
 }
