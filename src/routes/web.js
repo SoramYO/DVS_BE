@@ -16,19 +16,19 @@ let initWebRoutes = (app) => {
     router.put("/api/valuation/:id", verifyToken, staffController.handleValuation);
 
     //admin api
-    router.get("/api/users/:id", verifyAdmin, adminController.handleGetUserById);
-    router.get("/api/users", verifyAdmin, adminController.handleGetAllUsers);
-    router.get("/api/countUser", verifyAdmin, adminController.handleCountUser);
-    router.post("/api/users", verifyAdmin, adminController.handleCreateNewUser);
-    router.put("/api/users", verifyAdmin, adminController.handleUpdateUser);
-    router.put("/api/deleteUser", verifyAdmin, adminController.handleDeleteUser);
-    router.get("/api/diamonds", adminController.handleGetDiamonds);
-    router.get("/api/countDiamond", verifyAdmin, adminController.handleCountDiamond);
-    router.get("/api/requests", adminController.handleGetRequests);
-    router.get("/api/requests/:id", adminController.handleGetRequestById);
-    router.get("/api/countRequest", adminController.handleCountRequest);
-    router.get("/api/results", adminController.handleGetResults);
-    router.get("/api/profit", verifyAdmin, adminController.handleGetProfit);
+    router.get("/api/users/:id", verifyToken, adminController.handleGetUserById);
+    router.get("/api/users", verifyToken, adminController.handleGetAllUsers);
+    router.get("/api/countUser", verifyToken, adminController.handleCountUser);
+    router.post("/api/users", verifyToken, adminController.handleCreateNewUser);
+    router.put("/api/users", verifyToken, adminController.handleUpdateUser);
+    router.put("/api/deleteUser", verifyToken, adminController.handleDeleteUser);
+    router.get("/api/diamonds", verifyToken, adminController.handleGetDiamonds);
+    router.get("/api/countDiamond", verifyToken, adminController.handleCountDiamond);
+    router.get("/api/requests", verifyToken, adminController.handleGetRequests);
+    router.get("/api/requests/:id", verifyToken, adminController.handleGetRequestById);
+    router.get("/api/countRequest", verifyToken, adminController.handleCountRequest);
+    router.get("/api/results", verifyToken, adminController.handleGetResults);
+    router.get("/api/profit", verifyToken, adminController.handleGetProfit);
 
     return app.use("/", router);
 };
