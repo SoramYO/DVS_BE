@@ -11,11 +11,5 @@
             "src": "/src/routes/(.*)",
             "dest": "/"
         }
-    ],
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/api"
-        }
     ]
 }
