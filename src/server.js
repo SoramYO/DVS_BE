@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const initWebRoutes = require('./routes/web');
-import { SpeedInsights } from "@vercel/speed-insights/next"
+const { SpeedInsights } = require('@vercel/speed-insights/next')
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
