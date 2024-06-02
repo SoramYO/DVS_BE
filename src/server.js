@@ -4,7 +4,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const initWebRoutes = require('./routes/web');
-const { dbConnect } = require('./config/connectDb');
 
 dotenv.config();
 
@@ -16,13 +15,13 @@ var router = express.Router();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true,
-      optionsSuccessStatus: 200,
-      methods: "GET,POST,PUT,DELETE",
-    })
-  );
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: "GET,POST,PUT,DELETE",
+  })
+);
 app.use('/api', router);
 app.use(cookieParser());
 
