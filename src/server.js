@@ -4,14 +4,14 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const initWebRoutes = require('./routes/web');
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 const app = express();
 
 var router = express.Router();
-
+<SpeedInsights />
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
