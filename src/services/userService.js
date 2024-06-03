@@ -1,9 +1,9 @@
-var bcrypt = require('bcryptjs');
-var config = require('../config/dbconfig');
 const sql = require("mssql");
+var bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+var config = require('../config/dbconfig');
 
 let handleUserLogin = (username, password) => {
     return new Promise(async (resolve, reject) => {
