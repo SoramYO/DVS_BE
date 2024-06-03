@@ -1,10 +1,11 @@
-var { connectDB, sql } = require('../config/connectDb');
+var config = require('../config/dbconfig');
+const sql = require("mssql");
 
 
 let changeProcess = (body, params) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const request = pool.request();
 
             request.input('processId', sql.Int, body.processId);
@@ -28,7 +29,7 @@ let changeProcess = (body, params) => {
 let valuation = (body, params) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const request = pool.request();
 
             request.input('proportions', sql.NVarChar, body.proportions);
