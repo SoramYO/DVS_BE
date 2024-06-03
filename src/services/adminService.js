@@ -1,11 +1,12 @@
 var bcrypt = require('bcryptjs');
-var { connectDB, sql } = require('../config/connectDb');
+var config = require('../config/dbconfig');
+const sql = require("mssql");
 const salt = bcrypt.genSaltSync(10);
 
 let checkUserName = (username) => {
     return new Promise(async (resolve, reject) => {
         try {
-            var pool = await connectDB;
+            const pool = await sql.connect(config);
             let user = await pool.request().query("SELECT username FROM Account WHERE username = '" + username + "'");
             if (user.recordset.length > 0) {
                 resolve(true);
@@ -21,7 +22,7 @@ let checkUserName = (username) => {
 let getUserById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const user = await pool.request().query(`
           SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, ac.roleId
           FROM Account as ac
@@ -38,7 +39,7 @@ let getUserById = (id) => {
 const getAllUsers = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const users = await pool.request().query(`
           SELECT ac.id, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt, ac.status, name as role
           FROM Account as ac
@@ -68,7 +69,7 @@ let createNewUser = (data) => {
                         message: 'Password must be at least 6 characters'
                     });
                 }
-                const pool = await connectDB;
+                const pool = await sql.connect(config);
                 const hashedPassword = await hashUserPassword(data.password)
                 const request = pool.request();
                 request.input('username', sql.NVarChar, data.username);
@@ -111,7 +112,7 @@ let hashUserPassword = (password) => {
 let updateUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const hashedPassword = data.password ? await hashUserPassword(data.password) : null;
 
             const request = pool.request();
@@ -163,7 +164,7 @@ let updateUser = (data) => {
 let deleteUser = (data, query) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
 
             // Truy xuất dữ liệu hiện tại của người dùng
             const request = pool.request();
@@ -197,7 +198,7 @@ let deleteUser = (data, query) => {
 let getDiamonds = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const diamonds = await pool.request().query(`
             SELECT id, proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry
             FROM Diamond;
@@ -212,7 +213,7 @@ let getDiamonds = () => {
 let getRequests = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const requests = await pool.request().query(`
             SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
             AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
@@ -237,7 +238,7 @@ let getRequests = () => {
 let getResults = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const results = await pool.request().query(`
             SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued, 
             req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.updatedDate,
@@ -270,7 +271,7 @@ let getResults = () => {
 let countUser = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const count = await pool.request().query(`
             SELECT COUNT(id) AS count FROM Account;
         `);
@@ -284,7 +285,7 @@ let countUser = () => {
 let getRequestById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const request = await pool.request().query(`
             SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, 
             d.id AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence, d.color, d.cut, d.clarity, d.symmetry, d.shape,
@@ -308,7 +309,7 @@ let getRequestById = (id) => {
 let countDiamond = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const count = await pool.request().query(`
             SELECT COUNT(id) AS count FROM Diamond;
         `);
@@ -322,7 +323,7 @@ let countDiamond = async (req, res) => {
 let countRequest = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const count = await pool.request().query(`
             SELECT COUNT(id) AS count FROM Request;
         `);
@@ -336,7 +337,7 @@ let countRequest = async (req, res) => {
 let getProfit = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await connectDB;
+            const pool = await sql.connect(config);
             const profit = await pool.request().query(`
             SELECT  SUM(servicePrice) AS profit
             FROM
