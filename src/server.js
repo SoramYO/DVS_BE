@@ -33,7 +33,8 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://diamond-dashboard-one.vercel.app'
+  'https://diamond-dashboard-one.vercel.app',
+  'https://dvs-fe-soramyos-projects.vercel.app'
 ];
 
 app.use(
