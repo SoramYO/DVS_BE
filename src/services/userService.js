@@ -14,7 +14,7 @@ let handleUserLogin = (username, password) => {
             if (isExist) {
                 let user = await pool.request()
                     .input('username', sql.NVarChar, username)
-                    .query("SELECT ac.id, username, password, firstName, lastName, email, phone, createdAt, status, roleId, r.name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = @username");
+                    .query("SELECT ac.id, username, password, firstName,lastName ,status, r.name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = @username");
                 userData = user.recordset[0];
                 if (user.recordset.length > 0) {
                     //compare password
@@ -23,7 +23,7 @@ let handleUserLogin = (username, password) => {
                         if (check) {
                             userData.errCode = 0;
                             userData.errMessage = 'OK';
-                            const { password, errCode, errMessage, ...userWithoutPassword } = user.recordset[0];
+                            const { username, password, errCode, errMessage, status, ...userWithoutPassword } = user.recordset[0];
                             userData.user = userWithoutPassword;
                         } else {
                             userData.errCode = 1;
