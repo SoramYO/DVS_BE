@@ -35,24 +35,24 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUr
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-// app.use(
-//   cors({
-//     origin: "http://localhost:3000",
-//     withCredentials: true,
-//     credentials: true,
-//     optionsSuccessStatus: 200,
-//     methods: "GET,POST,PUT,DELETE",
-//   })
-// );
 app.use(
   cors({
-    origin: "https://diamond-dashboard-one.vercel.app",
+    origin: "http://localhost:3000",
     withCredentials: true,
     credentials: true,
     optionsSuccessStatus: 200,
     methods: "GET,POST,PUT,DELETE",
   })
 );
+// app.use(
+//   cors({
+//     origin: "https://diamond-dashboard-one.vercel.app",
+//     withCredentials: true,
+//     credentials: true,
+//     optionsSuccessStatus: 200,
+//     methods: "GET,POST,PUT,DELETE",
+//   })
+// );
 app.use(cookieParser());
 
 initWebRoutes(app);
