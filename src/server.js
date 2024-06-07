@@ -31,7 +31,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://diamond-dashboard-one.vercel.app',
+  'https://dvs-fe-soramyos-projects.vercel.app'
+];
 
 
 app.use(
