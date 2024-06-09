@@ -36,9 +36,6 @@ let handleLogin = async (req, res) => {
       user: userData.user ? userData.user : {},
     });
   }
-  //compare password
-  //return user info
-  //access_token:JWT (Json Web Token)
 };
 
 let handleRegister = async (req, res) => {
@@ -64,14 +61,47 @@ let handleRegister = async (req, res) => {
   }
 };
 
+let handleForgotPassword = async (req, res) => {
+  let email = req.body.email;
+  if (!email) {
+    return res.status(400).json({
+      errCode: 1,
+      message: "Missing INPUT PARAMETER! Please check again!",
+    });
+  }
+  let message = await userService.forgotPassword(email);
+  return res.status(200).json(message);
+}
+
 let handleCreateNewRequest = async (req, res) => {
   let data = req.body;
   let message = await userService.createNewRequest(data);
   return res.status(200).json(message);
 };
+let handlePayment = async (req, res) => {
+  let message = await userService.payment(req.body, req.params);
+  return res.status(200).json(message);
+}
+let handleCompletePayment = async (req, res) => {
+  let message = await userService.completePayment(req.params);
+  return res.status(200).json(message);
+}
+let handleVerifyEmail = async (req, res) => {
+  let message = await userService.verifyToken(req.query);
+  return res.status(200).json(message);
+}
+let handleResetPassword = async (req, res) => {
+  let message = await userService.resetPassword(req.body);
+  return res.status(200).json(message);
+}
 
 module.exports = {
   handleLogin: handleLogin,
   handleRegister: handleRegister,
+  handleForgotPassword: handleForgotPassword,
+  handleVerifyEmail: handleVerifyEmail,
+  handleResetPassword: handleResetPassword,
   handleCreateNewRequest: handleCreateNewRequest,
+  handlePayment: handlePayment,
+  handleCompletePayment: handleCompletePayment,
 };
