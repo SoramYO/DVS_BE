@@ -144,8 +144,14 @@ let createNewRequest = (data) => {
                 OUTPUT INSERTED.id INTO @NewDiamondID
                 VALUES (@proportions, @diamondOrigin, @caratWeight, @measurements, @polish, @flourescence, @color, @cut, @clarity, @symmetry, @shape);
 
+                DECLARE @ServicePrice INT;
+                SELECT @ServicePrice = price FROM Service WHERE id = @serviceId;
+
                 INSERT INTO Request (requestImage, note, createdDate, updatedDate, userId, processId, diamondId)
                 VALUES (@requestImage, @note, GETDATE(), GETDATE(), @userId, @processId, (SELECT id FROM @NewDiamondID));
+
+                INSERT INTO Payment (requestId, paymentAmount, paymentDate)
+                VALUES (SCOPE_IDENTITY(), @ServicePrice, GETDATE());
             `);
 
             resolve({ errCode: 0, message: 'Create new request success' });

@@ -134,6 +134,8 @@ let initWebRoutes = (app) => {
     *               type: integer
     *             processId:
     *               type: integer
+    *             serviceId:
+    *               type: integer   
     *   responses:
     *     "200":
     *       description: Request created successfully
