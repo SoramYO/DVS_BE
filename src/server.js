@@ -10,6 +10,8 @@ dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 const app = express();
+const CSS_URL =
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -21,6 +23,7 @@ const swaggerOptions = {
   },
   apis: ['./src/routes/web.js'],
 };
+
 // app.use(function (req, res, next) {
 //   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000/');
 //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -28,11 +31,14 @@ const swaggerOptions = {
 //   res.setHeader('Access-Control-Allow-Credentials', true);
 //   next();
 // })
+
 const swaggerDocs = swaggerDocument(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
+
 
 const allowedOrigins = [
   'http://localhost:3000',
@@ -52,13 +58,11 @@ app.use(
         callback(new Error('Not allowed by CORS'));
       }
     },
-    withCredentials: true,
     credentials: true,
     optionsSuccessStatus: 200,
     methods: "GET,POST,PUT,DELETE",
   })
 );
-app.use(cookieParser());
 
 initWebRoutes(app);
 
