@@ -157,19 +157,133 @@ const forgotPassword = async (email) => {
 
             const resetLink = `https://dvs-fe-soramyos-projects.vercel.app/reset-password?token=${token}&id=${userId}`;
             await transporter.sendMail({
-                from: '> Diamond Valuation System <',
+                from: '"Diamond Valuation System" <no-reply@diamondvaluationsystem.com>',
                 to: email,
                 subject: 'Password Reset',
-                html: `Click <a href="${resetLink}">here</a> to reset your password
-                Bá ếch gà vcl gà điên`
+                html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <img src="https://marketplace.canva.com/EAFqberfhMA/1/0/1600w/canva-black-gold-luxury-modern-diamond-brand-store-logo-VmwEPkcpqzE.jpg" alt="Diamond Valuation System" style="width: 100px; height: auto;">
+                            </div>
+                            <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
+                            <p style="color: #555;">Hello,</p>
+                            <p style="color: #555;">We received a request to reset your password for your Diamond Valuation System account. Click the button below to reset your password:</p>
+                            <div style="text-align: center; margin: 20px 0;">
+                                <a href="${resetLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">Reset Password</a>
+                            </div>
+                            <p style="color: #555;">If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
+                            <p style="color: #555;">Thank you,<br>The Diamond Valuation System Team</p>
+                        </div>
+                    `
             });
-
             resolve({ errCode: 0, message: 'Email sent successfully' });
         } catch (error) {
             rejects({ errCode: 1, message: 'Server error', error });
         }
     });
 };
+
+let sendSubscriptionEmail = async (body) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    background-color: #ffffff;
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background-color: #4CAF50;
+                    color: #ffffff;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 8px 8px 0 0;
+                }
+                .header h1 {
+                    margin: 0;
+                }
+                .content {
+                    padding: 20px;
+                }
+                .content h2 {
+                    color: #333333;
+                }
+                .content p {
+                    color: #666666;
+                    line-height: 1.6;
+                }
+                .content a {
+                    color: #4CAF50;
+                    text-decoration: none;
+                }
+                .footer {
+                    text-align: center;
+                    padding: 10px;
+                    color: #999999;
+                    font-size: 12px;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin: 20px 0;
+                    background-color: #4CAF50;
+                    color: #ffffff;
+                    text-decoration: none;
+                    border-radius: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Welcome to the Diamond Valuation System!</h1>
+                </div>
+                <div class="content">
+                    <h2>Thank you for subscribing!</h2>
+                    <p>Dear Valued Customer,</p>
+                    <p>We are thrilled to have you on board. By subscribing to our newsletter, you will receive the latest updates, exclusive offers, and expert advice on diamonds directly to your inbox. Stay tuned for exciting news and promotions!</p>
+                    <p>As a token of our appreciation, here's a special offer just for you:</p>
+                    <p><a href="https://dvs-fe-soramyos-projects.vercel.app" class="button">Get Your Exclusive Offer</a></p>
+                    <p>If you have any questions, feel free to <a href="mailto:support@diamondvaluation.com">contact us</a>. We're here to help you find the perfect diamond.</p>
+                    <p>Best regards,<br>The Diamond Valuation Team</p>
+                </div>
+                <div class="footer">
+                    <p>&copy; 2024 Diamond Valuation System. All rights reserved.</p>
+                    <p>123 Diamond Street, Suite 100, Jewelry City, Country</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+            await transporter.sendMail({
+                from: '> Diamond Valuation System <',
+                to: body.email,
+                subject: 'Welcome to Diamond Valuation System!',
+                html: htmlContent
+            });
+
+
+            resolve({ errCode: 0, message: 'Email sent successfully' });
+        } catch (error) {
+            resolve({ errCode: 1, message: 'Server error', error });
+        }
+    });
+};
+
 
 const verifyToken = async (query) => {
     return new Promise(async (resolve, reject) => {
@@ -363,5 +477,6 @@ module.exports = {
     hashUserPassword: hashUserPassword,
     createNewRequest: createNewRequest,
     payment: payment,
-    completePayment: completePayment
+    completePayment: completePayment,
+    sendSubscriptionEmail: sendSubscriptionEmail,
 }

@@ -34,7 +34,6 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerDocument(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL }));
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -44,8 +43,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://diamond-dashboard-one.vercel.app',
   'https://dvs-fe-soramyos-projects.vercel.app',
-  'https://dvs-fe.vercel.app/',
-  'https://dvs-fe-git-main-soramyos-projects.vercel.app/'
+  'https://dvs-fe.vercel.app',
+  'https://dvs-fe-git-main-soramyos-projects.vercel.app',
+  'http://localhost:8080',
 ];
 
 app.use(
