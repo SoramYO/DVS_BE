@@ -54,6 +54,14 @@ CREATE TABLE Request(
 	PRIMARY KEY(id)
 )
 
+
+CREATE TABLE PasswordResetTokens (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId INT FOREIGN KEY REFERENCES Account(id),
+    token NVARCHAR(255) NOT NULL,
+    expiryDate DATETIME NOT NULL
+);
+
 CREATE TABLE Result(
 	id int identity(1,1),
 	price float,

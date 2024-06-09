@@ -89,6 +89,145 @@ let initWebRoutes = (app) => {
     */
     router.post("/register", userController.handleRegister);
 
+
+    /**
+ * @swagger
+ * /api/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     description: Sends an email with a password reset link
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Password reset link sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Email not found
+ *       500:
+ *         description: Server error
+ */
+    router.post("/forgot-password", userController.handleForgotPassword);
+
+    /**
+ * @swagger
+ * /api/verify-token:
+ *   post:
+ *     summary: Verify password reset token
+ *     description: Verifies if the password reset token is valid
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid or expired token
+ *       500:
+ *         description: Server error
+ */
+    router.post("/verify-token", userController.handleVerifyEmail);
+
+    /**
+    * @swagger
+    * /api/reset-password:
+    *   put:
+    *     summary: Reset password
+    *     description: Resets the user's password
+    *     tags: [Authentication]
+    *     requestBody:
+    *       required: true
+    *       content:
+    *         application/json:
+    *           schema:
+    *             type: object
+    *             properties:
+    *               userId:
+    *                 type: integer
+    *                 example: id
+    *               token:
+    *                 type: string
+    *                 example: 'token'
+    *               password:
+    *                 type: string
+    *                 example: 'newpassword123'
+    *     responses:
+    *       200:
+    *         description: Password reset successfully
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 0
+    *                 message:
+    *                   type: string
+    *                   example: 'Password reset successfully'
+    *       400:
+    *         description: Invalid or expired token
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 2
+    *                 message:
+    *                   type: string
+    *                   example: 'Invalid or expired token'
+    *       500:
+    *         description: Server error
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 1
+    *                 message:
+    *                   type: string
+    *                   example: 'Server error'
+    *                 error:
+    *                   type: object
+    */
+
+    router.put("/reset-password", userController.handleResetPassword);
+
     /**
     * @swagger
     * /api/createNewRequest:
@@ -132,8 +271,8 @@ let initWebRoutes = (app) => {
     *               type: string
     *             userId:
     *               type: integer
-    *             processId:
-    *               type: integer
+    *             serviceId:
+    *               type: integer   
     *   responses:
     *     "200":
     *       description: Request created successfully
@@ -151,6 +290,91 @@ let initWebRoutes = (app) => {
     */
     router.post("/createNewRequest", verifyToken, userController.handleCreateNewRequest);
 
+    /**
+    * @swagger
+    * /api/payment/{id}:
+    *  post:
+    *   summary: Handle payment for a request
+    *   description: Handle payment for a specific request identified by its ID
+    *   tags:
+    *      - Payment
+    *   parameters:
+    *     - in: path
+    *       name: id
+    *       description: ID of the request
+    *       required: true
+    *       schema:
+    *         type: integer
+    *   security:
+    *     - bearerAuth: []
+    *   requestBody:
+    *     required: true
+    *     content:
+    *       application/json:
+    *         schema:
+    *           type: object
+    *           properties:
+    *             paymentAmount:
+    *               type: number
+    *   responses:
+    *     "200":
+    *       description: Payment successful
+    *       content:
+    *         application/json:
+    *           schema:
+    *             type: object
+    *             properties:
+    *               errCode:
+    *                 type: integer
+    *               message:
+    *                 type: string
+    *     "401":
+    *       description: Unauthorized
+    *     "404":
+    *       description: Request not found
+    */
+
+    router.put("/payment/:id", verifyToken, userController.handlePayment);
+    /**
+    * @swagger
+    * /api/completePayment/{id}:
+    *   post:
+    *     summary: Complete payment for a request
+    *     description: Complete the payment for a specific request identified by its ID
+    *     tags:
+    *       - Payment
+    *     parameters:
+    *       - in: path
+    *         name: id
+    *         description: ID of the request
+    *         required: true
+    *         schema:
+    *           type: integer
+    *     security:
+    *       - bearerAuth: []
+    *     responses:
+    *       '200':
+    *         description: Payment completed successfully
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   description: Error code (0 for success, non-zero for failure)
+    *                 message:
+    *                   type: string
+    *                   description: Message indicating the result of the operation
+    *       '401':
+    *         description: Unauthorized, user not authenticated
+    *       '404':
+    *         description: Request not found
+    *       '500':
+    *         description: Internal server error, failed to complete payment
+    */
+
+    router.post("/completePayment/:id", verifyToken, userController.handleCompletePayment);
     /**
    * @swagger
    * /api/changeProcess/{id}:
