@@ -95,6 +95,10 @@ let handleResetPassword = async (req, res) => {
   let message = await userService.resetPassword(req.body);
   return res.status(200).json(message);
 }
+let handleRegisterMail = async (req, res) => {
+  let message = await userService.sendSubscriptionEmail(req.body);
+  return res.status(200).json(message);
+}
 
 module.exports = {
   handleLogin: handleLogin,
@@ -105,4 +109,5 @@ module.exports = {
   handleCreateNewRequest: handleCreateNewRequest,
   handlePayment: handlePayment,
   handleCompletePayment: handleCompletePayment,
+  handleRegisterMail: handleRegisterMail,
 };

@@ -910,27 +910,77 @@ let initWebRoutes = (app) => {
     router.get("/results", verifyToken, adminController.handleGetResults);
 
     /**
-        * @swagger
-        * /api/profit:
-        *  get:
-        *   summary: Get profit
-        *   description: Get profit
-        *   tags:
-        *     - Admin
-        *   responses:
-        *     "200":
-        *       description: Profit retrieved successfully
-        *       content:
-        *         application/json:
-        *           schema:
-        *             type: object
-        *             properties:
-        *               profit:
-        *                 type: number
-        *     "401":
-        *       description: Unauthorized
-        */
+    * @swagger
+    * /api/profit:
+    *  get:
+    *   summary: Get profit
+    *   description: Get profit
+    *   tags:
+    *     - Admin
+    *   responses:
+    *     "200":
+    *       description: Profit retrieved successfully
+    *       content:
+    *         application/json:
+    *           schema:
+    *             type: object
+    *             properties:
+    *               profit:
+    *                 type: number
+    *     "401":
+    *       description: Unauthorized
+    */
     router.get("/profit", verifyToken, adminController.handleGetProfit);
+
+
+    /**
+    * @swagger
+    * /api/registerMail:
+    *   post:
+    *     summary: Subscribe to the newsletter
+    *     description: Subscribe to receive the latest offers, news, and promotions about diamonds.
+    *     tags:
+    *       - User
+    *     requestBody:
+    *       required: true
+    *       content:
+    *         application/json:
+    *           schema:
+    *             type: object
+    *             properties:
+    *               email:
+    *                 type: string
+    *                 format: email
+    *                 example: "customer@example.com"
+    *     responses:
+    *       '200':
+    *         description: Subscription successful
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 0
+    *                 message:
+    *                   type: string
+    *                   example: "Subscription successful, email sent."
+    *       '400':
+    *         description: Invalid email format
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 1
+    *                 message:
+    *                   type: string
+    *                   example: "Invalid email format."
+    */
+    router.post("/registerMail", userController.handleRegisterMail);
 
     router.get("/icon", (req, res) => {
         res.send('😀😃😄😁😆😅🤣😂');
