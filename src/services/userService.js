@@ -489,12 +489,11 @@ let createPaymentUrl = async (req, res) => {
             let secretKey = config.vnp_HashSecret;
             let vnpUrl = config.vnp_Url;
             let returnUrl = config.vnp_ReturnUrl;
-
             let orderId = moment(date).format('DDHHmmss');
             let amount = req.body.amount;
             let bankCode = req.body.bankCode;
-            let locale = req.body.language;
 
+            let locale = req.body.language;
             if (locale === null || locale === '') {
                 locale = 'vn';
             }
@@ -526,14 +525,13 @@ let createPaymentUrl = async (req, res) => {
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
 
             resolve({ errorCode: 0, message: 'Success', data: vnpUrl })
-            console.log(vnpUrl);
         } catch (error) {
             reject(error);
         }
     });
 };
 
-let vnPayReturn = async (req, res) => {
+let vnPayReturn = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             let vnp_Params = req.query;
@@ -546,8 +544,8 @@ let vnPayReturn = async (req, res) => {
             vnp_Params = sortObject(vnp_Params);
 
             let config = require('../config/default.json');
-            let tmnCode = config.get('vnp_TmnCode');
-            let secretKey = config.get('vnp_HashSecret');
+            let tmnCode = config.vnp_TmnCode;
+            let secretKey = config.vnp_HashSecret;
 
             let querystring = require('qs');
             let signData = querystring.stringify(vnp_Params, { encode: false });
@@ -557,10 +555,9 @@ let vnPayReturn = async (req, res) => {
 
             if (secureHash === signed) {
                 //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
-
-                res.render('success', { code: vnp_Params['vnp_ResponseCode'] })
+                resolve({ errorCode: 0, message: 'Success', data: vnp_Params['vnp_ResponseCode'] })
             } else {
-                res.render('success', { code: '97' })
+                resolve({ errorCode: 97, message: 'Fail', data: vnp_Params['vnp_ResponseCode'] })
             }
         } catch (error) {
             reject(error);

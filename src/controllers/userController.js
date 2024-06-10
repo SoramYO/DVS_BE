@@ -104,12 +104,12 @@ let handleCreatePaymentUrl = async (req, res) => {
   return res.status(200).json(message);
 }
 let handleVnPayReturn = async (req, res) => {
-  let message = await userService.vnPayReturn(req.query);
+  let message = await userService.vnPayReturn(req);
   return res.status(200).json(message);
 }
 
 let handleVnPayIPN = async (req, res) => {
-  let message = await userService.vnPayIPN(req.body);
+  let message = await userService.vnPayIPN(req);
   return res.status(200).json(message);
 }
 
