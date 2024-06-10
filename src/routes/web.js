@@ -982,6 +982,189 @@ let initWebRoutes = (app) => {
     */
     router.post("/registerMail", userController.handleRegisterMail);
 
+
+    /**
+     * @swagger
+     * /api/create_payment_url:
+     *   post:
+     *     summary: Create Payment URL
+     *     description: Generates a URL for initiating a VNPAY payment.
+     *     tags:
+     *       - Payment
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               amount:
+     *                 type: integer
+     *                 example: 100000
+     *                 description: Amount to be paid.
+     *               bankCode:
+     *                 type: string
+     *                 example: VNPAYQR
+     *                 description: Bank code for the transaction.
+     *               language:
+     *                 type: string
+     *                 example: vn
+     *                 description: Language for the transaction.
+     *     responses:
+     *       '302':
+     *         description: Redirects to the payment URL.
+     *       '500':
+     *         description: Server error.
+     */
+    router.post('/create_payment_url', userController.handleCreatePaymentUrl);
+
+    /**
+ * @swagger
+ * /api/vnpay_return:
+ *   get:
+ *     summary: VNPAY Return
+ *     description: Handles the return URL after payment is processed.
+ *     tags:
+ *       - Payment
+ *     parameters:
+ *       - name: vnp_SecureHash
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Secure hash for the transaction.
+ *       - name: other
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Other parameters returned by VNPAY.
+ *     responses:
+ *       '200':
+ *         description: Payment result.
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       '500':
+ *         description: Server error.
+ */
+    router.get('/vnpay_return', userController.handleVnPayReturn);
+
+
+    /**
+ * @swagger
+ * /api/vnpay_ipn:
+ *   get:
+ *     summary: VNPAY IPN
+ *     description: Handles the IPN (Instant Payment Notification) from VNPAY.
+ *     tags:
+ *       - Payment
+ *     parameters:
+ *       - name: vnp_SecureHash
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Secure hash for the transaction.
+ *       - name: other
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Other parameters returned by VNPAY.
+ *     responses:
+ *       '200':
+ *         description: Notification result.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 RspCode:
+ *                   type: string
+ *                   example: '00'
+ *                 Message:
+ *                   type: string
+ *                   example: 'Success'
+ *       '500':
+ *         description: Server error.
+ */
+    router.get('/vnpay_ipn', userController.handleVnPayIPN);
+
+
+    /**
+ * @swagger
+ * /api/querydr:
+ *   post:
+ *     summary: Query Transaction
+ *     description: Queries the status of a transaction.
+ *     tags:
+ *       - Payment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *                 description: Order ID.
+ *                 example: "12345678"
+ *               transDate:
+ *                 type: string
+ *                 description: Transaction date.
+ *                 example: "20240610123000"
+ *     responses:
+ *       '200':
+ *         description: Query result.
+ *       '500':
+ *         description: Server error.
+ */
+    router.post('/querydr', userController.handleQueryDR);
+
+
+    /**
+ * @swagger
+ * /api/refund:
+ *   post:
+ *     summary: Refund Transaction
+ *     description: Requests a refund for a transaction.
+ *     tags:
+ *       - Payment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *                 description: Order ID.
+ *                 example: "12345678"
+ *               transDate:
+ *                 type: string
+ *                 description: Transaction date.
+ *                 example: "20240610123000"
+ *               amount:
+ *                 type: number
+ *                 description: Amount to refund.
+ *                 example: 100000
+ *               transType:
+ *                 type: string
+ *                 description: Transaction type.
+ *                 example: "refund"
+ *               user:
+ *                 type: string
+ *                 description: User requesting the refund.
+ *                 example: "admin"
+ *     responses:
+ *       '200':
+ *         description: Refund result.
+ *       '500':
+ *         description: Server error.
+ */
+    router.post('/refund', userController.handleRefund);
+
     router.get("/icon", (req, res) => {
         res.send('😀😃😄😁😆😅🤣😂');
     });

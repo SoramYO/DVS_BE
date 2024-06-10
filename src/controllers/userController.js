@@ -99,6 +99,29 @@ let handleRegisterMail = async (req, res) => {
   let message = await userService.sendSubscriptionEmail(req.body);
   return res.status(200).json(message);
 }
+let handleCreatePaymentUrl = async (req, res) => {
+  let message = await userService.createPaymentUrl(req);
+  return res.status(200).json(message);
+}
+let handleVnPayReturn = async (req, res) => {
+  let message = await userService.vnPayReturn(req.query);
+  return res.status(200).json(message);
+}
+
+let handleVnPayIPN = async (req, res) => {
+  let message = await userService.vnPayIPN(req.body);
+  return res.status(200).json(message);
+}
+
+let handleQueryDR = async (req, res) => {
+  let message = await userService.queryDR(req.body);
+  return res.status(200).json(message);
+}
+
+let handleRefund = async (req, res) => {
+  let message = await userService.refund(req.body);
+  return res.status(200).json(message);
+}
 
 module.exports = {
   handleLogin: handleLogin,
@@ -110,4 +133,9 @@ module.exports = {
   handlePayment: handlePayment,
   handleCompletePayment: handleCompletePayment,
   handleRegisterMail: handleRegisterMail,
+  handleCreatePaymentUrl: handleCreatePaymentUrl,
+  handleVnPayReturn: handleVnPayReturn,
+  handleVnPayIPN: handleVnPayIPN,
+  handleQueryDR: handleQueryDR,
+  handleRefund: handleRefund,
 };
