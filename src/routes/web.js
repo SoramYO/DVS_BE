@@ -1165,6 +1165,74 @@ let initWebRoutes = (app) => {
 */
    router.post('/refund', userController.handleRefund);
 
+   /**
+    * @swagger
+    * /api/paypal:
+    *   post:
+    *     summary: Create a PayPal payment
+    *     tags: [Payment]
+    *     requestBody:
+    *       required: true
+    *       content:
+    *         application/json:
+    *           schema:
+    *             type: object
+    *             properties:
+    *               amount:
+    *                 type: string
+    *                 description: Amount to be paid
+    *                 example: "100000"
+    *     responses:
+    *       200:
+    *         description: Payment created successfully
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 errCode:
+    *                   type: integer
+    *                   example: 0
+    *                 message:
+    *                   type: string
+    *                   example: Success
+    *                 data:
+    *                   type: string
+    *                   description: URL to redirect user for payment approval
+    *                   example: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-60U79048BN771701L"
+    */
+   router.post('/paypal', userController.handlePaypal);
+
+
+   /**
+    * @swagger
+    * /api/paypalReturn:
+    *   get:
+    *     summary: Execute a PayPal payment
+    *     tags: [Payment]
+    *     parameters:
+   *       - in: query
+    *         name: paymentId
+    *         schema:
+    *           type: string
+    *         required: true
+    *         description: PayPal Payment ID
+    *       - in: query
+    *         name: PayerID
+    *         schema:
+    *           type: string
+    *         required: true
+    *         description: PayPal Payer ID
+    *     responses:
+    *       200:
+    *         description: Payment executed successfully
+    *         content:
+    *           application/json:
+    *             schema:
+    *               $ref: '#/components/schemas/PaypalResponse'
+    */
+   router.get('/paypalReturn', userController.handlePaypalReturn);
+
    router.get("/icon", (req, res) => {
       res.send('😀😃😄😁😆😅🤣😂');
    });

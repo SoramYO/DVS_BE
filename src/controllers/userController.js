@@ -122,6 +122,23 @@ let handleRefund = async (req, res) => {
   let message = await userService.refund(req);
   return res.status(200).json(message);
 }
+let handlePaypal = async (req, res) => {
+  try {
+    let message = await userService.paypalRequest(req);
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ errCode: 1, message: 'Internal Server Error' });
+  }
+};
+
+let handlePaypalReturn = async (req, res) => {
+  try {
+    let message = await userService.paypalReturn(req);
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ errCode: 1, message: 'Internal Server Error' });
+  }
+};
 
 module.exports = {
   handleLogin: handleLogin,
@@ -138,4 +155,6 @@ module.exports = {
   handleVnPayIPN: handleVnPayIPN,
   handleQueryDR: handleQueryDR,
   handleRefund: handleRefund,
+  handlePaypal: handlePaypal,
+  handlePaypalReturn: handlePaypalReturn,
 };
