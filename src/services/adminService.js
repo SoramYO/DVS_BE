@@ -245,7 +245,7 @@ let getResults = () => {
             dia.id AS DiamondID, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.flourescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape, 
             acc.id AS AccountID, acc.username, acc.firstName, acc.lastName, acc.email, acc.phone,
             pro.id AS ProcessID, pro.processStatus,
-            ser.id AS ServiceID, ser.servicePrice , ser.serviceName
+            ser.id AS ServiceID, ser.price, ser.serviceName
             FROM 
                 Result res
             JOIN 
@@ -339,7 +339,7 @@ let getProfit = async (req, res) => {
         try {
             const pool = await sql.connect(config);
             const profit = await pool.request().query(`
-            SELECT  SUM(servicePrice) AS profit
+            SELECT  SUM(ser.price) AS profit
             FROM
                 Result res
             JOIN
