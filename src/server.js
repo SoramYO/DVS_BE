@@ -43,6 +43,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://diamond-dashboard-one.vercel.app',
   'https://dvs-fe-soramyos-projects.vercel.app',
+  'https://dvs-be-sooty.vercel.app/',
   'https://dvs-fe.vercel.app',
   'https://dvs-fe-git-main-soramyos-projects.vercel.app',
   'http://localhost:8080',
