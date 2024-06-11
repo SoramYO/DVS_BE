@@ -682,7 +682,7 @@ let queryDR = async (req) => {
                 json: true,
                 body: dataObj
             }, function (error, response, body) {
-                console.log(response);
+                resolve(body);
             });
 
         } catch (error) {
@@ -753,7 +753,7 @@ let refund = async (req) => {
                 json: true,
                 body: dataObj
             }, function (error, response, body) {
-                console.log(response);
+                resolve(body);
             });
 
         } catch (error) {
