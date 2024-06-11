@@ -564,7 +564,7 @@ let vnPayReturn = async (req) => {
         }
     });
 }
-let vnPayIPN = async (req, res) => {
+let vnPayIPN = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             let vnp_Params = req.query;
@@ -599,29 +599,29 @@ let vnPayIPN = async (req, res) => {
                                 //thanh cong
                                 //paymentStatus = '1'
                                 // Ở đây cập nhật trạng thái giao dịch thanh toán thành công vào CSDL của bạn
-                                res.status(200).json({ RspCode: '00', Message: 'Success' })
+                                resolve({ RspCode: '00', Message: 'Success' })
                             }
                             else {
                                 //that bai
                                 //paymentStatus = '2'
                                 // Ở đây cập nhật trạng thái giao dịch thanh toán thất bại vào CSDL của bạn
-                                res.status(200).json({ RspCode: '00', Message: 'Success' })
+                                resolve({ RspCode: '01', Message: 'Fail' })
                             }
                         }
                         else {
-                            res.status(200).json({ RspCode: '02', Message: 'This order has been updated to the payment status' })
+                            resolve({ RspCode: '02', Message: 'This order has been updated to the payment status' })
                         }
                     }
                     else {
-                        res.status(200).json({ RspCode: '04', Message: 'Amount invalid' })
+                        resolve({ RspCode: '04', Message: 'Amount invalid' })
                     }
                 }
                 else {
-                    res.status(200).json({ RspCode: '01', Message: 'Order not found' })
+                    resolve({ RspCode: '01', Message: 'Order not found' })
                 }
             }
             else {
-                res.status(200).json({ RspCode: '97', Message: 'Checksum failed' })
+                resolve({ RspCode: '97', Message: 'Checksum failed' })
             }
         } catch (error) {
             reject(error);
@@ -629,7 +629,7 @@ let vnPayIPN = async (req, res) => {
     });
 }
 
-let queryDR = async (req, res) => {
+let queryDR = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             process.env.TZ = 'Asia/Ho_Chi_Minh';
@@ -638,9 +638,9 @@ let queryDR = async (req, res) => {
             let config = require('../config/default.json');
             let crypto = require("crypto");
 
-            let vnp_TmnCode = config.get('vnp_TmnCode');
-            let secretKey = config.get('vnp_HashSecret');
-            let vnp_Api = config.get('vnp_Api');
+            let vnp_TmnCode = config.vnp_TmnCode;
+            let secretKey = config.vnp_HashSecret;
+            let vnp_Api = config.vnp_Api;
 
             let vnp_TxnRef = req.body.orderId;
             let vnp_TransactionDate = req.body.transDate;
@@ -690,7 +690,7 @@ let queryDR = async (req, res) => {
         }
     });
 }
-let refund = async (req, res) => {
+let refund = async (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             process.env.TZ = 'Asia/Ho_Chi_Minh';
@@ -699,9 +699,9 @@ let refund = async (req, res) => {
             let config = require('../config/default.json');
             let crypto = require("crypto");
 
-            let vnp_TmnCode = config.get('vnp_TmnCode');
-            let secretKey = config.get('vnp_HashSecret');
-            let vnp_Api = config.get('vnp_Api');
+            let vnp_TmnCode = config.vnp_TmnCode;
+            let secretKey = config.vnp_HashSecret;
+            let vnp_Api = config.vnp_Api;
 
             let vnp_TxnRef = req.body.orderId;
             let vnp_TransactionDate = req.body.transDate;
