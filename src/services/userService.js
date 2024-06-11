@@ -9,8 +9,8 @@ const request = require('request');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const querystring = require('querystring');
-const { error } = require("console");
+const paypal = require('paypal-rest-sdk');
+
 
 
 let handleUserLogin = (username, password) => {
@@ -779,6 +779,75 @@ function sortObject(obj) {
     return sorted;
 }
 
+paypal.configure({
+    'mode': 'sandbox',
+    'client_id': process.env.PAYPAL_CLIENT_ID,
+    'client_secret': process.env.PAYPAL_CLIENT_SECRET
+});
+
+let paypalRequest = async (req) => {
+    return new Promise((resolve, reject) => {
+        let create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": "http://localhost:8080/api/paypalReturn",
+                "cancel_url": "http://localhost:3000/cancel"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": "item",
+                        "sku": "item",
+                        "price": req.body.amount,
+                        "currency": "USD",
+                        "quantity": 1
+                    }]
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": req.body.amount
+                },
+                "description": "This is the payment description."
+            }]
+        };
+
+        paypal.payment.create(create_payment_json, function (error, payment) {
+            if (error) {
+                reject(error);
+            } else {
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        resolve({ errCode: 0, message: 'Success', data: payment.links[i].href });
+                    }
+                }
+            }
+        });
+    });
+};
+
+let paypalReturn = async (req) => {
+    return new Promise((resolve, reject) => {
+        let payerId = req.query.PayerID;
+        let paymentId = req.query.paymentId;
+
+        let execute_payment_json = {
+            "payer_id": payerId,
+        };
+
+        paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+            if (error) {
+                reject(error);
+            } else {
+                resolve({ errCode: 0, message: 'Success', data: payment });
+            }
+        });
+    });
+};
+
+
 
 module.exports = {
     handleUserLogin: handleUserLogin,
@@ -797,4 +866,6 @@ module.exports = {
     vnPayIPN: vnPayIPN,
     queryDR: queryDR,
     refund: refund,
+    paypalRequest: paypalRequest,
+    paypalReturn: paypalReturn
 }
