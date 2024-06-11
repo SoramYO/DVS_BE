@@ -114,12 +114,12 @@ let handleVnPayIPN = async (req, res) => {
 }
 
 let handleQueryDR = async (req, res) => {
-  let message = await userService.queryDR(req.body);
+  let message = await userService.queryDR(req);
   return res.status(200).json(message);
 }
 
 let handleRefund = async (req, res) => {
-  let message = await userService.refund(req.body);
+  let message = await userService.refund(req);
   return res.status(200).json(message);
 }
 
