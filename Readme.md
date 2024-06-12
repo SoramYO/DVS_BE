@@ -1,5 +1,5 @@
 
-# Diamond Valuation API
+# 💎 User and Diamond Management API 💎
 
 Welcome to the **User and Diamond Management API**, a robust backend solution crafted to streamline operations in managing user accounts and diamond valuations. This project integrates cutting-edge technology with a SQL database to ensure efficient data handling and enhanced security features.
 
@@ -27,7 +27,7 @@ Efficiently configure the system by adjusting the `config` file and setting up e
 
 Ensure these variables are correctly set in your `.env` file:
 
-```
+```env
 PORT=8080
 ACCESS_TOKEN_SECRET=your_secret
 USER_DATABASE=your_user
@@ -37,23 +37,23 @@ DATABASE=your_db_name
 EMAIL=your_email@example.com
 PASSWORD=your_email_password
 PAYPAL_CLIENT_ID=your_paypal_client_id
-PAYPAL_CLIENT SECRET=your_paypal_client_secret
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret
 ```
 
 ## 🌟 Features
 
-### User Management
+### 👤 User Management
 - **Create, Update, Delete**: Fully manage user accounts.
 - **Authentication**: Robust session management and user authentication.
 - **Password Resets and Notifications**: Efficient handling of password security and email notifications.
 
-### Diamond Management
+### 💎 Diamond Management
 - **Valuation and Tracking**: Update and assess diamond information seamlessly.
 
-### Request Handling
+### 📝 Request Handling
 - **Service Requests**: Manage and oversee valuation requests ensuring detailed results.
 
-### Payment Integration
+### 💳 Payment Integration
 - **Secure Transactions**: Leverage VNPay and PayPal for secure financial transactions.
 
 ## 📚 API Documentation
@@ -81,3 +81,6 @@ This project is protected under the MIT License - for more details see the [LICE
 - **[SoramYO](https://github.com/SoramYO)** - Project Lead
 - **[ductain](https://github.com/ductain)** - Principal Developer
 
+---
+
+Thank you for using the User and Diamond Management API! If you have any questions or need further assistance, feel free to reach out.
