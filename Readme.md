@@ -84,5 +84,5 @@ Licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributors
 
-- **[Your Name](https://github.com/SoramYO)**
-- **[Contributor Name](https://github.com/ductain)**
+- **[SoramYO](https://github.com/SoramYO)**
+- **[ductain](https://github.com/ductain)**
