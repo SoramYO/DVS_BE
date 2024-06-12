@@ -16,23 +16,23 @@ cd your-project-name
 npm install # or 'yarn install' if you use Yarn
 ```
 
-Configuration
+##Configuration
 Configure the database and email service settings in your config file according to your environment.
 
 Running the Application
 ```bash
 npm start # or 'yarn start'
 ```
-Features
-  User Management
+##Features
+  #User Management
     Create, update, delete, and retrieve user accounts.
     Authenticate and register users, manage login sessions.
     Handle password resets and email notifications for various user actions.
-  Diamond Management
+  #Diamond Management
     Add, update, and evaluate diamond details linked with user requests.
-  Request Handling
+  #Request Handling
     Manage and track valuation requests, providing detailed results based on diamond characteristics.
-  Payment Integration
+  #Payment Integration
     createPaymentUrl: Generate a payment URL for VNPay gateway including security hashing.
     vnPayReturn: Process return data from VNPay after payment completion.
     vnPayIPN: Handle Instant Payment Notification (IPN) from VNPay to update transaction status.
@@ -40,7 +40,7 @@ Features
     refund: Process payment refunds through the VNPay gateway.
     paypalRequest: Create a PayPal payment request and retrieve the payment approval URL.
     paypalReturn: Process PayPal payments upon user return from PayPal after payment approval.
-API Documentation
+##API Documentation
 Access the Swagger UI to interact with the API documentation after running the server:
 ```bash
 http://localhost:8080/api-docs
