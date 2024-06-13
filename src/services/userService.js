@@ -957,7 +957,7 @@ let getRequestByUser = async (params) => {
 
             const pool = await sql.connect(config);
             const requests = await pool.request().query(`
-            SELECT r.id, r.requestImage, r.note, r.createdDate, r.updatedDate, r.paymentStatus, s.serviceName, s.price as servicePrice
+            SELECT r.id, r.requestImage, r.createdDate, r.paymentStatus, s.serviceName
             FROM Request r JOIN Service s ON r.serviceId = s.id
             WHERE r.userId = ${userId}
             `);
