@@ -1297,6 +1297,8 @@ let initWebRoutes = (app) => {
    */
    router.get('/paypalReturn', userController.handlePaypalReturn);
 
+   router.get('/getRequestByUser/:id', verifyToken, userController.handleGetRequestByUser);
+
    router.get("/icon", (req, res) => {
       res.send('😀😃😄😁😆😅🤣😂');
    });

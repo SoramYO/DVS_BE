@@ -140,6 +140,15 @@ let handlePaypalReturn = async (req, res) => {
   }
 };
 
+let handleGetRequestByUser = async (req, res) => {
+  try{
+    let message = await userService.getRequestByUser(req.params);
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ errCode: 1, message: 'Internal Server Error' });
+  }
+}
+
 module.exports = {
   handleLogin: handleLogin,
   handleRegister: handleRegister,
@@ -157,4 +166,5 @@ module.exports = {
   handleRefund: handleRefund,
   handlePaypal: handlePaypal,
   handlePaypalReturn: handlePaypalReturn,
+  handleGetRequestByUser: handleGetRequestByUser,
 };
