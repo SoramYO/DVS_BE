@@ -427,19 +427,6 @@ let payment = (body, params) => {
             request.input("requestId", sql.Int, params.id);
             request.input("paymentAmount", sql.Int, body.paymentAmount);
             let paymentStatus = "Unpaid";
-            let servicePrice = await pool
-                .request()
-                .input("requestId", sql.Int, params.id)
-                .query(
-                    `SELECT s.price FROM Request r JOIN Service s ON r.serviceId = s.id WHERE r.id = @requestId`
-                );
-            if (body.paymentAmount === 0) {
-                paymentStatus = "Unpaid";
-            } else if (body.paymentAmount === servicePrice.recordset[0].price) {
-                paymentStatus = "Full Payment";
-            } else if (body.paymentAmount === servicePrice.recordset[0].price * 0.2) {
-                paymentStatus = "Partially Paid";
-            }
             request.input("paymentStatus", sql.NVarChar, paymentStatus);
             request.input("paymentDate", sql.DateTime, new Date());
             await request.query(`
