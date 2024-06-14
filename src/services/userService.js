@@ -427,19 +427,6 @@ let payment = (body, params) => {
             request.input("requestId", sql.Int, params.id);
             request.input("paymentAmount", sql.Int, body.paymentAmount);
             let paymentStatus = "Unpaid";
-            let servicePrice = await pool
-                .request()
-                .input("requestId", sql.Int, params.id)
-                .query(
-                    `SELECT s.price FROM Request r JOIN Service s ON r.serviceId = s.id WHERE r.id = @requestId`
-                );
-            if (body.paymentAmount === 0) {
-                paymentStatus = "Unpaid";
-            } else if (body.paymentAmount === servicePrice.recordset[0].price) {
-                paymentStatus = "Full Payment";
-            } else if (body.paymentAmount === servicePrice.recordset[0].price * 0.2) {
-                paymentStatus = "Partially Paid";
-            }
             request.input("paymentStatus", sql.NVarChar, paymentStatus);
             request.input("paymentDate", sql.DateTime, new Date());
             await request.query(`
@@ -957,7 +944,7 @@ let getRequestByUser = async (params) => {
 
             const pool = await sql.connect(config);
             const requests = await pool.request().query(`
-            SELECT r.id, r.requestImage, r.note, r.createdDate, r.updatedDate, r.paymentStatus, s.serviceName, s.price as servicePrice
+            SELECT r.id, r.requestImage, r.createdDate, r.paymentStatus, s.serviceName
             FROM Request r JOIN Service s ON r.serviceId = s.id
             WHERE r.userId = ${userId}
             `);

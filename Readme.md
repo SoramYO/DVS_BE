@@ -1,7 +1,7 @@
 
-# 💎 User and Diamond Management API 💎
+# 💎 Diamond Valuation API 💎
 
-Welcome to the **User and Diamond Management API**, a robust backend solution crafted to streamline operations in managing user accounts and diamond valuations. This project integrates cutting-edge technology with a SQL database to ensure efficient data handling and enhanced security features.
+Welcome to the **Diamond Valuation API**, a robust backend solution crafted to streamline operations in managing user accounts and diamond valuations. This project integrates cutting-edge technology with a SQL database to ensure efficient data handling and enhanced security features.
 
 ## 📋 Requirements
 
