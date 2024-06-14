@@ -293,7 +293,7 @@ let initWebRoutes = (app) => {
    /**
    * @swagger
    * /api/payment/{id}:
-   *  post:
+   *  put:
    *   summary: Handle payment for a request
    *   description: Handle payment for a specific request identified by its ID
    *   tags:
