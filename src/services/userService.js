@@ -412,7 +412,7 @@ let createNewRequest = (data) => {
                 VALUES (SCOPE_IDENTITY(), 0, GETDATE());
             `);
 
-            resolve({ errCode: 0, message: "Create new request success" });
+            resolve({ errCode: 0, message: "Create new request success", data: result });
         } catch (error) {
             resolve({ errCode: 1, message: "Server error", error });
         }
