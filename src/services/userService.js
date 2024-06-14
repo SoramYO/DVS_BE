@@ -416,6 +416,7 @@ let createNewRequest = (data) => {
 
 
             resolve({ errCode: 0, message: "Create new request success", data: result.recordset[0] });
+
         } catch (error) {
             resolve({ errCode: 1, message: "Server error", error });
         }
