@@ -397,7 +397,7 @@ let createNewRequest = (data) => {
             request.input("processId", sql.Int, 1);
             request.input("serviceId", sql.Int, data.serviceId);
 
-           const result = await request.query(`
+        const result = await request.query(`
                 DECLARE @NewDiamondID TABLE (id INT);
 
                 INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
