@@ -397,7 +397,7 @@ let createNewRequest = (data) => {
             request.input("processId", sql.Int, 1);
             request.input("serviceId", sql.Int, data.serviceId);
 
-            const result = await request.query(`
+           const result = await request.query(`
                 DECLARE @NewDiamondID TABLE (id INT);
 
                 INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
@@ -410,9 +410,12 @@ let createNewRequest = (data) => {
 
                 INSERT INTO Payment (requestId, paymentAmount, paymentDate)
                 VALUES (SCOPE_IDENTITY(), 0, GETDATE());
+
+                SELECT r.id FROM Request r JOIN Diamond d ON r.diamondId = d.id WHERE d.id = (SELECT id FROM @NewDiamondID)
             `);
 
-            resolve({ errCode: 0, message: "Create new request success" });
+
+            resolve({ errCode: 0, message: "Create new request success", data: result.recordset[0] });
         } catch (error) {
             resolve({ errCode: 1, message: "Server error", error });
         }
