@@ -10,26 +10,35 @@ const moment = require("moment");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const paypal = require("paypal-rest-sdk");
+const { error } = require("console");
 
-let handleUserLogin = (username, password) => {
+let handleUserLogin = (usernameOrEmail, password) => {
     return new Promise(async (resolve, reject) => {
         try {
             let userData = {};
             const pool = await sql.connect(config);
-            let isExist = await checkUserName(username);
+            let isExist = await checkUserCredential(usernameOrEmail);
+
+            // Determine if input is username or email
+            let queryField = isEmail(usernameOrEmail) ? "email" : "username";
+
             if (isExist) {
                 let user = await pool
                     .request()
-                    .input("username", sql.NVarChar, username)
-
-                    .query(
-                        "SELECT ac.id, password, firstName, lastName, status, r.name as role FROM Account as ac JOIN Role as r ON ac.roleId = r.id WHERE username = @username"
-                    );
+                    .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
+                    .query(`
+                        SELECT ac.id, ac.password, ac.firstName, ac.lastName, ac.status, r.name AS role
+                        FROM Account AS ac
+                        JOIN Role AS r ON ac.roleId = r.id
+                        WHERE ac.${queryField} = @usernameOrEmail
+                    `);
 
                 userData = user.recordset[0];
+
                 if (user.recordset.length > 0) {
-                    //compare password
-                    let check = await bcrypt.compareSync(password, userData.password);
+                    // Compare password
+                    let check = await bcrypt.compare(password, userData.password);
+
                     if (userData.status === 1) {
                         if (check) {
                             userData.errCode = 0;
@@ -41,7 +50,7 @@ let handleUserLogin = (username, password) => {
                                 errCode,
                                 errMessage,
                                 ...userWithoutPassword
-                            } = user.recordset[0];
+                            } = userData;
 
                             userData.user = userWithoutPassword;
                         } else {
@@ -58,82 +67,97 @@ let handleUserLogin = (username, password) => {
                 }
             } else {
                 userData.errCode = 3;
-                userData.errMessage = "Username or password is incorrect";
+                userData.errMessage = "Username or email is incorrect";
             }
+
             resolve(userData);
         } catch (error) {
+            console.error("Error in handleUserLogin:", error);
             resolve({ errCode: 1, message: "Server error", error });
         }
     });
 };
 
-let checkUserName = (username) => {
+// Function to check if input is an email
+function isEmail(input) {
+    // Basic email regex for demonstration, modify as per your requirements
+    return /\S+@\S+\.\S+/.test(input);
+}
+
+let checkUserCredential = (usernameOrEmail) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             let user = await pool
                 .request()
-                .input("username", sql.NVarChar, username)
-                .query("SELECT username FROM Account WHERE username = @username");
+                .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
+                .query(`
+                    SELECT username, email
+                    FROM Account
+                    WHERE username = @usernameOrEmail OR email = @usernameOrEmail
+                `);
+
             if (user.recordset.length > 0) {
                 resolve(true);
             } else {
                 resolve(false);
             }
         } catch (error) {
+            console.error("Error in checkUserCredential:", error);
             resolve({ errCode: 1, message: "Server error", error });
         }
     });
 };
 
-let handleUserRegister = (
-    username,
-    password,
-    firstName,
-    lastName,
-    email,
-    phone
-) => {
+let handleUserRegister = (username, password, firstName, lastName, email, phone) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let isExist = await checkUserName(username);
+            // Check if username or email already exists
+            let isExist = await checkUserCredential(username);
             if (isExist) {
                 resolve({
                     errCode: 1,
-                    message: "Username exist try another username!",
+                    message: "Username or email exists, please try another username or email!",
                 });
-            } else if (!password || password.length < 6) {
-                resolve({
-                    errCode: 3,
-                    message: "Password must be at least 6 characters long.",
-                });
-            } else {
-                const pool = await sql.connect(config);
-                const hashedPassword = await bcrypt.hash(password, 10); // Hash the password using bcrypt
-
-                const request = pool.request();
-                request.input("username", sql.NVarChar, username);
-                request.input("password", sql.NVarChar, hashedPassword);
-                request.input("firstName", sql.NVarChar, firstName);
-                request.input("lastName", sql.NVarChar, lastName);
-                request.input("email", sql.NVarChar, email);
-                request.input("phone", sql.NVarChar, phone);
-                request.input("roleId", sql.Int, 1);
-                request.input("status", sql.Int, 1);
-                request.input("createdAt", sql.DateTime, new Date());
-
-                const result = await request.query(`
-        INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status, createdAt)
-        VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status, @createdAt)
-        `);
-
-                resolve({ errCode: 0, message: "Register success" });
+                return;
             }
+
+            // Hash the password using bcrypt
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Connect to the database
+            const pool = await sql.connect(config);
+            const request = pool.request();
+
+            // Prepare inputs for SQL query
+            request.input("username", sql.NVarChar, username);
+            request.input("password", sql.NVarChar, hashedPassword);
+            request.input("firstName", sql.NVarChar, firstName);
+            request.input("lastName", sql.NVarChar, lastName);
+            request.input("email", sql.NVarChar, email);
+            request.input("phone", sql.NVarChar, phone);
+            request.input("roleId", sql.Int, 1);
+            request.input("status", sql.Int, 1);
+
+            // Execute the SQL query to insert new user
+            const result = await request.query(`
+                INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status)
+                VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status)
+            `);
+
+            resolve({ errCode: 0, message: "Register success" });
         } catch (error) {
-            resolve({ errCode: 1, message: "Server error", error });
+            console.error("Error in handleUserRegister:", error);
+            // Handle specific error cases
+            if (error.code === "EREQUEST") {
+                resolve({ errCode: 2, message: "Database error" });
+            } else {
+                resolve({ errCode: 1, message: "Server error", error: error.message });
+            }
         }
     });
 };
+
 
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
@@ -178,7 +202,7 @@ const forgotPassword = async (email) => {
             await request
                 .input("userId", sql.Int, userId)
                 .input("token", sql.NVarChar, token)
-                .input("expiryDate", sql.DateTime, new Date(Date.now() + 3600000))
+                .input("expiryDate", sql.DateTime, new Date(Date.now() + 30000000))
                 .query(
                     "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, @expiryDate)"
                 );
@@ -196,6 +220,7 @@ const forgotPassword = async (email) => {
                             <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
                             <p style="color: #555;">Hello,</p>
                             <p style="color: #555;">We received a request to reset your password for your Diamond Valuation System account. Click the button below to reset your password:</p>
+                            <p style="color: #555;">This link have expiration time in 60 minutes</p>
                             <div style="text-align: center; margin: 20px 0;">
                                 <a href="${resetLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">Reset Password</a>
                             </div>
@@ -311,30 +336,30 @@ let sendSubscriptionEmail = async (body) => {
     });
 };
 
-const verifyToken = async (query) => {
-    return new Promise(async (resolve, reject) => {
-        const { token, id } = query;
-        try {
-            const pool = await sql.connect(config);
-            const request = pool.request();
+// const verifyToken = async (body) => {
+//     return new Promise(async (resolve, reject) => {
+//         const { token, id } = body;
+//         try {
+//             const pool = await sql.connect(config);
+//             const request = pool.request();
 
-            const result = await request
-                .input("token", sql.NVarChar, token)
-                .input("userId", sql.Int, id)
-                .query(
-                    "SELECT * FROM PasswordResetTokens WHERE token = @token AND userId = @userId AND expiryDate > GETDATE()"
-                );
+//             const result = await request
+//                 .input("token", sql.NVarChar, token)
+//                 .input("userId", sql.Int, id)
+//                 .query(
+//                     "SELECT * FROM PasswordResetTokens WHERE token = @token AND userId = @userId AND expiryDate > GETDATE()"
+//                 );
 
-            if (result.recordset.length === 0) {
-                resolve({ errCode: 2, message: "Invalid or expired token" });
-            }
+//             if (result.recordset.length === 0) {
+//                 resolve({ errCode: 2, message: "Invalid or expired token" });
+//             }
 
-            resolve({ errCode: 0, message: "Token is valid" });
-        } catch (error) {
-            resolve({ errCode: 1, message: "Server error", error });
-        }
-    });
-};
+//             resolve({ errCode: 0, message: "Token is valid" });
+//         } catch (error) {
+//             resolve({ errCode: 1, message: "Server error", error });
+//         }
+//     });
+// };
 
 let resetPassword = async (body) => {
     return new Promise(async (resolve, reject) => {
@@ -375,50 +400,410 @@ let resetPassword = async (body) => {
     });
 };
 
-let createNewRequest = (data) => {
+const getUserProfile = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const result = await pool.request()
+                .input('userId', sql.Int, userId)
+                .query(`
+                    SELECT ac.id AS userId, ac.username, ac.firstName, ac.lastName, ac.email, ac.phone, ac.createdAt
+                    FROM Account AS ac
+                    WHERE ac.id = @userId;
+                `);
+
+            if (result.recordset.length > 0) {
+                resolve(result.recordset[0]);
+            } else {
+                resolve({ errorCode: 1, message: 'User not found' });
+            }
+        } catch (error) {
+            console.error('Error in getUserProfile:', error);
+            reject(error);
+        }
+    });
+};
+
+const updateProfile = (userId, firstName, lastName, email, phone) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const result = await pool.request()
+                .input('userId', sql.Int, userId)
+                .input('firstName', sql.NVarChar, firstName)
+                .input('lastName', sql.NVarChar, lastName)
+                .input('email', sql.NVarChar, email)
+                .input('phone', sql.NVarChar, phone)
+                .query(`
+                    UPDATE Account
+                    SET firstName = @firstName, lastName = @lastName, email = @email, phone = @phone
+                    WHERE id = @userId;
+                `);
+
+            resolve({ errCode: 0, message: 'Profile updated successfully' });
+        } catch (error) {
+            console.error('Error in updateProfile:', error);
+            resolve({ errCode: 1, message: 'Server error', error });
+        }
+    });
+};
+
+const deleteAccount = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const result = await pool.request()
+                .input('userId', sql.Int, userId)
+                .query(`
+                    DELETE FROM Account
+                    WHERE id = @userId;
+                `);
+
+            resolve({ errCode: 0, message: 'Account deleted successfully' });
+        } catch (error) {
+            console.error('Error in deleteAccount:', error);
+            resolve({ errCode: 1, message: 'Server error', error });
+        }
+    });
+};
+
+const estimateDiamondValue = async (diamondProperties) => {
+    try {
+        // Perform calculations or call external service to estimate diamond value
+        const estimatedPrice = calculateEstimatedPrice(diamondProperties);
+
+        // Return the estimated price
+        return estimatedPrice;
+    } catch (error) {
+        console.error("Error in estimateDiamondValue service:", error);
+        throw new Error("Error estimating diamond value");
+    }
+};
+
+const getValuatedDiamondsByUserId = async (userId) => {
+    try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        request.input('userId', sql.Int, userId);
+        const result = await request.query(`
+        SELECT proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape
+        FROM Diamonds
+        JOIN Requests  ON Diamonds.id = Requests.diamondId
+        JOIN RequestProcesses RP ON Requests.id = RP.requestId
+        WHERE RP.processId = 3 AND Requests.userId = @userId
+    `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getValuatedDiamondsByUserId service:', error);
+        throw new Error('Error retrieving valuated diamonds by user ID');
+    }
+};
+
+const calculateEstimatedPrice = (diamondProperties) => {
+    const basePrices = {
+        color: {
+            D: 15000,
+            E: 14000,
+            F: 13000,
+            G: 12000,
+            H: 11000,
+            I: 10000,
+            J: 9000,
+            K: 8000,
+            L: 7000,
+            M: 6000,
+            N: 5000,
+        },
+        clarity: {
+            IF: 16000,
+            VVS1: 15000,
+            VVS2: 14000,
+            VS1: 13000,
+            VS2: 12000,
+            SI1: 11000,
+            SI2: 10000,
+            SI3: 9000,
+            I1: 8000,
+            I2: 7000,
+            I3: 6000,
+        },
+        cut: {
+            Affinity: 17000,
+            Excellent: 16000,
+            VeryGood: 15000,
+            Good: 14000,
+            Fair: 13000,
+
+        },
+        fluorescence: {
+            None: 0,
+            Faint: -200,
+            Medium: -500,
+            Strong: -1000,
+            VeryStrong: -1500,
+        },
+    };
+
+    const cutFactors = {
+        Excellent: 1.0,
+        VeryGood: 0.95,
+        Good: 0.9,
+    };
+
+    const { caratWeight, color, clarity, cut, fluorescence } = diamondProperties;
+
+    // Check if essential properties are present
+    if (!caratWeight || !color || !clarity || !cut) {
+        throw new Error('Missing essential diamond properties');
+    }
+
+    let basePricePerCarat = 10000;
+
+    if (basePrices.color[color]) {
+        basePricePerCarat += basePrices.color[color];
+    }
+
+    if (basePrices.clarity[clarity]) {
+        basePricePerCarat += basePrices.clarity[clarity];
+    }
+
+    if (basePrices.cut[cut]) {
+        basePricePerCarat += basePrices.cut[cut];
+    }
+
+    if (fluorescence && basePrices.fluorescence[fluorescence]) {
+        basePricePerCarat += basePrices.fluorescence[fluorescence];
+    }
+
+    const cutFactor = cutFactors[cut] || 1.0;
+    basePricePerCarat *= cutFactor;
+
+    const estimatedPrice = caratWeight * basePricePerCarat;
+    return Math.round(estimatedPrice);
+};
+const getAllServices = async () => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request().query(`
+            SELECT id as serviceId, serviceName, price
+            FROM Services
+        `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getAllServices service:', error);
+        throw new Error('Error retrieving services');
+    }
+};
+
+const createNewService = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             const request = pool.request();
-            request.input("proportions", sql.NVarChar, data.proportions);
-            request.input("diamondOrigin", sql.NVarChar, data.diamondOrigin);
-            request.input("caratWeight", sql.Float, data.caratWeight);
-            request.input("measurements", sql.NVarChar, data.measurements);
-            request.input("polish", sql.NVarChar, data.polish);
-            request.input("flourescence", sql.NVarChar, data.flourescence);
-            request.input("color", sql.NVarChar, data.color);
-            request.input("cut", sql.NVarChar, data.cut);
-            request.input("clarity", sql.NVarChar, data.clarity);
-            request.input("symmetry", sql.NVarChar, data.symmetry);
-            request.input("shape", sql.NVarChar, data.shape);
-            request.input("requestImage", sql.NVarChar, data.requestImage);
-            request.input("note", sql.NVarChar, data.note);
-            request.input("userId", sql.Int, data.userId);
-            request.input("processId", sql.Int, 1);
-            request.input("serviceId", sql.Int, data.serviceId);
+            request.input('serviceName', sql.NVarChar, data.serviceName);
+            request.input('price', sql.Int, data.price);
 
-        const result = await request.query(`
-                DECLARE @NewDiamondID TABLE (id INT);
-
-                INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry, shape)
-                OUTPUT INSERTED.id INTO @NewDiamondID
-                VALUES (@proportions, @diamondOrigin, @caratWeight, @measurements, @polish, @flourescence, @color, @cut, @clarity, @symmetry, @shape);
-
-
-                INSERT INTO Request (requestImage, note, createdDate, updatedDate, userId, processId, diamondId,serviceId , paymentStatus)
-                VALUES (@requestImage, @note, GETDATE(), GETDATE(), @userId, @processId, (SELECT id FROM @NewDiamondID) , @serviceId, 'Unpaid');
-
-                INSERT INTO Payment (requestId, paymentAmount, paymentDate)
-                VALUES (SCOPE_IDENTITY(), 0, GETDATE());
-
-                SELECT r.id FROM Request r JOIN Diamond d ON r.diamondId = d.id WHERE d.id = (SELECT id FROM @NewDiamondID)
+            await request.query(`
+                INSERT INTO Services (serviceName, price)
+                VALUES (@serviceName, @price)
             `);
 
-
-            resolve({ errCode: 0, message: "Create new request success", data: result.recordset[0] });
-
+            resolve({
+                errCode: 0,
+                message: 'Service created successfully'
+            });
         } catch (error) {
-            resolve({ errCode: 1, message: "Server error", error });
+            reject(error);
+        }
+    });
+};
+
+const updateService = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input('serviceId', sql.Int, data.serviceId);
+            request.input('serviceName', sql.NVarChar, data.serviceName);
+            request.input('description', sql.NVarChar, data.description);
+            request.input('price', sql.Int, data.price);
+
+            const result = await request.query(`
+                UPDATE Services
+                SET serviceName = @serviceName, price = @price
+                WHERE id = @serviceId
+            `);
+
+            if (result.rowsAffected[0] === 0) {
+                return resolve({
+                    errCode: 2,
+                    message: 'Service not found'
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                message: 'Service updated successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+const deleteService = (serviceId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input('serviceId', sql.Int, serviceId);
+
+            const result = await request.query(`
+                DELETE FROM Services
+                WHERE id = @serviceId
+            `);
+
+            if (result.rowsAffected[0] === 0) {
+                return resolve({
+                    errCode: 2,
+                    message: 'Service not found'
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                message: 'Service deleted successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+const estimateDiamondValueByCertificate = async (certificateId) => {
+    try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        request.input('certificateId', sql.NVarChar(255), certificateId);
+
+        const queryResult = await request.query(`
+            SELECT certificateId, Results.price AS estimatedPrice
+            FROM Diamonds
+            JOIN Requests ON Diamonds.id = Requests.diamondId
+            JOIN Results ON Requests.id = Results.requestId
+            WHERE certificateId = @certificateId
+        `);
+
+        if (queryResult.recordset.length === 0) {
+            return {
+                errCode: 2,
+                message: 'Diamond not found with the provided Certificate ID'
+            };
+        }
+
+        const diamond = queryResult.recordset[0];
+
+
+        return {
+            errCode: 0,
+            message: 'Estimated diamond value',
+            diamond: diamond
+        };
+    } catch (error) {
+        console.error("Error in estimateDiamondValueByCertificate service:", error);
+        return {
+            errCode: 1,
+            message: 'Server error'
+        };
+    }
+};
+
+const submitFeedback = async (userId, requestId, customerName, email, feedbackText) => {
+    try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        request.input('userId', sql.Int, userId);
+        request.input('requestId', sql.Int, requestId);
+        request.input('customerName', sql.NVarChar(255), customerName);
+        request.input('email', sql.NVarChar(255), email);
+        request.input('feedbackText', sql.NVarChar(1000), feedbackText);
+        request.input('createdAt', sql.DateTime, new Date());
+
+        await request.query(`
+            INSERT INTO Feedback (userId, requestId, customerName, email, feedbackText, createdAt)
+            VALUES (@userId, @requestId, @customerName, @email, @feedbackText, @createdAt)
+        `);
+
+        return {
+            errCode: 0,
+            message: 'Feedback submitted successfully'
+        };
+    } catch (error) {
+        console.error("Error in submitFeedback service:", error);
+        return {
+            errCode: 1,
+            message: 'Server error'
+        };
+    }
+};
+
+const createNewRequest = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const {
+                requestImage,
+                note,
+                userId,
+                serviceId
+            } = data;
+
+            // Connect to the database
+            const pool = await sql.connect(config);
+            const request = pool.request();
+
+            // Define input parameters
+            request.input("requestImage", sql.NVarChar(sql.MAX), requestImage);
+            request.input("note", sql.NVarChar(255), note);
+            request.input("userId", sql.Int, userId);
+            request.input("processId", sql.Int, 1);
+            request.input("serviceId", sql.Int, serviceId);
+
+            // Insert the new request into the Request table
+            const result = await request.query(`
+                DECLARE @NewDiamondID TABLE (id INT);
+
+                INSERT INTO Diamonds (certificateId, proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape)
+                OUTPUT INSERTED.id INTO @NewDiamondID
+                VALUES (NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+                INSERT INTO Requests (requestImage, note,paymentStatus, userId, processId, diamondId, serviceId )
+                VALUES (@requestImage, @note,'Pending', @userId, @processId, (SELECT id FROM @NewDiamondID), @serviceId );
+
+                SELECT SCOPE_IDENTITY() AS requestId;
+            `);
+
+            if (result.recordset.length > 0) {
+                const requestId = result.recordset[0].requestId;
+                resolve({
+                    errCode: 0,
+                    message: "Create new request success",
+                    requestId: requestId
+                });
+            } else {
+                resolve({
+                    errCode: 1,
+                    message: "Failed to create new request"
+                });
+            }
+        } catch (error) {
+            console.error("Error in createNewRequest:", error);
+            resolve({
+                errCode: 1,
+                message: "Server error",
+                error: error.message
+            });
         }
     });
 };
@@ -876,8 +1261,8 @@ let paypalRequest = async (req) => {
                         item_list: {
                             items: [
                                 {
-                                    name: "item",
-                                    sku: "item",
+                                    name: "diamond",
+                                    sku: req.body.requestId,
                                     price: req.body.amount,
                                     currency: "USD",
                                     quantity: 1,
@@ -961,12 +1346,22 @@ let getRequestByUser = async (params) => {
 
 module.exports = {
     handleUserLogin: handleUserLogin,
-    checkUserName: checkUserName,
+    checkUserCredential: checkUserCredential,
     forgotPassword: forgotPassword,
-    verifyToken: verifyToken,
     resetPassword: resetPassword,
     handleUserRegister: handleUserRegister,
     hashUserPassword: hashUserPassword,
+    getUserProfile: getUserProfile,
+    updateProfile: updateProfile,
+    deleteAccount: deleteAccount,
+    estimateDiamondValue: estimateDiamondValue,
+    getValuatedDiamondsByUserId: getValuatedDiamondsByUserId,
+    getAllServices: getAllServices,
+    createNewService: createNewService,
+    updateService: updateService,
+    deleteService: deleteService,
+    estimateDiamondValueByCertificate: estimateDiamondValueByCertificate,
+    submitFeedback: submitFeedback,
     createNewRequest: createNewRequest,
     payment: payment,
     completePayment: completePayment,

@@ -208,29 +208,56 @@ let getDiamonds = () => {
     });
 }
 
-let getRequests = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const pool = await sql.connect(config);
-            const requests = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate, d.id
-            AS DiamondID, d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence,d.color,d.cut, d.clarity,d.symmetry,d.shape,
-            a.username, a.firstName, a.lastName, a.email, a.phone,
-            p.processStatus,
-            s.serviceName
-            FROM Request r
-            JOIN Diamond d ON r.diamondId = d.id
-            JOIN Account a ON r.userId = a.id
-            JOIN Process p ON r.processId = p.id
-            JOIN Service s ON r.serviceId = s.id
-            ORDER BY r.createdDate DESC;
+// let getRequests = () => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             const pool = await sql.connect(config);
+//             const requests = await pool.request().query(`
+//             SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate,
+//             a.username, a.firstName, a.lastName, a.email, a.phone,
+//             p.processStatus,
+//             s.serviceName
+//             FROM Requests r
+//             JOIN Account a ON r.userId = a.id
+//             JOIN Processes p ON r.processId = p.id
+//             JOIN Services s ON r.serviceId = s.id
+//             ORDER BY r.createdDate DESC;
+//         `);
+//             resolve(requests.recordset);
+//         } catch (error) {
+//             reject(error);
+//         }
+//     });
+// }
+const getRequests = async () => {
+    try {
+        let pool = await sql.connect(config);
+        let requests = await pool.request().query(`
+            SELECT
+                req.id, req.requestImage, req.note, req.createdDate, req.paymentStatus,
+                ac.username AS customerUsername, ac.firstName AS customerFirstName, ac.lastName AS customerLastName,
+                process.processStatus, process.actor, dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight,
+                dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
+                serv.serviceName
+            FROM
+                Requests AS req
+            JOIN
+                Account AS ac ON req.userId = ac.id
+            JOIN
+                Processes AS process ON req.processId = process.id
+            JOIN
+                Diamonds AS dia ON req.diamondId = dia.id
+            JOIN
+                Services AS serv ON req.serviceId = serv.id
+            ORDER BY
+                req.createdDate DESC
         `);
-            resolve(requests.recordset);
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
+        return requests.recordset;
+    } catch (error) {
+        console.error('Error in managerService.getValuationRequests:', error);
+        throw error;
+    }
+};
 
 let getResults = () => {
     return new Promise(async (resolve, reject) => {
@@ -239,22 +266,23 @@ let getResults = () => {
             const results = await pool.request().query(`
             SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued,
             req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.updatedDate,
-            dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.flourescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
+            dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements,
+            dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
             acc.username, acc.firstName, acc.lastName, acc.email, acc.phone,
             pro.processStatus,
             ser.serviceName
             FROM
-                Result res
+                Results res
             JOIN
-                Request req ON res.requestId = req.id
+                Requests req ON res.requestId = req.id
             JOIN
-                Diamond dia ON req.diamondId = dia.id
+                Diamonds dia ON req.diamondId = dia.id
             JOIN
                 Account acc ON req.userId = acc.id
             JOIN
-                Process pro ON req.processId = pro.id
+                Processes pro ON req.processId = pro.id
             JOIN
-                Service ser ON req.serviceId = ser.id
+                Services ser ON req.serviceId = ser.id
             ORDER BY res.dateValued DESC;
         `);
             resolve(results.recordset);
@@ -269,17 +297,22 @@ let getRequestById = (id) => {
         try {
             const pool = await sql.connect(config);
             const request = await pool.request().query(`
-            SELECT r.id AS RequestID, r.requestImage, r.note, r.createdDate, r.updatedDate,
-            d.proportions, d.diamondOrigin, d.caratWeight, d.measurements, d.polish, d.flourescence, d.color, d.cut, d.clarity, d.symmetry, d.shape,
-            a.username, a.firstName, a.lastName, a.email, a.phone,
-            p.processStatus,
-            s.serviceName
-            FROM Request r
-            JOIN Diamond d ON r.diamondId = d.id
-            JOIN Account a ON r.userId = a.id
-            JOIN Process p ON r.processId = p.id
-            JOIN Service s ON r.serviceId = s.id
-            WHERE r.id = ${id};
+            SELECT req.id, req.requestImage, req.note, req.createdDate, req.paymentStatus,
+                ac.username AS customerUsername, ac.firstName AS customerFirstName, ac.lastName AS customerLastName,
+                process.processStatus, process.actor, dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight,
+                dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
+                serv.serviceName
+            FROM
+                Requests AS req
+            JOIN
+                Account AS ac ON req.userId = ac.id
+            JOIN
+                Processes AS process ON req.processId = process.id
+            JOIN
+                Diamonds AS dia ON req.diamondId = dia.id
+            JOIN
+                Services AS serv ON req.serviceId = serv.id
+            WHERE req.id = ${id};
         `);
             resolve(request.recordset);
         } catch (error) {
