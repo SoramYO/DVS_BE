@@ -136,7 +136,7 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
             request.input("lastName", sql.NVarChar, lastName);
             request.input("email", sql.NVarChar, email);
             request.input("phone", sql.NVarChar, phone);
-            request.input("roleId", sql.Int, 1);
+            request.input("roleId", sql.Int, 5);
             request.input("status", sql.Int, 1);
 
             // Execute the SQL query to insert new user
