@@ -1253,7 +1253,7 @@ let paypalRequest = async (req) => {
                     payment_method: "paypal",
                 },
                 redirect_urls: {
-                    return_url: "http://localhost:8080/api/paypalReturn",
+                    return_url: "http://localhost:3000/paymentSuccess",
                     cancel_url: "http://localhost:3000/cancel",
                 },
                 transactions: [
