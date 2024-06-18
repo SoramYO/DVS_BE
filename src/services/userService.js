@@ -814,17 +814,13 @@ let payment = (body, params) => {
             const pool = await sql.connect(config);
             const request = pool.request();
             request.input("requestId", sql.Int, params.id);
-            request.input("paymentAmount", sql.Int, body.paymentAmount);
-            let paymentStatus = "Unpaid";
-            request.input("paymentStatus", sql.NVarChar, paymentStatus);
-            request.input("paymentDate", sql.DateTime, new Date());
             await request.query(`
                 UPDATE Payment
-                SET paymentAmount = @paymentAmount, paymentDate = @paymentDate
+                SET paymentAmount = 100, paymentDate = GETDATE()
                 WHERE requestId = @requestId;
 
                 UPDATE Request
-                SET paymentStatus = @paymentStatus
+                SET paymentStatus = 'Paid'
                 WHERE id = @requestId;
             `);
             resolve({ errCode: 0, message: "Payment success" });
