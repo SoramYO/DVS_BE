@@ -357,7 +357,7 @@ let handleCreateNewRequest = async (req, res) => {
   return res.status(200).json(message);
 };
 let handlePayment = async (req, res) => {
-  let message = await userService.payment(req.body, req.params);
+  let message = await userService.payment(req.body);
   return res.status(200).json(message);
 }
 let handleCompletePayment = async (req, res) => {

@@ -1599,21 +1599,15 @@ let initWebRoutes = (app) => {
     *                   example: 'Error from server'
     */
    router.put("/approve-request", verifyToken, managerController.handleApproveRequest);
+
    /**
    * @swagger
-   * /api/payment/{id}:
+   * /api/payment:
    *  put:
    *   summary: Handle payment for a request
    *   description: Handle payment for a specific request identified by its ID
    *   tags:
    *      - Payment
-   *   parameters:
-   *     - in: path
-   *       name: id
-   *       description: ID of the request
-   *       required: true
-   *       schema:
-   *         type: integer
    *   security:
    *     - bearerAuth: []
    *   requestBody:
@@ -1623,7 +1617,7 @@ let initWebRoutes = (app) => {
    *         schema:
    *           type: object
    *           properties:
-   *             paymentAmount:
+   *             requestId:
    *               type: number
    *   responses:
    *     "200":
@@ -1642,7 +1636,7 @@ let initWebRoutes = (app) => {
    *     "404":
    *       description: Request not found
    */
-
+   router.put("/payment", verifyToken, userController.handlePayment);
    /**
  * @swagger
  * /api/receive-diamond-valuation:
@@ -1951,7 +1945,7 @@ let initWebRoutes = (app) => {
    */
    router.post("/approve-commitment", verifyToken, staffController.handleApproveCommitment);
 
-   router.put("/payment/:id", verifyToken, userController.handlePayment);
+
    /**
    * @swagger
    * /api/completePayment/{id}:
