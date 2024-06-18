@@ -808,12 +808,12 @@ const createNewRequest = (data) => {
     });
 };
 
-let payment = (body, params) => {
+let payment = (body) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             const request = pool.request();
-            request.input("requestId", sql.Int, params.id);
+            request.input("requestId", sql.Int, body.requestId);
             await request.query(`
                 UPDATE Payment
                 SET paymentAmount = 100, paymentDate = GETDATE()
