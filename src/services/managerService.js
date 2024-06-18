@@ -19,29 +19,60 @@ const getStaff = async () => {
         }
     })
 };
+
 const approveRequest = async (managerId, approvalId, status) => {
     try {
+        // Validate status against allowed values
+        if (!['Approved', 'Rejected'].includes(status)) {
+            throw new Error('Invalid status');
+        }
+
         let pool = await sql.connect(config);
+
+        // Fetch requestType based on approvalId
+        let requestTypeQuery = await pool.request()
+            .input('approvalId', sql.Int, approvalId)
+            .query('SELECT requestType FROM RequestProcesses WHERE id = @approvalId');
+
+        if (!requestTypeQuery.recordset || requestTypeQuery.recordset.length === 0) {
+            throw new Error(`No requestType found for approvalId ${approvalId}`);
+        }
+
+        let requestType = requestTypeQuery.recordset[0].requestType;
+
+        // Fetch processId based on requestType
+        let processIdQuery = await pool.request()
+            .input('requestType', sql.NVarChar(255), requestType)
+            .query('SELECT id FROM Processes WHERE processStatus = @requestType');
+
+        if (!processIdQuery.recordset || processIdQuery.recordset.length === 0) {
+            throw new Error(`No processId found for requestType ${requestType}`);
+        }
+
+        let processId = processIdQuery.recordset[0].id;
+
+        // Update RequestProcesses table
         let result = await pool.request()
             .input('approvalId', sql.Int, approvalId)
             .input('status', sql.NVarChar(50), status)
             .input('managerId', sql.Int, managerId)
+            .input('processId', sql.Int, processId)
             .query(`
-                UPDATE RequestApproval
+                UPDATE RequestProcesses
                 SET status = @status,
-                    managerId = @managerId
+                    managerId = @managerId,
+                    finishDate = GETDATE(),
+                    processId = @processId
                 WHERE id = @approvalId;
-                
-                UPDATE Requests
-                SET processId = (SELECT id FROM Processes WHERE processStatus = (SELECT requestType FROM RequestApproval WHERE id = @approvalId) AND actor = 'Manager')
-                WHERE id = (SELECT requestId FROM RequestApproval WHERE id = @approvalId);
             `);
+
         return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error('Error in managerService.approveRequest:', error);
         throw error;
     }
 };
+
 
 module.exports = {
     getStaff: getStaff,

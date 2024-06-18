@@ -82,7 +82,7 @@ const handlePrintValuationReport = async (req, res) => {
 
 const handleRequestApproval = async (req, res) => {
     try {
-        const { requestId, requestType } = req.body;
+        const { requestId, requestType, description } = req.body;
 
         if (!requestId || !requestType) {
             return res.status(400).json({
@@ -90,13 +90,19 @@ const handleRequestApproval = async (req, res) => {
                 message: 'Invalid input parameters or Request ID or Request Type missing'
             });
         }
+        let result = await staffService.requestApproval(req.user.id, requestId, requestType, description);
 
-        let result = await staffService.requestApproval(requestId, requestType);
-
-        res.status(200).json({
-            errCode: 0,
-            message: 'Approval request submitted successfully'
-        });
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Approval request submitted successfully'
+            });
+        } else {
+            res.status(500).json({
+                errCode: -1,
+                message: 'Failed to submit approval request'
+            });
+        }
     } catch (error) {
         console.error('Error in managerController.handleRequestApproval:', error);
         res.status(500).json({
@@ -105,6 +111,7 @@ const handleRequestApproval = async (req, res) => {
         });
     }
 };
+
 
 const handleReceiveDiamond = async (req, res) => {
     try {

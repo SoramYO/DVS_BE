@@ -121,22 +121,28 @@ const printValuationReport = async (requestId) => {
         throw error;
     }
 };
-const requestApproval = async (requestId, requestType) => {
+const requestApproval = async (staffId, requestId, requestType, description) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
             .input('requestType', sql.NVarChar(255), requestType)
+            .input('description', sql.NVarChar(1000), description)
+            .input('status', sql.NVarChar(50), 'Pending')
+            .input('staffId', sql.Int, staffId)
+            .input('processId', sql.Int, (await pool.request()
+                .query('SELECT TOP 1 processId FROM RequestProcesses ORDER BY finishDate DESC')).recordset[0].processId)
             .query(`
-                INSERT INTO RequestApproval (requestId, requestType, status, managerId)
-                VALUES (@requestId, @requestType, 'Pending', NULL);
+                INSERT INTO RequestProcesses (requestType, description, status, staffId, processId, requestId)
+                VALUES (@requestType, @description, @status, @staffId, @processId, @requestId)
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
-        console.error('Error in managerService.requestApproval:', error);
+        console.error('Error in staffService.requestApproval:', error);
         throw error;
     }
 };
+
 
 const receiveDiamond = async (requestId, receivedBy) => {
     try {
