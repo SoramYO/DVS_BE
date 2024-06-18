@@ -202,9 +202,8 @@ const forgotPassword = async (email) => {
             await request
                 .input("userId", sql.Int, userId)
                 .input("token", sql.NVarChar, token)
-                .input("expiryDate", sql.DateTime, new Date(Date.now() + 30000000))
                 .query(
-                    "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, @expiryDate)"
+                    "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, DATEADD(minute, 300, GETDATE()))"
                 );
 
             const resetLink = `https://dvs-fe-soramyos-projects.vercel.app/reset-password?token=${token}&id=${userId}`;
@@ -729,11 +728,10 @@ const submitFeedback = async (userId, requestId, customerName, email, feedbackTe
         request.input('customerName', sql.NVarChar(255), customerName);
         request.input('email', sql.NVarChar(255), email);
         request.input('feedbackText', sql.NVarChar(1000), feedbackText);
-        request.input('createdAt', sql.DateTime, new Date());
 
         await request.query(`
-            INSERT INTO Feedback (userId, requestId, customerName, email, feedbackText, createdAt)
-            VALUES (@userId, @requestId, @customerName, @email, @feedbackText, @createdAt)
+            INSERT INTO Feedback (userId, requestId, customerName, email, feedbackText)
+            VALUES (@userId, @requestId, @customerName, @email, @feedbackText)
         `);
 
         return {
@@ -849,9 +847,9 @@ let completePayment = async (params) => {
 
             await request
                 .input("paymentAmount", sql.Int, fullPayment)
-                .input("paymentDate", sql.DateTime, new Date()).query(`
+                .query(`
                 UPDATE Payment
-                SET paymentAmount = @paymentAmount, paymentDate = @paymentDate
+                SET paymentAmount = @paymentAmount, paymentDate = GETDATE()
                 WHERE requestId = @requestId;
             `);
 
@@ -1249,7 +1247,7 @@ let paypalRequest = async (req) => {
                     payment_method: "paypal",
                 },
                 redirect_urls: {
-                    return_url: "http://localhost:3000/paymentSuccess",
+                    return_url: "https://dvs-fe.vercel.app/paymentSuccess",
                     cancel_url: "http://localhost:3000/cancel",
                 },
                 transactions: [

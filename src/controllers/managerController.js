@@ -26,10 +26,17 @@ const handleApproveRequest = async (req, res) => {
 
         let result = await managerService.approveRequest(req.user.id, approvalId, status);
 
-        res.status(200).json({
-            errCode: 0,
-            message: 'Approval status updated successfully'
-        });
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Approval status updated successfully'
+            });
+        } else {
+            res.status(500).json({
+                errCode: -1,
+                message: 'Failed to update approval status'
+            });
+        }
     } catch (error) {
         console.error('Error in managerController.handleApproveRequest:', error);
         res.status(500).json({
@@ -38,6 +45,8 @@ const handleApproveRequest = async (req, res) => {
         });
     }
 };
+
+
 
 
 module.exports = {
