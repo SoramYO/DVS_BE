@@ -1334,7 +1334,7 @@ let getRequestByUser = async (params) => {
             const pool = await sql.connect(config);
             const requests = await pool.request().query(`
             SELECT r.id, r.requestImage, r.createdDate, r.paymentStatus, s.serviceName
-            FROM Request r JOIN Service s ON r.serviceId = s.id
+            FROM Requests r JOIN Service s ON r.serviceId = s.id
             WHERE r.userId = ${userId}
             `);
             resolve({ errCode: 0, message: "Success", data: requests.recordset });
