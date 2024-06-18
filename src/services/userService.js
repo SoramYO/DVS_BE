@@ -815,11 +815,11 @@ let payment = (body) => {
             const request = pool.request();
             request.input("requestId", sql.Int, body.requestId);
             await request.query(`
-                UPDATE Payment
+                UPDATE Payments
                 SET paymentAmount = 100, paymentDate = GETDATE()
                 WHERE requestId = @requestId;
 
-                UPDATE Request
+                UPDATE Requests
                 SET paymentStatus = 'Paid'
                 WHERE id = @requestId;
             `);
