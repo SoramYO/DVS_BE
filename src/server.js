@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 const initWebRoutes = require('./routes/web');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('swagger-jsdoc');
+var config = require('../src/config/dbconfig');
+const sql = require('mssql');
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
@@ -67,8 +69,22 @@ app.use(
 
 initWebRoutes(app);
 
+// Database connection
+sql.connect(config).then(pool => {
+  if (pool.connected) {
+    console.log('Connected to database');
+  } else {
+    console.log('Failed to connect to database');
+  }
+}).catch(err => {
+  console.error('Database connection failed: ', err);
+});
+
 app.listen(PORT, () => {
   console.log('Diamond API is running at ' + PORT);
 });
+
+
+
 
 module.exports = app;

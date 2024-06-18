@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
-  const token = req.cookies.accessToken;
+  const token = req.cookies.accessToken || req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Access Denied' });
 
   try {
@@ -10,6 +10,9 @@ const verifyToken = (req, res, next) => {
     req.user = verified;
     next();
   } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: 'Token expired' });
+    }
     res.status(400).json({ message: 'Invalid Token' });
   }
 }
