@@ -2811,7 +2811,7 @@ let initWebRoutes = (app) => {
   */
   router.get('/paypalReturn', userController.handlePaypalReturn);
 
-  router.get('/getRequestByUser/:id', verifyToken, userController.handleGetRequestByUser);
+  router.get('/getRequestByUser', verifyToken, userController.handleGetRequestByUser);
 
   /**
    * @swagger
