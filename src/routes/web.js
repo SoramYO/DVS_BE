@@ -359,8 +359,8 @@ let initWebRoutes = (app) => {
 
   /**
 * @swagger
-* /api/profile:
-*   delete:
+* /api/profile-remove:
+*   put:
 *     summary: Delete user account
 *     description: Deletes the user's account permanently
 *     tags: [User]
@@ -404,7 +404,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Server error'
 */
-  router.delete("/profile", verifyToken, userController.deleteAccount);
+  router.put("/profile-remove", verifyToken, userController.deleteAccount);
 
   /**
    * @swagger
@@ -2811,7 +2811,80 @@ let initWebRoutes = (app) => {
   */
   router.get('/paypalReturn', userController.handlePaypalReturn);
 
+  /**
+   * @swagger
+   * /api/getRequestByUser:
+   *  get:
+   *   summary: Get all requests by a user
+   *   description: Retrieve all requests made by the authenticated user.
+   *   tags:
+   *     - User
+   *   security:
+   *     - bearerAuth: []
+   *   responses:
+   *     "200":
+   *       description: Success
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               errCode:
+   *                 type: integer
+   *                 example: 0
+   *               message:
+   *                 type: string
+   *                 example: Success
+   *               data:
+   *                 type: array
+   *                 items:
+   *                   type: object
+   *                   properties:
+   *                     id:
+   *                       type: integer
+   *                       example: 1
+   *                     requestImage:
+   *                       type: string
+   *                       example: "https://example.com/request-image.jpg"
+   *                     createdDate:
+   *                       type: string
+   *                       format: date-time
+   *                       example: "2023-06-18T15:53:00"
+   *                     paymentStatus:
+   *                       type: string
+   *                       example: "Pending"
+   *                     serviceName:
+   *                       type: string
+   *                       example: "Diamond Cleaning"
+   *     "401":
+   *       description: Unauthorized
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               errCode:
+   *                 type: integer
+   *                 example: 1
+   *               message:
+   *                 type: string
+   *                 example: "Unauthorized"
+   *     "500":
+   *       description: Internal Server Error
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               errCode:
+   *                 type: integer
+   *                 example: 1
+   *               message:
+   *                 type: string
+   *                 example: "Internal Server Error"
+   */
   router.get('/getRequestByUser', verifyToken, userController.handleGetRequestByUser);
+
 
   /**
    * @swagger
