@@ -382,6 +382,106 @@ let getProfit = async (req, res) => {
     })
 }
 
+const getAllServices = async () => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request().query(`
+            SELECT id as serviceId, serviceName, price
+            FROM Services
+        `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getAllServices service:', error);
+        throw new Error('Error retrieving services');
+    }
+};
+
+const createNewService = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input('serviceName', sql.NVarChar, data.serviceName);
+            request.input('price', sql.Int, data.price);
+
+            await request.query(`
+                INSERT INTO Services (serviceName, price)
+                VALUES (@serviceName, @price)
+            `);
+
+            resolve({
+                errCode: 0,
+                message: 'Service created successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+const updateService = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input('serviceId', sql.Int, data.serviceId);
+            request.input('serviceName', sql.NVarChar, data.serviceName);
+            request.input('description', sql.NVarChar, data.description);
+            request.input('price', sql.Int, data.price);
+
+            const result = await request.query(`
+                UPDATE Services
+                SET serviceName = @serviceName, price = @price
+                WHERE id = @serviceId
+            `);
+
+            if (result.rowsAffected[0] === 0) {
+                return resolve({
+                    errCode: 2,
+                    message: 'Service not found'
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                message: 'Service updated successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+const deleteService = (serviceId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input('serviceId', sql.Int, serviceId);
+
+            const result = await request.query(`
+                DELETE FROM Services
+                WHERE id = @serviceId
+            `);
+
+            if (result.rowsAffected[0] === 0) {
+                return resolve({
+                    errCode: 2,
+                    message: 'Service not found'
+                });
+            }
+
+            resolve({
+                errCode: 0,
+                message: 'Service deleted successfully'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
 module.exports = {
     checkUserName: checkUserName,
     getUserById: getUserById,
@@ -398,4 +498,8 @@ module.exports = {
     getRequestById: getRequestById,
     countRequest: countRequest,
     getProfit: getProfit,
+    getAllServices: getAllServices,
+    createNewService: createNewService,
+    updateService: updateService,
+    deleteService: deleteService,
 }

@@ -642,7 +642,7 @@ let initWebRoutes = (app) => {
    *                   type: string
    *                   example: 'Server error'
    */
-  router.get('/services', userController.viewServices);
+  router.get('/services', adminController.handleViewServices);
 
   /**
    * @swagger
@@ -711,7 +711,7 @@ let initWebRoutes = (app) => {
    *                   type: string
    *                   example: 'Server error'
    */
-  router.post("/service", verifyToken, userController.handleCreateNewService);
+  router.post("/service", verifyToken, adminController.handleCreateNewService);
 
   /**
 * @swagger
@@ -796,7 +796,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Server error'
 */
-  router.put("/service", verifyToken, userController.handleUpdateService);
+  router.put("/service", verifyToken, adminController.handleUpdateService);
 
   /**
 * @swagger
@@ -869,7 +869,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Server error'
 */
-  router.delete("/service/:serviceId", verifyToken, userController.handleDeleteService);
+  router.delete("/service/:serviceId", verifyToken, adminController.handleDeleteService);
 
   /**
    * @swagger

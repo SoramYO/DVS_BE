@@ -581,105 +581,8 @@ const calculateEstimatedPrice = (diamondProperties) => {
     const estimatedPrice = caratWeight * basePricePerCarat;
     return Math.round(estimatedPrice);
 };
-const getAllServices = async () => {
-    try {
-        const pool = await sql.connect(config);
-        const result = await pool.request().query(`
-            SELECT id as serviceId, serviceName, price
-            FROM Services
-        `);
 
-        return result.recordset;
-    } catch (error) {
-        console.error('Error in getAllServices service:', error);
-        throw new Error('Error retrieving services');
-    }
-};
 
-const createNewService = (data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const pool = await sql.connect(config);
-            const request = pool.request();
-            request.input('serviceName', sql.NVarChar, data.serviceName);
-            request.input('price', sql.Int, data.price);
-
-            await request.query(`
-                INSERT INTO Services (serviceName, price)
-                VALUES (@serviceName, @price)
-            `);
-
-            resolve({
-                errCode: 0,
-                message: 'Service created successfully'
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-const updateService = (data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const pool = await sql.connect(config);
-            const request = pool.request();
-            request.input('serviceId', sql.Int, data.serviceId);
-            request.input('serviceName', sql.NVarChar, data.serviceName);
-            request.input('description', sql.NVarChar, data.description);
-            request.input('price', sql.Int, data.price);
-
-            const result = await request.query(`
-                UPDATE Services
-                SET serviceName = @serviceName, price = @price
-                WHERE id = @serviceId
-            `);
-
-            if (result.rowsAffected[0] === 0) {
-                return resolve({
-                    errCode: 2,
-                    message: 'Service not found'
-                });
-            }
-
-            resolve({
-                errCode: 0,
-                message: 'Service updated successfully'
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-const deleteService = (serviceId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const pool = await sql.connect(config);
-            const request = pool.request();
-            request.input('serviceId', sql.Int, serviceId);
-
-            const result = await request.query(`
-                DELETE FROM Services
-                WHERE id = @serviceId
-            `);
-
-            if (result.rowsAffected[0] === 0) {
-                return resolve({
-                    errCode: 2,
-                    message: 'Service not found'
-                });
-            }
-
-            resolve({
-                errCode: 0,
-                message: 'Service deleted successfully'
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
 
 const estimateDiamondValueByCertificate = async (certificateId) => {
     try {
@@ -747,63 +650,88 @@ const submitFeedback = async (userId, requestId, customerName, email, feedbackTe
     }
 };
 
-const createNewRequest = (data) => {
-    return new Promise(async (resolve, reject) => {
+const createNewRequest = async (data) => {
+    try {
+        const {
+            requestImage,
+            note,
+            userId,
+            serviceId
+        } = data;
+
+        // Connect to the database
+        const pool = await sql.connect(config);
+        const request = pool.request();
+
+        // Start a transaction
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
         try {
-            const {
-                requestImage,
-                note,
-                userId,
-                serviceId
-            } = data;
-
-            // Connect to the database
-            const pool = await sql.connect(config);
-            const request = pool.request();
-
-            // Define input parameters
-            request.input("requestImage", sql.NVarChar(sql.MAX), requestImage);
-            request.input("note", sql.NVarChar(255), note);
-            request.input("userId", sql.Int, userId);
-            request.input("processId", sql.Int, 1);
-            request.input("serviceId", sql.Int, serviceId);
-
-            // Insert the new request into the Request table
-            const result = await request.query(`
+            // Step 1: Insert a new record into Diamonds table
+            const insertDiamondQuery = `
                 DECLARE @NewDiamondID TABLE (id INT);
 
                 INSERT INTO Diamonds (certificateId, proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape)
                 OUTPUT INSERTED.id INTO @NewDiamondID
                 VALUES (NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-                INSERT INTO Requests (requestImage, note,paymentStatus, userId, processId, diamondId, serviceId )
-                VALUES (@requestImage, @note,'Pending', @userId, @processId, (SELECT id FROM @NewDiamondID), @serviceId );
+                SELECT id FROM @NewDiamondID;
+            `;
+            const diamondResult = await transaction.request().query(insertDiamondQuery);
+            const diamondId = diamondResult.recordset[0].id;
+
+            // Step 2: Insert a new record into Requests table
+            const insertRequestQuery = `
+                INSERT INTO Requests (requestImage, note, paymentStatus, userId, diamondId, serviceId)
+                VALUES (@requestImage, @note, 'Pending', @userId, @diamondId, @serviceId);
 
                 SELECT SCOPE_IDENTITY() AS requestId;
-            `);
+            `;
+            const requestResult = await transaction.request()
+                .input('requestImage', sql.NVarChar(sql.MAX), requestImage)
+                .input('note', sql.NVarChar(255), note)
+                .input('userId', sql.Int, userId)
+                .input('diamondId', sql.Int, diamondId)
+                .input('serviceId', sql.Int, serviceId)
+                .query(insertRequestQuery);
 
-            if (result.recordset.length > 0) {
-                const requestId = result.recordset[0].requestId;
-                resolve({
-                    errCode: 0,
-                    message: "Create new request success",
-                    requestId: requestId
-                });
-            } else {
-                resolve({
-                    errCode: 1,
-                    message: "Failed to create new request"
-                });
-            }
+            const requestId = requestResult.recordset[0].requestId;
+
+            // Step 3: Insert a new record into RequestProcesses table
+            const insertRequestProcessQuery = `
+                INSERT INTO RequestProcesses (requestType, createdDate, status, requestId, staffId, processId)
+                VALUES ('Valuation', GETDATE(), 'Pending', @requestId, NULL, 15);
+
+                SELECT SCOPE_IDENTITY() AS requestProcessId;
+            `;
+            const requestProcessResult = await transaction.request()
+                .input('requestId', sql.Int, requestId)
+                .input('userId', sql.Int, userId)
+                .query(insertRequestProcessQuery);
+            const requestProcessId = requestProcessResult.recordset[0].requestProcessId;
+
+            // Commit the transaction if all queries succeed
+            await transaction.commit();
+
+            return {
+                errCode: 0,
+                message: "Create new request success",
+                requestId: requestId
+            };
         } catch (error) {
-            console.error("Error in createNewRequest:", error);
-            resolve({
-                errCode: 1,
-                message: "Server error",
-                error: error.message
-            });
+            // Rollback the transaction if there's an error
+            await transaction.rollback();
+            throw error;
         }
-    });
+    } catch (error) {
+        console.error("Error in createNewRequest:", error);
+        return {
+            errCode: 1,
+            message: "Server error",
+            error: error.message
+        };
+    }
 };
 
 let payment = (body) => {
@@ -1320,10 +1248,9 @@ let paypalReturn = async (req) => {
     });
 };
 
-let getRequestByUser = async (params) => {
+let getRequestByUser = async (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let userId = params.id;
 
             const pool = await sql.connect(config);
             const requests = await pool.request().query(`
@@ -1350,10 +1277,6 @@ module.exports = {
     deleteAccount: deleteAccount,
     estimateDiamondValue: estimateDiamondValue,
     getValuatedDiamondsByUserId: getValuatedDiamondsByUserId,
-    getAllServices: getAllServices,
-    createNewService: createNewService,
-    updateService: updateService,
-    deleteService: deleteService,
     estimateDiamondValueByCertificate: estimateDiamondValueByCertificate,
     submitFeedback: submitFeedback,
     createNewRequest: createNewRequest,
