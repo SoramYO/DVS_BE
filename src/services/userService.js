@@ -701,8 +701,8 @@ const createNewRequest = async (data) => {
 
             // Step 3: Insert a new record into RequestProcesses table
             const insertRequestProcessQuery = `
-                INSERT INTO RequestProcesses (requestType, createdDate, status, requestId, staffId, processId)
-                VALUES ('Valuation', GETDATE(), 'Pending', @requestId, NULL, 15);
+                INSERT INTO RequestProcesses (requestType, createdDate, status, requestId, sender, processId)
+                VALUES ('Valuation', GETDATE(), 'Pending', @requestId, @userId, 15);
 
                 SELECT SCOPE_IDENTITY() AS requestProcessId;
             `;

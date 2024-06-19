@@ -19,7 +19,7 @@ const handleApproveValuationRequest = async (req, res) => {
         }
 
 
-        let isApproved = await staffService.approveValuationRequest(req.user.id, requestId);
+        let isApproved = await staffService.takeRequest(req.user.id, requestId);
 
         if (isApproved) {
             return res.status(200).json({
@@ -145,6 +145,7 @@ const handleReceiveDiamond = async (req, res) => {
         });
     }
 };
+
 const handleSendValuationResult = async (req, res) => {
     try {
         const { requestId, valuationResultId } = req.body;
@@ -310,6 +311,73 @@ const handleApproveCommitment = async (req, res) => {
     }
 };
 
+const handleGetNewRequest = async (req, res) => {
+    try {
+        const requests = await staffService.getNewRequest();
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in staffController.handleGetNewRequest:', error);
+        res.status(500).json({
+            errCode: 1,
+            message: 'Error from server'
+        });
+    }
+}
+
+const handleBookingsAppoinment = async (req, res) => {
+    try {
+        const { id, appointmentDate } = req.body;
+        if (!id || !appointmentDate) {
+            return res.status(400).json({
+                errCode: 1,
+                message: 'Invalid input parameters or missing required fields'
+            });
+        }
+
+        const result = await staffService.bookingsAppoinment(id, appointmentDate);
+
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Appointment booked successfully'
+            });
+        } else {
+            res.status(404).json({
+                errCode: 2,
+                message: 'Request not found or invalid request ID'
+            });
+        }
+    } catch (error) {
+        console.error('Error in handleBookingsAppoinment controller:', error);
+        res.status(500).json({
+            errCode: 1,
+            message: 'Server error'
+        });
+    }
+}
+
+const handleGetTakeRequest = async (req, res) => {
+    try {
+        const requests = await staffService.getTakenRequestByStaff(req.user.id);
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
 
 module.exports = {
     handleApproveValuationRequest: handleApproveValuationRequest,
@@ -322,5 +390,8 @@ module.exports = {
     handleReceiveDiamondForValuation: handleReceiveDiamondForValuation,
     handleSendValuationResultToCustomer: handleSendValuationResultToCustomer,
     handleSendDiamondToValuation: handleSendDiamondToValuation,
-    handleApproveCommitment: handleApproveCommitment
+    handleApproveCommitment: handleApproveCommitment,
+    handleGetNewRequest: handleGetNewRequest,
+    handleBookingsAppoinment: handleBookingsAppoinment,
+    handleGetTakeRequest: handleGetTakeRequest
 }

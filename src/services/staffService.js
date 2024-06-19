@@ -1,23 +1,23 @@
 var config = require('../config/dbconfig');
 const sql = require("mssql");
 
-const approveValuationRequest = async (staffId, requestId) => {
+const takeRequest = async (staffId, requestId) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
-            .input('userId', sql.Int, staffId)
+            .input('staffId', sql.Int, staffId)
             .query(`
-                UPDATE Requests
-                SET processId = (SELECT id FROM Processes WHERE processStatus = 'Approved' AND actor = 'Consulting Staff')
-                WHERE id = @requestId;
-
-                INSERT INTO RequestProcesses (requestId, userId, processId, processDay)
-                VALUES (@requestId, @userId, (SELECT id FROM Processes WHERE processStatus = 'Approved' AND actor = 'Consulting Staff'), GETDATE());
+                UPDATE RequestProcesses
+                SET requestType = 'Approved',
+                    receiver = @staffId, finishDate = GETDATE(),
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Approved'),
+                    status = 'TakeByConsulting'
+                WHERE requestId = @requestId AND receiver IS NULL;
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
-        console.error('Error in managerService.approveValuationRequest:', error);
+        console.error('Error in managerService.takeRequest:', error);
         throw error;
     }
 };
@@ -105,7 +105,7 @@ const printValuationReport = async (requestId) => {
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
             .query(`
-                SELECT r.id AS requestId, r.requestImage, r.note, r.createdDate, r.updatedDate, r.paymentStatus,
+                SELECT r.id AS requestId, r.requestImage, r.note, r.createdDate, r.appointmentDate, r.paymentStatus,
                     a.username AS customerUsername, a.firstName AS customerFirstName, a.lastName AS customerLastName,
                     dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
                     re.price, re.companyName, re.dateValued AS valuationDate
@@ -143,7 +143,6 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
     }
 };
 
-
 const receiveDiamond = async (requestId, receivedBy) => {
     try {
         let pool = await sql.connect(config);
@@ -151,22 +150,20 @@ const receiveDiamond = async (requestId, receivedBy) => {
             .input('requestId', sql.Int, requestId)
             .input('receivedBy', sql.Int, receivedBy)
             .query(`
+                UPDATE RequestProcesses
+                SET processId = (SELECT id FROM Processes WHERE processStatus = 'Start Valuated')
+                WHERE requestId = @requestId;
+
                 DECLARE @processId INT;
                 
                 SET @processId = (
-                    SELECT TOP 1 id
+                    SELECT id
                     FROM Processes
-                    WHERE processStatus = 'Received'
-                        AND actor = 'Consulting Staff'
-                    ORDER BY id
+                    WHERE processStatus = 'Start Valuated'
                 );
 
-                UPDATE Requests
-                SET processId = @processId
-                WHERE id = @requestId;
-
-                INSERT INTO RequestProcesses (requestId, userId, processId, processDay)
-                VALUES (@requestId, @receivedBy, @processId, GETDATE());
+                INSERT INTO RequestProcesses (requestType, requestId, sender, processId)
+                VALUES ('Ready for valuation', @requestId, @receivedBy, @processId);
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -216,9 +213,9 @@ const receiveDiamondForValuation = async (requestId, receivedBy) => {
                 DECLARE @processId INT;
 
                 SET @processId = (
-                    SELECT TOP 1 id 
-                    FROM Processes 
-                    WHERE processStatus = 'Received for Valuation' 
+                    SELECT TOP 1 id
+                    FROM Processes
+                    WHERE processStatus = 'Received for Valuation'
                         AND actor = 'Valuation Staff'
                     ORDER BY id
                 );
@@ -299,16 +296,16 @@ const sendDiamondToValuation = async (requestId, sentBy) => {
     }
 };
 
-const approveCommitment = async (managerId, commitmentId, status) => {
+const approveCommitment = async (receiver, commitmentId, status) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('commitmentId', sql.Int, commitmentId)
             .input('status', sql.NVarChar(50), status)
-            .input('managerId', sql.Int, managerId)
+            .input('receiver', sql.Int, receiver)
             .query(`
                 UPDATE Commitments
-                SET status = @status, approvedBy = @managerId, approvedAt = GETDATE()
+                SET status = @status, approvedBy = @receiver, approvedAt = GETDATE()
                 WHERE id = @commitmentId;
             `);
         return result.rowsAffected[0] > 0;
@@ -318,10 +315,90 @@ const approveCommitment = async (managerId, commitmentId, status) => {
     }
 };
 
+const getNewRequest = async () => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query(`
+                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                FROM
+                    Requests r
+                JOIN
+                    RequestProcesses rp ON r.id = rp.requestId
+                JOIN
+                    Processes p ON rp.processId = p.id
+                JOIN
+                    Services s ON r.serviceId = s.id
+                JOIN
+                    Account a ON rp.sender = a.id
+                WHERE
+                    rp.receiver IS NULL
+                    AND a.roleId = 5
+                ORDER BY
+                    r.createdDate DESC;
+            `);
 
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getNewRequest:', error);
+        throw error;
+    }
+}
+
+const bookingsAppoinment = async (id, appointmentDate) => {
+    try {
+        let appointmentDateIn = new Date(appointmentDate);
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('requestId', sql.Int, id)
+            .input('appointmentDate', sql.DateTime, appointmentDateIn)
+            .query(`
+                UPDATE Requests
+                SET appointmentDate = @appointmentDate
+                WHERE id = @requestId;
+
+                UPDATE RequestProcesses
+                SET finishDate = GETDATE(),
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Booked Appointment')
+                WHERE requestId = @requestId;
+            `);
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('Error in staffService.bookingsAppoinment:', error);
+        throw error;
+    }
+};
+
+const getTakenRequestByStaff = async (staffId) => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('staffId', sql.Int, staffId)
+            .query(`
+                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                FROM
+                    Requests r
+                JOIN
+                    RequestProcesses rp ON r.id = rp.requestId
+                JOIN
+                    Processes p ON rp.processId = p.id
+                JOIN
+                    Services s ON r.serviceId = s.id
+                WHERE
+                    rp.receiver = @staffId
+                ORDER BY
+                    r.createdDate DESC;
+            `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getTakenRequestByStaff:', error);
+        throw error;
+    }
+}
 
 module.exports = {
-    approveValuationRequest: approveValuationRequest,
+    takeRequest: takeRequest,
     changeProcess: changeProcess,
     valuation: valuation,
     printValuationReport: printValuationReport,
@@ -332,4 +409,7 @@ module.exports = {
     sendValuationResultToCustomer: sendValuationResultToCustomer,
     sendDiamondToValuation: sendDiamondToValuation,
     approveCommitment: approveCommitment,
+    getNewRequest: getNewRequest,
+    bookingsAppoinment: bookingsAppoinment,
+    getTakenRequestByStaff: getTakenRequestByStaff,
 }

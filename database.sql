@@ -50,7 +50,7 @@ CREATE TABLE Requests (
     requestImage NVARCHAR(255) NOT NULL,
     note NVARCHAR(255) NOT NULL,
     createdDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    appointmentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     paymentStatus NVARCHAR(255) NOT NULL,
     userId INT,
     diamondId INT,
@@ -106,11 +106,11 @@ CREATE TABLE RequestProcesses (
     status NVARCHAR(50),
     requestId INT NOT NULL,
     staffId INT NOT NULL,
-    managerId INT,
+    receiver INT,
     processId INT,
     FOREIGN KEY (staffId) REFERENCES Account(id),
     FOREIGN KEY (processId) REFERENCES Processes(id),
-    FOREIGN KEY (managerId) REFERENCES Account(id),
+    FOREIGN KEY (receiver) REFERENCES Account(id),
     FOREIGN KEY (requestId) REFERENCES Requests(id)
 );
 
@@ -157,7 +157,7 @@ INSERT INTO Services (price, serviceName) VALUES
 ('$200', 'Advanced Valuation'),
 ('$50', 'Diamond Inspection');
 
-INSERT INTO Requests (requestImage, note, createdDate, updatedDate, paymentStatus, userId, diamondId, serviceId) VALUES
+INSERT INTO Requests (requestImage, note, createdDate, appointmentDate, paymentStatus, userId, diamondId, serviceId) VALUES
 ('image1.jpg', 'Urgent request', GETDATE(), GETDATE(), 'Pending', 7, 1, 2),
 ('image2.jpg', 'Standard request', GETDATE(), GETDATE(), 'Paid', 8, 2, 3),
 ('image3.jpg', 'Regular request', GETDATE(), GETDATE(), 'Pending', 9, 3, 1);
@@ -184,7 +184,7 @@ INSERT INTO Payments (paymentAmount, paymentDate, requestId) VALUES
      (2, 2, 'Jane Smith', 'jane.smith@example.com', 'Very satisfied with the diamond cleaning service.', GETDATE()),
      (null , null, 'Son', 'ngoxuanson121@gmail.com',N'làm ăn tốt đấy',GETDATE())
 
-        INSERT INTO RequestProcesses (requestType, createdDate, finishDate, description, status, requestId, staffId, managerId, processId) VALUES
+        INSERT INTO RequestProcesses (requestType, createdDate, finishDate, description, status, requestId, staffId, receiver, processId) VALUES
         ('Valuation', GETDATE(), GETDATE(), 'Basic valuation service', 'Completed', 1, 5, 2, 6),
         ('Inspection', GETDATE(), GETDATE(), 'Diamond inspection service', 'Completed', 2, 6, 2, 6),
         ('Valuation', GETDATE(), GETDATE(), 'Advanced valuation service', 'Completed', 3, 5, 2, 6);

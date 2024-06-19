@@ -50,7 +50,7 @@ CREATE TABLE Request(
 	requestImage nvarchar(MAX),
 	note nvarchar(255),
 	createdDate datetime,
-	updatedDate datetime,
+	appointmentDate datetime,
 	PRIMARY KEY(id)
 )
 
@@ -93,16 +93,16 @@ INSERT INTO Diamond (proportions, diamondOrigin, caratWeight, measurements, poli
 
 
 --Import some data to Request
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 1, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 2, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 3, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 4, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 5, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 6, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 7, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 8, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 9, 1, 1);
-INSERT INTO Request (requestImage, note, createdDate, updatedDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 10, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 1, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 2, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 3, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 4, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 5, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 6, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 7, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 8, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 9, 1, 1);
+INSERT INTO Request (requestImage, note, createdDate, appointmentDate, diamondId, userId, processId) VALUES ('https://encrypted/tbn0.gstatic.com/images?q=tbn:ANd9GcSP3frOOEwI_TR/xpvcrdcI8qqTW9/rpGPBdvC9jlTd5A&s', 'Good', '2021/01/01', '2021/01/01', 10, 1, 1);
 --Import some data to Result
 INSERT INTO Result (requestId, price, companyName, dateValued) VALUES (1, 1000, 'Company 1', '2021/01/01');
 INSERT INTO Result (requestId, price, companyName, dateValued) VALUES (2, 1000, 'Company 1', '2021/01/01');
