@@ -124,6 +124,70 @@ let handleGetProfit = async (req, res) => {
         profit
     })
 }
+const handleViewServices = async (req, res) => {
+    try {
+        const services = await userService.getAllServices();
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Services retrieved successfully',
+            services
+        });
+    } catch (error) {
+        console.error('Error in viewServices controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+};
+
+const handleCreateNewService = async (req, res) => {
+    try {
+        const { serviceName, price } = req.body;
+        if (!serviceName || !price) {
+            return res.status(400).json({ errCode: 1, message: 'Invalid input parameters' });
+        }
+
+        let message = await userService.createNewService(req.body);
+
+        return res.status(200).json(message);
+
+    } catch (error) {
+        console.error('Error in handleCreateNewService controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+};
+
+const handleUpdateService = async (req, res) => {
+    try {
+        const { serviceId, serviceName, price } = req.body;
+        if (!serviceId || !serviceName || !price) {
+            return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
+        }
+
+        let message = await userService.updateService(req.body);
+        return res.status(200).json(message);
+    } catch (error) {
+        console.error('Error in handleUpdateService controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+};
+
+const handleDeleteService = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+        if (!serviceId) {
+            return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
+        }
+
+        const message = await userService.deleteService(serviceId);
+
+        return res.status(200).json(message);
+
+    } catch (error) {
+        console.error('Error in handleDeleteService controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -138,4 +202,8 @@ module.exports = {
     handleGetRequestById: handleGetRequestById,
     handleCountRequest: handleCountRequest,
     handleGetProfit: handleGetProfit,
+    handleViewServices: handleViewServices,
+    handleCreateNewService: handleCreateNewService,
+    handleUpdateService: handleUpdateService,
+    handleDeleteService: handleDeleteService,
 }
