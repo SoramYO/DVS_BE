@@ -228,24 +228,22 @@ let getDiamonds = () => {
 //         }
 //     });
 // }
+
 const getRequests = async () => {
     try {
         let pool = await sql.connect(config);
         let requests = await pool.request().query(`
             SELECT
                 req.id, req.requestImage, req.note, req.createdDate, req.paymentStatus,
-                ac.username AS customerUsername, ac.firstName AS customerFirstName, ac.lastName AS customerLastName,
-                process.processStatus, process.actor, dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight,
-                dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
+                ac.firstName, ac.lastName, ac.email, ac.phone,
+                rp.staffId,
                 serv.serviceName
             FROM
                 Requests AS req
             JOIN
                 Account AS ac ON req.userId = ac.id
             JOIN
-                Processes AS process ON req.processId = process.id
-            JOIN
-                Diamonds AS dia ON req.diamondId = dia.id
+                RequestProcesses AS rp ON req.id = rp.requestId
             JOIN
                 Services AS serv ON req.serviceId = serv.id
             ORDER BY
@@ -257,6 +255,7 @@ const getRequests = async () => {
         throw error;
     }
 };
+
 
 let getResults = () => {
     return new Promise(async (resolve, reject) => {

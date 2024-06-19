@@ -454,7 +454,8 @@ const deleteAccount = (userId) => {
             const result = await pool.request()
                 .input('userId', sql.Int, userId)
                 .query(`
-                    DELETE FROM Account
+                    UPDATE Account
+                    SET status = 0
                     WHERE id = @userId;
                 `);
 
