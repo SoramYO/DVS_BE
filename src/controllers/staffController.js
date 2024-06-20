@@ -214,6 +214,7 @@ const handleSendValuationResult = async (req, res) => {
 const handleSendValuationResultToCustomer = async (req, res) => {
     try {
         const { requestId } = req.body;
+        console.log('requestId', requestId);
 
         if (!requestId) {
             return res.status(400).json({
@@ -222,7 +223,7 @@ const handleSendValuationResultToCustomer = async (req, res) => {
             });
         }
 
-        const result = await staffService.sendValuationResultToCustomer(requestId, req.user.id);
+        const result = await staffService.sendValuationResultToCustomer(requestId);
 
         if (result) {
             res.status(200).json({
@@ -255,7 +256,7 @@ const handleSendDiamondToValuation = async (req, res) => {
             });
         }
 
-        const result = await staffService.sendDiamondToValuation(requestId, req.user.id);
+        const result = await staffService.sendValuationResult(requestId, req.user.id);
 
         if (result) {
             res.status(200).json({
@@ -440,6 +441,24 @@ const handleGetRequestTakenByValuation = async (req, res) => {
     }
 }
 
+const handleGetFinishedRequest = async (req, res) => {
+    try {
+        const requests = await staffService.getFinishedRequest();
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
 
 module.exports = {
     handleApproveValuationRequest: handleApproveValuationRequest,
@@ -458,5 +477,6 @@ module.exports = {
     handleGetRequestReadyForValuation: handleGetRequestReadyForValuation,
     handleTakeRequestForValuation: handleTakeRequestForValuation,
     handleGetRequestTakenByValuation: handleGetRequestTakenByValuation,
+    handleGetFinishedRequest: handleGetFinishedRequest,
 
 }

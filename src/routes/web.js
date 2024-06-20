@@ -3133,6 +3133,8 @@ let initWebRoutes = (app) => {
 
   router.get("/take-request-by-valuation", verifyToken, staffController.handleGetRequestTakenByValuation);
 
+  router.get("/finished-request", verifyToken, staffController.handleGetFinishedRequest);
+
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
