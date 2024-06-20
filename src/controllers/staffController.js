@@ -19,7 +19,7 @@ const handleApproveValuationRequest = async (req, res) => {
         }
 
 
-        let isApproved = await staffService.approveValuationRequest(req.user.id, requestId);
+        let isApproved = await staffService.takeRequest(req.user.id, requestId);
 
         if (isApproved) {
             return res.status(200).json({
@@ -46,10 +46,43 @@ let handleChangeProcess = async (req, res) => {
     let message = await staffService.changeProcess(req.body, req.params);
     return res.status(200).json(message)
 }
-let handleValuation = async (req, res) => {
-    let message = await staffService.valuation(req.body, req.params);
-    return res.status(200).json(message)
+
+const handleValuation = async (req, res) => {
+    try {
+        console.log('req.body', req.body);
+        console.log('req.params', req.params);
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({
+                errCode: 1,
+                message: 'Invalid input parameters or Request ID or Valuation Result missing'
+            });
+        }
+
+
+        let result = await staffService.valuation(req.body, req.params);
+
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Valuation submitted successfully'
+            });
+        } else {
+            res.status(500).json({
+                errCode: -1,
+                message: 'Failed to submit valuation'
+            });
+        }
+    } catch (error) {
+        console.error('Error in managerController.handleValuation:', error);
+        res.status(500).json({
+            errCode: -1,
+            message: 'Error from server'
+        });
+    }
 }
+
 const handlePrintValuationReport = async (req, res) => {
     try {
         const { requestId } = req.query;
@@ -112,7 +145,6 @@ const handleRequestApproval = async (req, res) => {
     }
 };
 
-
 const handleReceiveDiamond = async (req, res) => {
     try {
         const { requestId } = req.body;
@@ -145,6 +177,7 @@ const handleReceiveDiamond = async (req, res) => {
         });
     }
 };
+
 const handleSendValuationResult = async (req, res) => {
     try {
         const { requestId, valuationResultId } = req.body;
@@ -171,39 +204,6 @@ const handleSendValuationResult = async (req, res) => {
         }
     } catch (error) {
         console.error('Error in handleSendValuationResult controller:', error);
-        res.status(500).json({
-            errCode: 1,
-            message: 'Server error'
-        });
-    }
-};
-
-const handleReceiveDiamondForValuation = async (req, res) => {
-    try {
-        const { requestId } = req.body;
-
-        if (!requestId) {
-            return res.status(400).json({
-                errCode: 1,
-                message: 'Invalid input parameters or missing required fields'
-            });
-        }
-
-        const result = await staffService.receiveDiamondForValuation(requestId, req.user.id);
-
-        if (result) {
-            res.status(200).json({
-                errCode: 0,
-                message: 'Diamond received for valuation successfully'
-            });
-        } else {
-            res.status(404).json({
-                errCode: 2,
-                message: 'Request not found or invalid request ID'
-            });
-        }
-    } catch (error) {
-        console.error('Error in handleReceiveDiamondForValuation controller:', error);
         res.status(500).json({
             errCode: 1,
             message: 'Server error'
@@ -255,7 +255,7 @@ const handleSendDiamondToValuation = async (req, res) => {
             });
         }
 
-        const result = await consultingService.sendDiamondToValuation(requestId, req.user.id);
+        const result = await staffService.sendDiamondToValuation(requestId, req.user.id);
 
         if (result) {
             res.status(200).json({
@@ -310,6 +310,136 @@ const handleApproveCommitment = async (req, res) => {
     }
 };
 
+const handleGetNewRequest = async (req, res) => {
+    try {
+        const requests = await staffService.getNewRequest();
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in staffController.handleGetNewRequest:', error);
+        res.status(500).json({
+            errCode: 1,
+            message: 'Error from server'
+        });
+    }
+}
+
+const handleBookingsAppoinment = async (req, res) => {
+    try {
+        const { id, appointmentDate } = req.body;
+        if (!id || !appointmentDate) {
+            return res.status(400).json({
+                errCode: 1,
+                message: 'Invalid input parameters or missing required fields'
+            });
+        }
+
+        const result = await staffService.bookingsAppoinment(id, appointmentDate);
+
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Appointment booked successfully'
+            });
+        } else {
+            res.status(404).json({
+                errCode: 2,
+                message: 'Request not found or invalid request ID'
+            });
+        }
+    } catch (error) {
+        console.error('Error in handleBookingsAppoinment controller:', error);
+        res.status(500).json({
+            errCode: 1,
+            message: 'Server error'
+        });
+    }
+}
+
+const handleGetTakeRequest = async (req, res) => {
+    try {
+        const requests = await staffService.getTakenRequestByStaff(req.user.id);
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
+const handleGetRequestReadyForValuation = async (req, res) => {
+    try {
+        const requests = await staffService.getRequestReadyForValuation();
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
+const handleTakeRequestForValuation = async (req, res) => {
+    try {
+        const { requestId } = req.body;
+
+        let isApproved = await staffService.takeRequestForValuation(req.user.id, requestId);
+
+        if (isApproved) {
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Valuation request approved successfully',
+            });
+        } else {
+            return res.status(404).json({
+                errCode: 2,
+                message: 'Valuation request not found',
+            });
+        }
+    } catch (error) {
+        console.error('Error in managerController.handleApproveValuationRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
+const handleGetRequestTakenByValuation = async (req, res) => {
+    try {
+        const requests = await staffService.getRequestTakenByValuation(req.user.id);
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
 
 module.exports = {
     handleApproveValuationRequest: handleApproveValuationRequest,
@@ -319,8 +449,14 @@ module.exports = {
     handleRequestApproval: handleRequestApproval,
     handleReceiveDiamond: handleReceiveDiamond,
     handleSendValuationResult: handleSendValuationResult,
-    handleReceiveDiamondForValuation: handleReceiveDiamondForValuation,
     handleSendValuationResultToCustomer: handleSendValuationResultToCustomer,
     handleSendDiamondToValuation: handleSendDiamondToValuation,
-    handleApproveCommitment: handleApproveCommitment
+    handleApproveCommitment: handleApproveCommitment,
+    handleGetNewRequest: handleGetNewRequest,
+    handleBookingsAppoinment: handleBookingsAppoinment,
+    handleGetTakeRequest: handleGetTakeRequest,
+    handleGetRequestReadyForValuation: handleGetRequestReadyForValuation,
+    handleTakeRequestForValuation: handleTakeRequestForValuation,
+    handleGetRequestTakenByValuation: handleGetRequestTakenByValuation,
+
 }

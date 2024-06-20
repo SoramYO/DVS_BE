@@ -20,7 +20,7 @@ const getStaff = async () => {
     })
 };
 
-const approveRequest = async (managerId, approvalId, status) => {
+const approveRequest = async (receiver, approvalId, status) => {
     try {
         // Validate status against allowed values
         if (!['Approved', 'Rejected'].includes(status)) {
@@ -55,12 +55,12 @@ const approveRequest = async (managerId, approvalId, status) => {
         let result = await pool.request()
             .input('approvalId', sql.Int, approvalId)
             .input('status', sql.NVarChar(50), status)
-            .input('managerId', sql.Int, managerId)
+            .input('receiver', sql.Int, receiver)
             .input('processId', sql.Int, processId)
             .query(`
                 UPDATE RequestProcesses
                 SET status = @status,
-                    managerId = @managerId,
+                    receiver = @receiver,
                     finishDate = GETDATE(),
                     processId = @processId
                 WHERE id = @approvalId;

@@ -1099,11 +1099,11 @@ let initWebRoutes = (app) => {
 
   /**
 * @swagger
-* /api/approve-valuation-request:
+* /api/take-request:
 *   post:
 *     summary: Approve valuation request
 *     description: Consulting Staff can approve a valuation request
-*     tags: [Valuation Management]
+*     tags: [Requests]
 *     security:
 *       - bearerAuth: []
 *     requestBody:
@@ -1170,7 +1170,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Error from server'
 */
-  router.post("/approve-valuation-request", verifyToken, staffController.handleApproveValuationRequest);
+  router.post("/take-request", verifyToken, staffController.handleApproveValuationRequest);
 
   /**
 * @swagger
@@ -1210,7 +1210,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   format: date-time
 *                   example: "2024-06-20T10:30:00Z"
-*                 updatedDate:
+*                 appointmentDate:
 *                   type: string
 *                   format: date-time
 *                   example: "2024-06-20T10:45:00Z"
@@ -1603,7 +1603,6 @@ let initWebRoutes = (app) => {
 */
   router.post("/send-valuation-result", verifyToken, staffController.handleSendValuationResult);
 
-
   /**
   * @swagger
   * /api/payment:
@@ -1641,82 +1640,6 @@ let initWebRoutes = (app) => {
   *       description: Request not found
   */
   router.put("/payment", verifyToken, userController.handlePayment);
-
-  /**
-* @swagger
-* /api/receive-diamond-valuation:
-*   post:
-*     summary: Receive diamond for valuation
-*     description: Allows Valuation staff to receive diamonds for valuation.
-*     tags: [Valuation Management]
-*     security:
-*       - bearerAuth: []
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties:
-*               requestId:
-*                 type: integer
-*                 description: ID of the request associated with the diamond.
-*                 example: 1
-*     responses:
-*       '200':
-*         description: Diamond received for valuation successfully
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 0
-*                 message:
-*                   type: string
-*                   example: 'Diamond received for valuation successfully'
-*       '400':
-*         description: Invalid input parameters or missing required fields
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 1
-*                 message:
-*                   type: string
-*                   example: 'Invalid input parameters or missing required fields'
-*       '404':
-*         description: Request not found or invalid request ID
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 2
-*                 message:
-*                   type: string
-*                   example: 'Request not found or invalid request ID'
-*       '500':
-*         description: Server error
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 1
-*                 message:
-*                   type: string
-*                   example: 'Server error'
-*/
-  router.post("/receive-diamond-valuation", verifyToken, staffController.handleReceiveDiamondForValuation);
 
   /**
 * @swagger
@@ -1796,7 +1719,7 @@ let initWebRoutes = (app) => {
 
   /**
   * @swagger
-  * /api/send-diamond-to-valuation:
+  * /api/send-diamond-to-valuationStaff:
   *   post:
   *     summary: Send diamond's sample to valuation staff
   *     description: Allows Consulting Staff to send the diamond's sample taken from the customer to the valuation staff.
@@ -1868,7 +1791,7 @@ let initWebRoutes = (app) => {
   *                   type: string
   *                   example: 'Server error'
   */
-  router.post("/send-diamond-to-valuation", verifyToken, staffController.handleSendDiamondToValuation);
+  router.post("/send-diamond-to-valuationStaff", verifyToken, staffController.handleSendDiamondToValuation);
 
   /**
   * @swagger
@@ -2885,7 +2808,6 @@ let initWebRoutes = (app) => {
    */
   router.get('/getRequestByUser', verifyToken, userController.handleGetRequestByUser);
 
-
   /**
    * @swagger
    * /api/countUser:
@@ -2983,6 +2905,233 @@ let initWebRoutes = (app) => {
 *       description: Unauthorized
 */
   router.get("/profit", verifyToken, adminController.handleGetProfit);
+
+  /**
+ * @swagger
+ * /api/new-request:
+ *   get:
+ *     summary: Get new requests for staff
+ *     description: Retrieve a list of new requests that have not been assigned to any receiver yet.
+ *     tags:
+ *       - Requests
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Get new request successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: Get new request successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       requestId:
+ *                         type: integer
+ *                         example: 1
+ *                       requestImage:
+ *                         type: string
+ *                         example: "http://example.com/image.jpg"
+ *                       note:
+ *                         type: string
+ *                         example: "Customer note"
+ *                       createdDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2023-06-20T12:00:00Z"
+ *                       paymentStatus:
+ *                         type: string
+ *                         example: "Paid"
+ *                       serviceName:
+ *                         type: string
+ *                         example: "Basic Valuation"
+ *                       status:
+ *                         type: string
+ *                         example: "Pending"
+ *                       processStatus:
+ *                         type: string
+ *                         example: "Unprocessed"
+ *       500:
+ *         description: Error from server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: Error from server
+ */
+  router.get("/new-request", verifyToken, staffController.handleGetNewRequest);
+
+
+  /**
+   * @swagger
+   * /api/take-request:
+   *   get:
+   *     summary: Get taken requests by staff
+   *     description: Retrieve a list of requests that have been taken by the logged-in staff member.
+   *     tags:
+   *       - Requests
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Get taken requests successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: 0
+   *                 message:
+   *                   type: string
+   *                   example: Get taken requests successfully
+   *                 data:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       requestId:
+   *                         type: integer
+   *                         example: 1
+   *                       requestImage:
+   *                         type: string
+   *                         example: "http://example.com/image.jpg"
+   *                       note:
+   *                         type: string
+   *                         example: "Customer note"
+   *                       createdDate:
+   *                         type: string
+   *                         format: date-time
+   *                         example: "2023-06-20T12:00:00Z"
+   *                       paymentStatus:
+   *                         type: string
+   *                         example: "Paid"
+   *                       serviceName:
+   *                         type: string
+   *                         example: "Basic Valuation"
+   *                       status:
+   *                         type: string
+   *                         example: "Pending"
+   *                       processStatus:
+   *                         type: string
+   *                         example: "Unprocessed"
+   *       500:
+   *         description: Error from server
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: -1
+   *                 message:
+   *                   type: string
+   *                   example: Error from server
+   */
+  router.get("/take-request", verifyToken, staffController.handleGetTakeRequest);
+
+  /**
+   * @swagger
+   * /api/appointment:
+   *   put:
+   *     summary: Book an appointment for a request
+   *     description: Updates the appointment date for a specific request and changes its process status to "Booked Appointment".
+   *     tags:
+   *       - Requests
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               id:
+   *                 type: integer
+   *                 example: 1
+   *               appointmentDate:
+   *                 type: string
+   *                 format: date-time
+   *                 example: "2023-06-25T10:00:00Z"
+   *     responses:
+   *       200:
+   *         description: Appointment booked successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: 0
+   *                 message:
+   *                   type: string
+   *                   example: Appointment booked successfully
+   *       400:
+   *         description: Invalid input parameters or missing required fields
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: 1
+   *                 message:
+   *                   type: string
+   *                   example: Invalid input parameters or missing required fields
+   *       404:
+   *         description: Request not found or invalid request ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: 2
+   *                 message:
+   *                   type: string
+   *                   example: Request not found or invalid request ID
+   *       500:
+   *         description: Server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errCode:
+   *                   type: integer
+   *                   example: 1
+   *                 message:
+   *                   type: string
+   *                   example: Server error
+   */
+  router.put("/appointment", verifyToken, staffController.handleBookingsAppoinment);
+
+  router.get("/request-ready", verifyToken, staffController.handleGetRequestReadyForValuation);
+
+  router.put("/take-request-for-valuation", verifyToken, staffController.handleTakeRequestForValuation);
+
+  router.get("/take-request-by-valuation", verifyToken, staffController.handleGetRequestTakenByValuation);
 
 
   router.get("/icon", (req, res) => {
