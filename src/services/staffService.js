@@ -159,6 +159,7 @@ const printValuationReport = async (requestId) => {
         throw error;
     }
 };
+
 const requestApproval = async (staffId, requestId, requestType, description) => {
     try {
         let pool = await sql.connect(config);
@@ -206,22 +207,20 @@ const sendValuationResult = async (requestId, valuationResultId) => {
             .input('requestId', sql.Int, requestId)
             .input('valuationResultId', sql.Int, valuationResultId)
             .query(`
+                UPDATE RequestProcesses
+                SET processId = (SELECT id FROM Processes WHERE processStatus = 'Sent to Consulting')
+                WHERE requestId = @requestId;
+
                 DECLARE @processId INT;
                 
                 SET @processId = (
-                    SELECT TOP 1 id
+                    SELECT id
                     FROM Processes
                     WHERE processStatus = 'Sent to Consulting'
-                        AND actor = 'Valuation Staff'
-                    ORDER BY id
                 );
 
-                UPDATE Requests
-                SET processId = @processId
-                WHERE id = @requestId;
-
-                INSERT INTO RequestProcesses (requestId, processId, processDay, userId)
-                VALUES (@requestId, @processId, GETDATE(), @valuationResultId);
+                INSERT INTO RequestProcesses (requestType, requestId, sender, processId)
+                VALUES ('Ready for return', @requestId, @valuationResultId, @processId);
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -230,29 +229,23 @@ const sendValuationResult = async (requestId, valuationResultId) => {
     }
 };
 
-const sendValuationResultToCustomer = async (requestId, sentBy) => {
+const sendValuationResultToCustomer = async (requestId) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
-            .input('sentBy', sql.Int, sentBy)
             .query(`
-                DECLARE @processId INT;
-
-                SET @processId = (
-                    SELECT TOP 1 id
-                    FROM Processes
-                    WHERE processStatus = 'Result Sent to Customer'
-                        AND actor = 'Consulting Staff'
-                    ORDER BY id
-                );
-
-                UPDATE Requests
-                SET processId = @processId
-                WHERE id = @requestId;
-
-                INSERT INTO RequestProcesses (requestId, userId, processId, processDay)
-                VALUES (@requestId, @sentBy, @processId, GETDATE());
+                UPDATE RequestProcesses
+                SET
+                    requestType = 'Return to customer',
+                    receiver = (SELECT userId FROM Requests WHERE id = @requestId),
+                    finishDate = GETDATE(),
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Completed'),
+                    status = 'TakeByCustomer'
+                WHERE
+                    requestId = @requestId
+                    AND receiver IS NULL
+                    AND status IS NULL;
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -339,6 +332,36 @@ const getNewRequest = async () => {
         throw error;
     }
 }
+
+const getFinishedRequest = async () => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query(`
+                    SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                    FROM
+                        Requests r
+                    JOIN
+                        RequestProcesses rp ON r.id = rp.requestId
+                    JOIN
+                        Processes p ON rp.processId = p.id
+                    JOIN
+                        Services s ON r.serviceId = s.id
+                    WHERE
+                        rp.requestType = 'Ready for return' AND
+                        rp.receiver IS NULL
+                        AND p.processStatus = 'Sent to Consulting'
+                    ORDER BY
+                        r.createdDate DESC;
+            `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getFinishedRequest:', error);
+        throw error;
+    }
+}
+
 const getRequestReadyForValuation = async () => {
     try {
         let pool = await sql.connect(config);
@@ -465,5 +488,6 @@ module.exports = {
     bookingsAppoinment: bookingsAppoinment,
     getTakenRequestByStaff: getTakenRequestByStaff,
     takeRequestForValuation: takeRequestForValuation,
+    getFinishedRequest: getFinishedRequest
 
 }
