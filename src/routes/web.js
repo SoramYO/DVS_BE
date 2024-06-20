@@ -1643,82 +1643,6 @@ let initWebRoutes = (app) => {
 
   /**
 * @swagger
-* /api/receive-diamond-valuation:
-*   post:
-*     summary: Receive diamond for valuation
-*     description: Allows Valuation staff to receive diamonds for valuation.
-*     tags: [Valuation Management]
-*     security:
-*       - bearerAuth: []
-*     requestBody:
-*       required: true
-*       content:
-*         application/json:
-*           schema:
-*             type: object
-*             properties:
-*               requestId:
-*                 type: integer
-*                 description: ID of the request associated with the diamond.
-*                 example: 1
-*     responses:
-*       '200':
-*         description: Diamond received for valuation successfully
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 0
-*                 message:
-*                   type: string
-*                   example: 'Diamond received for valuation successfully'
-*       '400':
-*         description: Invalid input parameters or missing required fields
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 1
-*                 message:
-*                   type: string
-*                   example: 'Invalid input parameters or missing required fields'
-*       '404':
-*         description: Request not found or invalid request ID
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 2
-*                 message:
-*                   type: string
-*                   example: 'Request not found or invalid request ID'
-*       '500':
-*         description: Server error
-*         content:
-*           application/json:
-*             schema:
-*               type: object
-*               properties:
-*                 errCode:
-*                   type: integer
-*                   example: 1
-*                 message:
-*                   type: string
-*                   example: 'Server error'
-*/
-  router.post("/receive-diamond-valuation", verifyToken, staffController.handleReceiveDiamondForValuation);
-
-  /**
-* @swagger
 * /api/send-valuation-result-customer:
 *   post:
 *     summary: Send valuation result to customer
@@ -1795,7 +1719,7 @@ let initWebRoutes = (app) => {
 
   /**
   * @swagger
-  * /api/send-diamond-to-valuation:
+  * /api/send-diamond-to-valuationStaff:
   *   post:
   *     summary: Send diamond's sample to valuation staff
   *     description: Allows Consulting Staff to send the diamond's sample taken from the customer to the valuation staff.
@@ -1867,7 +1791,7 @@ let initWebRoutes = (app) => {
   *                   type: string
   *                   example: 'Server error'
   */
-  router.post("/send-diamond-to-valuation", verifyToken, staffController.handleSendDiamondToValuation);
+  router.post("/send-diamond-to-valuationStaff", verifyToken, staffController.handleSendDiamondToValuation);
 
   /**
   * @swagger
@@ -2982,7 +2906,6 @@ let initWebRoutes = (app) => {
 */
   router.get("/profit", verifyToken, adminController.handleGetProfit);
 
-
   /**
  * @swagger
  * /api/new-request:
@@ -3053,6 +2976,7 @@ let initWebRoutes = (app) => {
  */
   router.get("/new-request", verifyToken, staffController.handleGetNewRequest);
 
+
   /**
    * @swagger
    * /api/take-request:
@@ -3122,7 +3046,6 @@ let initWebRoutes = (app) => {
    *                   example: Error from server
    */
   router.get("/take-request", verifyToken, staffController.handleGetTakeRequest);
-
 
   /**
    * @swagger
@@ -3203,6 +3126,12 @@ let initWebRoutes = (app) => {
    *                   example: Server error
    */
   router.put("/appointment", verifyToken, staffController.handleBookingsAppoinment);
+
+  router.get("/request-ready", verifyToken, staffController.handleGetRequestReadyForValuation);
+
+  router.put("/take-request-for-valuation", verifyToken, staffController.handleTakeRequestForValuation);
+
+  router.get("/take-request-by-valuation", verifyToken, staffController.handleGetRequestTakenByValuation);
 
 
   router.get("/icon", (req, res) => {
