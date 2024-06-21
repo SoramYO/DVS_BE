@@ -256,7 +256,7 @@ const handleSendDiamondToValuation = async (req, res) => {
             });
         }
 
-        const result = await staffService.sendValuationResult(requestId, req.user.id);
+        const result = await staffService.sendDiamondToValuation(requestId, req.user.id);
 
         if (result) {
             res.status(200).json({
