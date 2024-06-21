@@ -221,7 +221,7 @@ const handleSendValuationResultToCustomer = async (req, res) => {
             });
         }
 
-        const result = await staffService.sendValuationResultToCustomer(requestId);
+        const result = await staffService.sendValuationResultToCustomer(requestId, req.user.id);
 
         if (result) {
             res.status(200).json({

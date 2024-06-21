@@ -3,6 +3,7 @@ const sql = require("mssql");
 
 const takeRequest = async (staffId, requestId) => {
     try {
+
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
@@ -13,7 +14,7 @@ const takeRequest = async (staffId, requestId) => {
                     receiver = @staffId, finishDate = GETDATE(),
                     processId = (SELECT id FROM Processes WHERE processStatus = 'Approved'),
                     status = 'TakeByConsulting'
-                WHERE requestId = @requestId AND receiver IS NULL;
+                WHERE requestId = @requestId AND receiver IS NULL AND requestType = 'Valuation';
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -229,12 +230,21 @@ const sendValuationResult = async (requestId, valuationResultId) => {
     }
 };
 
-const sendValuationResultToCustomer = async (requestId) => {
+const sendValuationResultToCustomer = async (requestId, staffId) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
+            .input('receiver', sql.Int, staffId)
             .query(`
+                UPDATE RequestProcesses
+                SET
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Completed')
+                WHERE
+                    requestId = @requestId
+                    AND status = 'TakeByConsulting'
+                    AND receiver = @receiver;
+
                 UPDATE RequestProcesses
                 SET
                     requestType = 'Return to customer',
@@ -247,6 +257,7 @@ const sendValuationResultToCustomer = async (requestId) => {
                     AND receiver IS NULL
                     AND status IS NULL;
             `);
+            console.log(result);
         return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error('Error in consultingService.sendValuationResultToCustomer:', error);
