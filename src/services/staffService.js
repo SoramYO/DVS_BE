@@ -378,7 +378,7 @@ const getRequestReadyForValuation = async () => {
                         Services s ON r.serviceId = s.id
                     WHERE
                         rp.receiver IS NULL
-                        AND p.requestType = 'Ready for valuation'
+                        AND rp.requestType = 'Ready for valuation'
                     ORDER BY
                         r.createdDate DESC;
             `);
