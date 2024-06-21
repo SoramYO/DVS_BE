@@ -431,6 +431,7 @@ const getTakenRequestByStaff = async (staffId) => {
                     Services s ON r.serviceId = s.id
                 WHERE
                     rp.receiver = @staffId
+                    AND rp.status = 'TakeByConsulting'
                 ORDER BY
                     r.createdDate DESC;
             `);
