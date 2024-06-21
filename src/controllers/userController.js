@@ -287,6 +287,24 @@ const handleFeedback = async (req, res) => {
   }
 };
 
+const handleGetFinishRequestByUser = async (req, res) => {
+  try {
+    
+
+    const finishRequest = await userService.finishRequest(req.user.id);
+
+    return res.status(200).json(finishRequest);
+
+
+  } catch (error) {
+    console.error("Error in handleFeedback controller:", error);
+    res.status(500).json({
+      errCode: 1,
+      message: 'Server error'
+    });
+  }
+};
+
 let handleCreateNewRequest = async (req, res) => {
   let data = req.body;
   let message = await userService.createNewRequest(data);
@@ -387,4 +405,5 @@ module.exports = {
   handlePaypal: handlePaypal,
   handlePaypalReturn: handlePaypalReturn,
   handleGetRequestByUser: handleGetRequestByUser,
+  handleGetFinishRequestByUser: handleGetFinishRequestByUser,
 };

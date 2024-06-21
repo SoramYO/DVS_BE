@@ -3135,6 +3135,7 @@ let initWebRoutes = (app) => {
 
   router.get("/finished-request", verifyToken, staffController.handleGetFinishedRequest);
 
+  router.get("/finish-request-by-user", verifyToken, userController.handleGetFinishRequestByUser)
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');

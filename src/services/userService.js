@@ -11,6 +11,7 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const paypal = require("paypal-rest-sdk");
 const { error } = require("console");
+const { resolve } = require("dns");
 
 let handleUserLogin = (usernameOrEmail, password) => {
     return new Promise(async (resolve, reject) => {
@@ -1266,6 +1267,37 @@ let getRequestByUser = async (userId) => {
     });
 };
 
+const finishRequest = async (userId) => {
+    if (!userId) {
+        throw new Error('userId is required and must be an integer');
+    }
+
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`
+                SELECT r.id AS requestId, r.requestImage, r.note, r.createdDate, r.paymentStatus, s.serviceName
+                FROM Requests r
+                JOIN RequestProcesses rp ON r.id = rp.requestId
+                JOIN Processes p ON rp.processId = p.id
+                JOIN Services s ON r.serviceId = s.id
+                JOIN Account a ON a.id = rp.receiver
+                WHERE rp.status = 'TakeByCustomer'
+                    AND a.roleId = 5
+                    AND r.userId = @userId
+                ORDER BY r.createdDate DESC;
+            `);
+        
+        return { errCode: 0, message: "Success", data: result.recordset };
+    } catch (error) {
+        console.error('Error in finishRequest:', error);
+        throw new Error(`Database query failed: ${error.message}`);
+    }
+};
+
+
+
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserCredential: checkUserCredential,
@@ -1292,4 +1324,5 @@ module.exports = {
     paypalRequest: paypalRequest,
     paypalReturn: paypalReturn,
     getRequestByUser: getRequestByUser,
+    finishRequest:finishRequest,
 };
