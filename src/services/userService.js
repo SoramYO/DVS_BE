@@ -236,6 +236,47 @@ const forgotPassword = async (email) => {
     });
 };
 
+const notificationValuationSuccess = async ( requestId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const pool = await sql.connect(config);
+            const request = pool.request();
+            request.input("requestId", sql.Int, requestId);
+            const result = await request.query(
+                `SELECT ac.email
+                FROM Account ac
+                JOIN Requests r ON ac.id = r.userId
+                WHERE r.id = @requestId`
+            );
+            if (result.recordset.length === 0) {
+                resolve({ errCode: 2, message: "Email not found" });
+            }
+            const email = result.recordset[0].email;
+            await transporter.sendMail({
+                from: '"Diamond Valuation System" <no-reply@diamondvaluationsystem.com>',
+                to: email,
+                subject: "Diamond Valuation Success",
+                html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <img src="https://marketplace.canva.com/EAFqberfhMA/1/0/1600w/canva-black-gold-luxury-modern-diamond-brand-store-logo-VmwEPkcpqzE.jpg" alt="Diamond Valuation System" style="width: 100px; height: auto;">
+                            </div>
+                            <h2 style="color: #333; text-align: center;">Diamond Valuation Success</h2>
+                            <p style="color: #555;">Hello,</p>
+                            <p style="color: #555;">Your diamond valuation request has been completed successfully. Please log in to your account to view the valuation results.</p>
+                            <p style="color: #555;">Thank you for using Diamond Valuation System!</p>
+                            <p style="color: #555;">Best regards,<br>The Diamond Valuation System Team</p>
+                        </div>
+                    `,
+            });
+            resolve({ errCode: 0, message: "Email sent successfully" });
+        } catch (error) {
+            resolve({ errCode: 1, message: "Server error", error });
+        }
+    }
+    );
+};
+
 let sendSubscriptionEmail = async (body) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -335,6 +376,8 @@ let sendSubscriptionEmail = async (body) => {
         }
     });
 };
+
+
 
 // const verifyToken = async (body) => {
 //     return new Promise(async (resolve, reject) => {
@@ -1325,4 +1368,5 @@ module.exports = {
     paypalReturn: paypalReturn,
     getRequestByUser: getRequestByUser,
     finishRequest:finishRequest,
+    notificationValuationSuccess: notificationValuationSuccess,
 };

@@ -290,12 +290,8 @@ const handleFeedback = async (req, res) => {
 const handleGetFinishRequestByUser = async (req, res) => {
   try {
     
-
     const finishRequest = await userService.finishRequest(req.user.id);
-
     return res.status(200).json(finishRequest);
-
-
   } catch (error) {
     console.error("Error in handleFeedback controller:", error);
     res.status(500).json({
@@ -304,6 +300,21 @@ const handleGetFinishRequestByUser = async (req, res) => {
     });
   }
 };
+
+const handleNotificationValuationSuccess = async (req, res) => {
+  try {
+    const { requestId } = req.body;
+    const result = await userService.notificationValuationSuccess(requestId);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in handleNotificationValuationSuccess controller:", error);
+    res.status(500).json({
+      errCode: 1,
+      message: 'Server error'
+    });
+  }
+};
+
 
 let handleCreateNewRequest = async (req, res) => {
   let data = req.body;
@@ -406,4 +417,5 @@ module.exports = {
   handlePaypalReturn: handlePaypalReturn,
   handleGetRequestByUser: handleGetRequestByUser,
   handleGetFinishRequestByUser: handleGetFinishRequestByUser,
+  handleNotificationValuationSuccess: handleNotificationValuationSuccess,
 };
