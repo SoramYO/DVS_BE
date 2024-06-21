@@ -49,8 +49,6 @@ let handleChangeProcess = async (req, res) => {
 
 const handleValuation = async (req, res) => {
     try {
-        console.log('req.body', req.body);
-        console.log('req.params', req.params);
         const { id } = req.params;
 
         if (!id) {
@@ -180,9 +178,10 @@ const handleReceiveDiamond = async (req, res) => {
 
 const handleSendValuationResult = async (req, res) => {
     try {
-        const { requestId, valuationResultId } = req.body;
+        const { requestId } = req.body;
 
-        if (!requestId || !valuationResultId) {
+
+        if (!requestId) {
             return res.status(400).json({
                 errCode: 1,
                 message: 'Invalid input parameters or missing required fields'
@@ -214,7 +213,6 @@ const handleSendValuationResult = async (req, res) => {
 const handleSendValuationResultToCustomer = async (req, res) => {
     try {
         const { requestId } = req.body;
-        console.log('requestId', requestId);
 
         if (!requestId) {
             return res.status(400).json({
