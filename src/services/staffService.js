@@ -367,20 +367,20 @@ const getRequestReadyForValuation = async () => {
         let pool = await sql.connect(config);
         let result = await pool.request()
             .query(`
-                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
-                FROM
-                    Requests r
-                JOIN
-                    RequestProcesses rp ON r.id = rp.requestId
-                JOIN
-                    Processes p ON rp.processId = p.id
-                JOIN
-                    Services s ON r.serviceId = s.id
-                WHERE
-                    rp.receiver IS NULL
-                    AND p.processStatus = 'Start Valuated'
-                ORDER BY
-                    r.createdDate DESC;
+                    SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                    FROM
+                        Requests r
+                            JOIN
+                        RequestProcesses rp ON r.id = rp.requestId
+                            JOIN
+                        Processes p ON rp.processId = p.id
+                            JOIN
+                        Services s ON r.serviceId = s.id
+                    WHERE
+                        rp.receiver IS NULL
+                        AND p.processStatus = 'Sent to Consulting'
+                    ORDER BY
+                        r.createdDate DESC;
             `);
 
         return result.recordset;
