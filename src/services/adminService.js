@@ -197,8 +197,8 @@ let getDiamonds = () => {
         try {
             const pool = await sql.connect(config);
             const diamonds = await pool.request().query(`
-            SELECT id, proportions, diamondOrigin, caratWeight, measurements, polish, flourescence, color, cut, clarity, symmetry
-            FROM Diamond;
+            SELECT id, certificateId, proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape
+            FROM Diamonds;
         `);
             resolve(diamonds.recordset);
         } catch (error) {
@@ -233,18 +233,25 @@ const getRequests = async () => {
     try {
         let pool = await sql.connect(config);
         let requests = await pool.request().query(`
-            SELECT
-                req.id, req.requestImage, req.note, req.createdDate, req.paymentStatus,
-                ac.firstName, ac.lastName, ac.email, ac.phone,
-                serv.serviceName
-            FROM
-                Requests AS req
-            JOIN
-                Account AS ac ON req.userId = ac.id
-            JOIN
-                Services AS serv ON req.serviceId = serv.id
-            ORDER BY
-                req.createdDate DESC
+                    SELECT
+                        req.id,
+                        req.requestImage,
+                        req.note,
+                        req.createdDate,
+                        req.paymentStatus,
+                        ac.firstName,
+                        ac.lastName,
+                        ac.email,
+                        ac.phone,
+                        serv.serviceName
+                    FROM
+                        Requests req
+                    JOIN
+                        Account ac ON req.userId = ac.id
+                    JOIN
+                        Services serv ON req.serviceId = serv.id
+                    ORDER BY
+                        req.createdDate DESC;
         `);
         return requests.recordset;
     } catch (error) {
@@ -254,66 +261,117 @@ const getRequests = async () => {
 };
 
 
-let getResults = () => {
+const getResults = () => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             const results = await pool.request().query(`
-            SELECT  res.id AS ResultID, res.price, res.companyName, res.dateValued,
-            req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate,
-            dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements,
-            dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
-            acc.username, acc.firstName, acc.lastName, acc.email, acc.phone,
-            pro.processStatus,
-            ser.serviceName
-            FROM
-                Results res
-            JOIN
-                Requests req ON res.requestId = req.id
-            JOIN
-                Diamonds dia ON req.diamondId = dia.id
-            JOIN
-                Account acc ON req.userId = acc.id
-            JOIN
-                Processes pro ON req.processId = pro.id
-            JOIN
-                Services ser ON req.serviceId = ser.id
-            ORDER BY res.dateValued DESC;
-        `);
+                    SELECT 
+                        res.id AS ResultID,
+                        res.price,
+                        res.companyName,
+                        res.dateValued,
+                        req.id AS RequestID,
+                        req.requestImage,
+                        req.note,
+                        req.createdDate,
+                        req.appointmentDate,
+                        dia.certificateId,
+                        dia.proportions,
+                        dia.diamondOrigin,
+                        dia.caratWeight,
+                        dia.measurements,
+                        dia.polish,
+                        dia.fluorescence,
+                        dia.color,
+                        dia.cut,
+                        dia.clarity,
+                        dia.symmetry,
+                        dia.shape,
+                        acc.firstName,
+                        acc.lastName,
+                        acc.email,
+                        acc.phone,
+                        pro.processStatus,
+                        ser.serviceName
+                    FROM
+                        Results res
+                    JOIN
+                        Requests req ON res.requestId = req.id
+                    JOIN
+                        Diamonds dia ON req.diamondId = dia.id
+                    JOIN
+                        Account acc ON req.userId = acc.id
+                    JOIN
+                        (
+                            SELECT 
+                                rp.requestId,
+                                MAX(COALESCE(rp.finishDate, rp.createdDate)) AS maxFinishDate -- Lấy finishDate hoặc nếu null thì lấy createdDate
+                            FROM 
+                                RequestProcesses rp
+                            GROUP BY 
+                                rp.requestId
+                        ) rp_max ON req.id = rp_max.requestId
+                    JOIN
+                        RequestProcesses rp ON req.id = rp.requestId
+                        AND (rp.finishDate = rp_max.maxFinishDate OR (rp.finishDate IS NULL AND rp.createdDate = rp_max.maxFinishDate)) -- Điều kiện lấy ra dòng có finishDate hoặc createdDate là maxFinishDate
+                    JOIN
+                        Processes pro ON rp.processId = pro.id
+                    JOIN
+                        Services ser ON req.serviceId = ser.id
+                    ORDER BY 
+                        res.dateValued DESC;
+            `);
             resolve(results.recordset);
         } catch (error) {
             reject(error);
         }
     });
-}
+};
 
-let getRequestById = (id) => {
+
+const getRequestById = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
-            const request = await pool.request().query(`
-            SELECT req.id, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus,
-            ac.firstName, ac.lastName, ac.email, ac.phone,
-            process.processStatus, serv.serviceName
-            FROM
-                Requests AS req
-            JOIN
-                Account AS ac ON req.userId = ac.id
-            JOIN
-                RequestProcesses AS reqPro ON req.id = reqPro.requestId
-            JOIN
-                Processes AS process ON reqPro.processId = process.id
-            JOIN
-                Services AS serv ON req.serviceId = serv.id
-            WHERE
-                req.id = ${id};
-        `);
+            const request = await pool.request().input("id", sql.Int, id)
+                .query(`
+                    SELECT req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus, 
+                    ac.firstName, ac.lastName, ac.email, ac.phone,
+                    pro.processStatus,
+                    ser.serviceName
+                    FROM
+                        Requests req
+                    JOIN
+                        Account ac ON req.userId = ac.id
+                    JOIN
+                        (   SELECT
+                                requestId,
+                                MAX(COALESCE(finishDate, createdDate)) AS maxFinishDate
+                            FROM
+                                RequestProcesses
+                            WHERE
+                                requestId = @id
+                            GROUP BY
+                                requestId
+                        ) rp_max ON req.id = rp_max.requestId
+                    JOIN
+                        RequestProcesses rp ON req.id = rp.requestId
+                        AND (rp.finishDate = rp_max.maxFinishDate OR (rp.finishDate IS NULL AND rp.createdDate = rp_max.maxFinishDate)) -- Điều kiện lấy ra dòng có finishDate hoặc createdDate là maxFinishDate
+                    JOIN
+                        Processes pro ON rp.processId = pro.id
+                    JOIN
+                        Services ser ON req.serviceId = ser.id
+                    WHERE
+                        req.id = @id;
+
+                `);
             resolve(request.recordset);
         } catch (error) {
             reject(error);
         }
     });
-}
+};
 
 let countUser = () => {
     return new Promise(async (resolve, reject) => {
@@ -334,7 +392,7 @@ let countDiamond = async (req, res) => {
         try {
             const pool = await sql.connect(config);
             const count = await pool.request().query(`
-            SELECT COUNT(id) AS count FROM Diamond;
+            SELECT COUNT(id) AS count FROM Diamonds;
         `);
             resolve(count.recordset[0].count);
         } catch (error) {
@@ -348,7 +406,7 @@ let countRequest = async (req, res) => {
         try {
             const pool = await sql.connect(config);
             const count = await pool.request().query(`
-            SELECT COUNT(id) AS count FROM Request;
+            SELECT COUNT(id) AS count FROM Requests;
         `);
             resolve(count.recordset[0].count);
         } catch (error) {
@@ -364,11 +422,11 @@ let getProfit = async (req, res) => {
             const profit = await pool.request().query(`
             SELECT  SUM(ser.price) AS profit
             FROM
-                Result res
+                Results res
             JOIN
-                Request req ON res.requestId = req.id
+                Requests req ON res.requestId = req.id
             JOIN
-                Service ser ON req.serviceId = ser.id
+                Services ser ON req.serviceId = ser.id
         `);
             resolve(profit.recordset[0].profit);
         } catch (error) {
