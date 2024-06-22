@@ -462,73 +462,91 @@ let initWebRoutes = (app) => {
   router.post("/request", verifyToken, userController.handleCreateNewRequest);
 
   /**
-   * @swagger
-   * /api/estimate-diamond-value:
-   *   post:
-   *     summary: Estimate diamond value
-   *     description: Calculate the estimated value of a diamond based on its properties
-   *     tags:
-   *       - Diamond
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               caratWeight:
-   *                 type: number
-   *                 example: 1.5
-   *               color:
-   *                 type: string
-   *                 example: 'D'
-   *               clarity:
-   *                 type: string
-   *                 example: 'IF'
-   *               cut:
-   *                 type: string
-   *                 example: 'Excellent'
-   *               fluorescence:
-   *                 type: string
-   *                 example: 'None'
-   *     responses:
-   *       200:
-   *         description: Successfully estimated diamond value
-   *         schema:
-   *           type: object
-   *           properties:
-   *             errCode:
-   *               type: integer
-   *               example: 0
-   *             message:
-   *               type: string
-   *               example: 'Estimated diamond value'
-   *             estimatedPrice:
-   *               type: number
-   *               example: 1500
-   *       400:
-   *         description: Invalid input parameters
-   *         schema:
-   *           type: object
-   *           properties:
-   *             errCode:
-   *               type: integer
-   *               example: 1
-   *             message:
-   *               type: string
-   *               example: 'Invalid input parameters'
-   *       500:
-   *         description: Server error
-   *         schema:
-   *           type: object
-   *           properties:
-   *             errCode:
-   *               type: integer
-   *               example: 1
-   *             message:
-   *               type: string
-   *               example: 'Server error'
-   */
+  * @swagger
+  * /api/estimate-diamond-value:
+  *   post:
+  *     summary: Estimate diamond value
+  *     description: Calculate the estimated value of a diamond based on its properties
+  *     tags:
+  *       - Diamond
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               caratWeight:
+  *                 type: number
+  *                 example: 1.5
+  *               color:
+  *                 type: string
+  *                 example: 'D'
+  *               clarity:
+  *                 type: string
+  *                 example: 'IF'
+  *               cut:
+  *                 type: string
+  *                 example: 'Excellent'
+  *               fluorescence:
+  *                 type: string
+  *                 example: 'None'
+  *               origin:
+  *                 type: string
+  *                 example: 'Natural'
+  *               shape:
+  *                 type: string
+  *                 example: 'Round'
+  *               polish:
+  *                 type: string
+  *                 example: 'Excellent'
+  *               symmetry:
+  *                 type: string
+  *                 example: 'Excellent'
+  *               proportions:
+  *                 type: string
+  *                 example: 'Ideal'
+  *               measurements:
+  *                 type: string
+  *                 example: 'Small'
+  *     responses:
+  *       200:
+  *         description: Successfully estimated diamond value
+  *         schema:
+  *           type: object
+  *           properties:
+  *             errCode:
+  *               type: integer
+  *               example: 0
+  *             message:
+  *               type: string
+  *               example: 'Estimated diamond value'
+  *             estimatedPrice:
+  *               type: number
+  *               example: 1500
+  *       400:
+  *         description: Invalid input parameters
+  *         schema:
+  *           type: object
+  *           properties:
+  *             errCode:
+  *               type: integer
+  *               example: 1
+  *             message:
+  *               type: string
+  *               example: 'Invalid input parameters'
+  *       500:
+  *         description: Server error
+  *         schema:
+  *           type: object
+  *           properties:
+  *             errCode:
+  *               type: integer
+  *               example: 1
+  *             message:
+  *               type: string
+  *               example: 'Server error'
+  */
   router.post("/estimate-diamond-value", userController.estimateDiamondValue);
 
   /**
@@ -2975,7 +2993,6 @@ let initWebRoutes = (app) => {
  */
   router.get("/new-request", verifyToken, staffController.handleGetNewRequest);
 
-
   /**
    * @swagger
    * /api/take-request:
@@ -3126,16 +3143,495 @@ let initWebRoutes = (app) => {
    */
   router.put("/appointment", verifyToken, staffController.handleBookingsAppoinment);
 
+  /**
+ * @swagger
+ * /api/request-ready:
+ *   get:
+ *     summary: Get requests ready for valuation
+ *     description: Retrieve a list of requests that are ready for valuation
+ *     tags:
+ *       - Request
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved list of requests ready for valuation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   requestId:
+ *                     type: integer
+ *                     example: 1
+ *                   requestImage:
+ *                     type: string
+ *                     example: 'https://example.com/image.jpg'
+ *                   note:
+ *                     type: string
+ *                     example: 'Customer note here'
+ *                   createdDate:
+ *                     type: string
+ *                     format: date-time
+ *                     example: '2024-06-22T14:00:00Z'
+ *                   paymentStatus:
+ *                     type: string
+ *                     example: 'Paid'
+ *                   serviceName:
+ *                     type: string
+ *                     example: 'Diamond Valuation'
+ *                   status:
+ *                     type: string
+ *                     example: 'Ready for valuation'
+ *                   processStatus:
+ *                     type: string
+ *                     example: 'In Process'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Unauthorized'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Server error'
+ */
   router.get("/request-ready", verifyToken, staffController.handleGetRequestReadyForValuation);
 
+  /**
+ * @swagger
+ * /api/take-request-for-valuation:
+ *   put:
+ *     summary: Take request for valuation
+ *     description: Assign a staff member to a request for valuation
+ *     tags:
+ *       - Request
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               staffId:
+ *                 type: integer
+ *                 example: 123
+ *               requestId:
+ *                 type: integer
+ *                 example: 456
+ *     responses:
+ *       200:
+ *         description: Successfully taken request for valuation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Invalid input parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Invalid input parameters'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Unauthorized'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Server error'
+ */
   router.put("/take-request-for-valuation", verifyToken, staffController.handleTakeRequestForValuation);
 
+  /**
+ * @swagger
+ * /api/take-request-by-valuation:
+ *   get:
+ *     summary: Get requests taken by valuation
+ *     description: Retrieve a list of requests that have been taken by a staff member for valuation
+ *     tags:
+ *       - Request
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: staffId
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 123
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved requests taken by valuation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   requestId:
+ *                     type: integer
+ *                     example: 456
+ *                   requestImage:
+ *                     type: string
+ *                     example: 'image.jpg'
+ *                   note:
+ *                     type: string
+ *                     example: 'Customer notes'
+ *                   createdDate:
+ *                     type: string
+ *                     format: date-time
+ *                     example: '2024-06-21T00:00:00.000Z'
+ *                   paymentStatus:
+ *                     type: string
+ *                     example: 'Paid'
+ *                   serviceName:
+ *                     type: string
+ *                     example: 'Diamond Valuation'
+ *                   status:
+ *                     type: string
+ *                     example: 'TakeByValuation'
+ *                   processStatus:
+ *                     type: string
+ *                     example: 'Valuated'
+ *       400:
+ *         description: Invalid input parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Invalid input parameters'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Unauthorized'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Server error'
+ */
   router.get("/take-request-by-valuation", verifyToken, staffController.handleGetRequestTakenByValuation);
 
+  /**
+  * @swagger
+  * /api/finished-request:
+  *   get:
+  *     summary: Get finished requests ready for return
+  *     description: Retrieve a list of finished requests that are ready to be returned to the customer
+  *     tags:
+  *       - Request
+  *     security:
+  *       - bearerAuth: []
+  *     responses:
+  *       200:
+  *         description: Successfully retrieved finished requests ready for return
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: array
+  *               items:
+  *                 type: object
+  *                 properties:
+  *                   requestId:
+  *                     type: integer
+  *                     example: 456
+  *                   requestImage:
+  *                     type: string
+  *                     example: 'image.jpg'
+  *                   note:
+  *                     type: string
+  *                     example: 'Customer notes'
+  *                   createdDate:
+  *                     type: string
+  *                     format: date-time
+  *                     example: '2024-06-21T00:00:00.000Z'
+  *                   paymentStatus:
+  *                     type: string
+  *                     example: 'Paid'
+  *                   serviceName:
+  *                     type: string
+  *                     example: 'Diamond Valuation'
+  *                   status:
+  *                     type: string
+  *                     example: 'TakeByValuation'
+  *                   processStatus:
+  *                     type: string
+  *                     example: 'Valuated'
+  *       401:
+  *         description: Unauthorized
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 errCode:
+  *                   type: integer
+  *                   example: 1
+  *                 message:
+  *                   type: string
+  *                   example: 'Unauthorized'
+  *       500:
+  *         description: Server error
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 errCode:
+  *                   type: integer
+  *                   example: 1
+  *                 message:
+  *                   type: string
+  *                   example: 'Server error'
+  */
   router.get("/finished-request", verifyToken, staffController.handleGetFinishedRequest);
 
+  /**
+ * @swagger
+ * /api/finish-request-by-user:
+ *   get:
+ *     summary: Get finished requests by user
+ *     description: Retrieve a list of finished requests for a specific user
+ *     tags:
+ *       - Request
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved finished requests by user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 'Success'
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       requestId:
+ *                         type: integer
+ *                         example: 123
+ *                       requestImage:
+ *                         type: string
+ *                         example: 'image.jpg'
+ *                       note:
+ *                         type: string
+ *                         example: 'Customer notes'
+ *                       createdDate:
+ *                         type: string
+ *                         format: date-time
+ *                         example: '2024-06-21T00:00:00.000Z'
+ *                       paymentStatus:
+ *                         type: string
+ *                         example: 'Paid'
+ *                       serviceName:
+ *                         type: string
+ *                         example: 'Diamond Valuation'
+ *       400:
+ *         description: Missing or invalid parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Invalid input parameters'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Unauthorized'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Server error'
+ */
   router.get("/finish-request-by-user", verifyToken, userController.handleGetFinishRequestByUser)
 
+  /**
+ * @swagger
+ * /api/notification-valuation-success:
+ *   post:
+ *     summary: Notify user of successful diamond valuation
+ *     description: Send an email notification to the user when their diamond valuation request has been completed successfully
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               requestId:
+ *                 type: integer
+ *                 example: 123
+ *     responses:
+ *       200:
+ *         description: Successfully sent notification
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 'Email sent successfully'
+ *       400:
+ *         description: Invalid input parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Invalid input parameters'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Unauthorized'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Server error'
+ */
   router.post("/notification-valuation-success", verifyToken, userController.handleNotificationValuationSuccess);
 
 
