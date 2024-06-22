@@ -164,21 +164,37 @@ const printValuationReport = async (requestId) => {
 const requestApproval = async (staffId, requestId, requestType, description) => {
     try {
         let pool = await sql.connect(config);
+
+
+        let processQuery = `
+            SELECT TOP 1 processId
+            FROM RequestProcesses
+            WHERE requestId = @requestId
+            ORDER BY COALESCE(finishDate, createdDate) DESC
+        `;
+        let processResult = await pool.request()
+            .input('requestId', sql.Int, requestId)
+            .query(processQuery);
+
+        let processId = processResult.recordset[0].processId;
+
+
+        let insertQuery = `
+            INSERT INTO RequestProcesses (requestType, description, status, sender, processId, requestId)
+            VALUES (@requestType, @description, @status, @sender, @processId, @requestId)
+        `;
         let result = await pool.request()
             .input('requestId', sql.Int, requestId)
             .input('requestType', sql.NVarChar(255), requestType)
             .input('description', sql.NVarChar(1000), description)
             .input('status', sql.NVarChar(50), 'Pending')
-            .input('staffId', sql.Int, staffId)
-            .input('processId', sql.Int, (await pool.request()
-                .query('SELECT TOP 1 processId FROM RequestProcesses ORDER BY finishDate DESC')).recordset[0].processId)
-            .query(`
-                INSERT INTO RequestProcesses (requestType, description, status, staffId, processId, requestId)
-                VALUES (@requestType, @description, @status, @staffId, @processId, @requestId)
-            `);
+            .input('sender', sql.Int, staffId)
+            .input('processId', sql.Int, processId)
+            .query(insertQuery);
+
         return result.rowsAffected[0] > 0;
     } catch (error) {
-        console.error('Error in staffService.requestApproval:', error);
+        console.error('Error in requestApproval:', error);
         throw error;
     }
 };
@@ -257,7 +273,7 @@ const sendValuationResultToCustomer = async (requestId, staffId) => {
                     AND receiver IS NULL
                     AND status IS NULL;
             `);
-            console.log(result);
+        console.log(result);
         return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error('Error in consultingService.sendValuationResultToCustomer:', error);
@@ -431,7 +447,7 @@ const getTakenRequestByStaff = async (staffId) => {
         let result = await pool.request()
             .input('staffId', sql.Int, staffId)
             .query(`
-                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,rp.finishDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
                 FROM
                     Requests r
                 JOIN
@@ -483,6 +499,23 @@ const getRequestTakenByValuation = async (staffId) => {
     }
 }
 
+const customerTookSample = async (requestId) => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('requestId', sql.Int, requestId)
+            .query(`
+                UPDATE RequestProcesses
+                SET processId = (SELECT id FROM Processes WHERE processStatus = 'Done')
+                WHERE requestId = @requestId;
+            `);
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('Error in staffService.customerTookSample:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     takeRequest: takeRequest,
     getRequestTakenByValuation: getRequestTakenByValuation,
@@ -500,6 +533,7 @@ module.exports = {
     bookingsAppoinment: bookingsAppoinment,
     getTakenRequestByStaff: getTakenRequestByStaff,
     takeRequestForValuation: takeRequestForValuation,
-    getFinishedRequest: getFinishedRequest
+    getFinishedRequest: getFinishedRequest,
+    customerTookSample: customerTookSample
 
 }
