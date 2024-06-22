@@ -90,7 +90,6 @@ let initWebRoutes = (app) => {
   */
   router.post("/register", userController.handleRegister);
 
-
   /**
 * @swagger
 * /api/forgot-password:
@@ -3138,6 +3137,7 @@ let initWebRoutes = (app) => {
   router.get("/finish-request-by-user", verifyToken, userController.handleGetFinishRequestByUser)
 
   router.post("/notification-valuation-success", verifyToken, userController.handleNotificationValuationSuccess);
+
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');

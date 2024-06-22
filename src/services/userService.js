@@ -236,7 +236,7 @@ const forgotPassword = async (email) => {
     });
 };
 
-const notificationValuationSuccess = async ( requestId) => {
+const notificationValuationSuccess = async (requestId) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
@@ -524,26 +524,6 @@ const estimateDiamondValue = async (diamondProperties) => {
     }
 };
 
-const getValuatedDiamondsByUserId = async (userId) => {
-    try {
-        const pool = await sql.connect(config);
-        const request = pool.request();
-        request.input('userId', sql.Int, userId);
-        const result = await request.query(`
-        SELECT proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape
-        FROM Diamonds
-        JOIN Requests  ON Diamonds.id = Requests.diamondId
-        JOIN RequestProcesses RP ON Requests.id = RP.requestId
-        WHERE RP.processId = 3 AND Requests.userId = @userId
-    `);
-
-        return result.recordset;
-    } catch (error) {
-        console.error('Error in getValuatedDiamondsByUserId service:', error);
-        throw new Error('Error retrieving valuated diamonds by user ID');
-    }
-};
-
 const calculateEstimatedPrice = (diamondProperties) => {
     const basePrices = {
         color: {
@@ -578,7 +558,6 @@ const calculateEstimatedPrice = (diamondProperties) => {
             VeryGood: 15000,
             Good: 14000,
             Fair: 13000,
-
         },
         fluorescence: {
             None: 0,
@@ -586,6 +565,47 @@ const calculateEstimatedPrice = (diamondProperties) => {
             Medium: -500,
             Strong: -1000,
             VeryStrong: -1500,
+        },
+        origin: {
+            Natural: 10000,
+            Synthetic: -5000,
+        },
+        shape: {
+            Round: 1000,
+            Oval: 800,
+            Princess: 600,
+            Cushion: 500,
+            Emerald: 400,
+            Asscher: 300,
+            Marquise: 200,
+            Radiant: 100,
+            Pear: 50,
+        },
+        polish: {
+            Excellent: 1000,
+            VeryGood: 800,
+            Good: 600,
+            Fair: 400,
+            Poor: 200,
+        },
+        symmetry: {
+            Excellent: 1000,
+            VeryGood: 800,
+            Good: 600,
+            Fair: 400,
+            Poor: 200,
+        },
+        proportions: {
+            Ideal: 2000,
+            Excellent: 1500,
+            VeryGood: 1000,
+            Good: 500,
+            Fair: 0,
+        },
+        measurements: {
+            Small: 1000,
+            Medium: 2000,
+            Large: 3000,
         },
     };
 
@@ -595,7 +615,7 @@ const calculateEstimatedPrice = (diamondProperties) => {
         Good: 0.9,
     };
 
-    const { caratWeight, color, clarity, cut, fluorescence } = diamondProperties;
+    const { caratWeight, color, clarity, cut, fluorescence, origin, shape, polish, symmetry, proportions, measurements } = diamondProperties;
 
     // Check if essential properties are present
     if (!caratWeight || !color || !clarity || !cut) {
@@ -620,12 +640,59 @@ const calculateEstimatedPrice = (diamondProperties) => {
         basePricePerCarat += basePrices.fluorescence[fluorescence];
     }
 
+    if (origin && basePrices.origin[origin]) {
+        basePricePerCarat += basePrices.origin[origin];
+    }
+
+    if (shape && basePrices.shape[shape]) {
+        basePricePerCarat += basePrices.shape[shape];
+    }
+
+    if (polish && basePrices.polish[polish]) {
+        basePricePerCarat += basePrices.polish[polish];
+    }
+
+    if (symmetry && basePrices.symmetry[symmetry]) {
+        basePricePerCarat += basePrices.symmetry[symmetry];
+    }
+
+    if (proportions && basePrices.proportions[proportions]) {
+        basePricePerCarat += basePrices.proportions[proportions];
+    }
+
+    if (measurements && basePrices.measurements[measurements]) {
+        basePricePerCarat += basePrices.measurements[measurements];
+    }
+
     const cutFactor = cutFactors[cut] || 1.0;
     basePricePerCarat *= cutFactor;
 
     const estimatedPrice = caratWeight * basePricePerCarat;
     return Math.round(estimatedPrice);
 };
+
+
+const getValuatedDiamondsByUserId = async (userId) => {
+    try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        request.input('userId', sql.Int, userId);
+        const result = await request.query(`
+        SELECT proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape
+        FROM Diamonds
+        JOIN Requests  ON Diamonds.id = Requests.diamondId
+        JOIN RequestProcesses RP ON Requests.id = RP.requestId
+        WHERE RP.processId = 3 AND Requests.userId = @userId
+    `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getValuatedDiamondsByUserId service:', error);
+        throw new Error('Error retrieving valuated diamonds by user ID');
+    }
+};
+
+
 
 
 
@@ -1331,7 +1398,7 @@ const finishRequest = async (userId) => {
                     AND r.userId = @userId
                 ORDER BY r.createdDate DESC;
             `);
-        
+
         return { errCode: 0, message: "Success", data: result.recordset };
     } catch (error) {
         console.error('Error in finishRequest:', error);
@@ -1367,6 +1434,6 @@ module.exports = {
     paypalRequest: paypalRequest,
     paypalReturn: paypalReturn,
     getRequestByUser: getRequestByUser,
-    finishRequest:finishRequest,
+    finishRequest: finishRequest,
     notificationValuationSuccess: notificationValuationSuccess,
 };

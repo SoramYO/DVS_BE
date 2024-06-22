@@ -180,6 +180,12 @@ const estimateDiamondValue = async (req, res) => {
       cut,
       clarity,
       fluorescence,
+      origin,
+      shape,
+      polish,
+      symmetry,
+      proportions,
+      measurements,
     } = req.body;
 
     if (!caratWeight || !fluorescence || !color || !cut || !clarity) {
@@ -196,6 +202,12 @@ const estimateDiamondValue = async (req, res) => {
       color,
       cut,
       clarity,
+      origin,
+      shape,
+      polish,
+      symmetry,
+      proportions,
+      measurements,
     });
 
     return res.status(200).json({
@@ -211,6 +223,7 @@ const estimateDiamondValue = async (req, res) => {
     });
   }
 };
+
 
 const viewValuatedDiamondInfo = async (req, res) => {
   try {
@@ -289,7 +302,7 @@ const handleFeedback = async (req, res) => {
 
 const handleGetFinishRequestByUser = async (req, res) => {
   try {
-    
+
     const finishRequest = await userService.finishRequest(req.user.id);
     return res.status(200).json(finishRequest);
   } catch (error) {
