@@ -392,11 +392,9 @@ let sendSubscriptionEmail = async (body) => {
 //                 .query(
 //                     "SELECT * FROM PasswordResetTokens WHERE token = @token AND userId = @userId AND expiryDate > GETDATE()"
 //                 );
-
 //             if (result.recordset.length === 0) {
 //                 resolve({ errCode: 2, message: "Invalid or expired token" });
 //             }
-
 //             resolve({ errCode: 0, message: "Token is valid" });
 //         } catch (error) {
 //             resolve({ errCode: 1, message: "Server error", error });
@@ -409,7 +407,6 @@ let resetPassword = async (body) => {
         const { userId, token, password } = body;
         try {
             const pool = await sql.connect(config);
-
             // Kiểm tra token
             const checkTokenRequest = pool.request();
             const result = await checkTokenRequest
