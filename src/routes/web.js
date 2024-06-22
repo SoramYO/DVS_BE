@@ -1385,83 +1385,83 @@ let initWebRoutes = (app) => {
   router.post("/request-approval", verifyToken, staffController.handleRequestApproval);
 
   /**
-   * @swagger
-   * /api/approve-request:
-   *   put:
-   *     summary: Approve or reject a request
-   *     description: Manager approves or rejects a request for sealing commitment form or pledge form.
-   *     tags: [Diamond Management]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               approvalId:
-   *                 type: integer
-   *                 description: ID of the approval request
-   *                 example: 1
-   *               status:
-   *                 type: string
-   *                 description: Status of approval (Approved, Rejected)
-   *                 example: 'Approved'
-   *     responses:
-   *       200:
-   *         description: Approval status updated successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 errCode:
-   *                   type: integer
-   *                   example: 0
-   *                 message:
-   *                   type: string
-   *                   example: 'Approval status updated successfully'
-   *       400:
-   *         description: Invalid input parameters or Approval ID missing
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 errCode:
-   *                   type: integer
-   *                   example: 1
-   *                 message:
-   *                   type: string
-   *                   example: 'Invalid input parameters or Approval ID missing'
-   *       404:
-   *         description: Approval request not found
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 errCode:
-   *                   type: integer
-   *                   example: 2
-   *                 message:
-   *                   type: string
-   *                   example: 'Approval request not found'
-   *       500:
-   *         description: Server error
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 errCode:
-   *                   type: integer
-   *                   example: -1
-   *                 message:
-   *                   type: string
-   *                   example: 'Error from server'
-   */
+ * @swagger
+ * /api/approve-request:
+ *   put:
+ *     summary: Approve or reject a request
+ *     description: Manager approves or rejects a request for sealing commitment form or pledge form.
+ *     tags: [Diamond Management]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               approvalId:
+ *                 type: integer
+ *                 description: ID of the approval request
+ *                 example: 1
+ *               status:
+ *                 type: string
+ *                 description: Status of approval (Approved, Rejected)
+ *                 example: 'Approved'
+ *     responses:
+ *       200:
+ *         description: Approval status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 0
+ *                 message:
+ *                   type: string
+ *                   example: 'Approval status updated successfully'
+ *       400:
+ *         description: Invalid input parameters or Approval ID missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: 'Invalid input parameters or Approval ID missing'
+ *       404:
+ *         description: Approval request not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: 2
+ *                 message:
+ *                   type: string
+ *                   example: 'Approval request not found'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errCode:
+ *                   type: integer
+ *                   example: -1
+ *                 message:
+ *                   type: string
+ *                   example: 'Error from server'
+ */
   router.put("/approve-request", verifyToken, managerController.handleApproveRequest);
 
   /**
@@ -3634,6 +3634,9 @@ let initWebRoutes = (app) => {
  */
   router.post("/notification-valuation-success", verifyToken, userController.handleNotificationValuationSuccess);
 
+  router.post("/customer-took-sample", verifyToken, staffController.handleCustomerTookSample);
+
+  router.get("/request-approved", verifyToken, managerController.handleGetRequestApproved);
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');

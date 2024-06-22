@@ -457,6 +457,39 @@ const handleGetFinishedRequest = async (req, res) => {
     }
 }
 
+const handleCustomerTookSample = async (req, res) => {
+    try {
+        const { requestId } = req.body;
+
+        if (!requestId) {
+            return res.status(400).json({
+                errCode: 1,
+                message: 'Invalid input parameters or missing required fields'
+            });
+        }
+
+        const result = await staffService.customerTookSample(requestId, req.user.id);
+
+        if (result) {
+            res.status(200).json({
+                errCode: 0,
+                message: 'Customer took sample successfully'
+            });
+        } else {
+            res.status(404).json({
+                errCode: 2,
+                message: 'Request not found or invalid request ID'
+            });
+        }
+    } catch (error) {
+        console.error('Error in handleCustomerTookSample controller:', error);
+        res.status(500).json({
+            errCode: 1,
+            message: 'Server error'
+        });
+    }
+}
+
 
 module.exports = {
     handleApproveValuationRequest: handleApproveValuationRequest,
@@ -476,5 +509,6 @@ module.exports = {
     handleTakeRequestForValuation: handleTakeRequestForValuation,
     handleGetRequestTakenByValuation: handleGetRequestTakenByValuation,
     handleGetFinishedRequest: handleGetFinishedRequest,
+    handleCustomerTookSample: handleCustomerTookSample
 
 }
