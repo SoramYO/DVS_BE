@@ -122,6 +122,9 @@ const valuation = (body, params) => {
                     FROM Requests
                     WHERE id = @id
                 );
+
+                INSERT INTO Results (price, companyName, requestId, dateValued)
+                VALUES (${body.price}, 'Diamond Valuation', @id, GETDATE());
             `);
 
             resolve({
