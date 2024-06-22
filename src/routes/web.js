@@ -965,7 +965,7 @@ let initWebRoutes = (app) => {
    *                   type: string
    *                   example: 'Server error'
    */
-  router.post("/estimate-diamond-value-by-certificate", verifyToken, userController.estimateDiamondValueByCertificate);
+  router.post("/estimate-diamond-value-by-certificate", userController.estimateDiamondValueByCertificate);
 
   /**
    * @swagger
