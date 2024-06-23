@@ -159,7 +159,20 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
                 from: '"Diamond Valuation System" <no-reply@diamondvaluationsystem.com>',
                 to: email,
                 subject: 'Account Activation Code',
-                text: `Your activation code is: ${activationCode}`
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img src="https://marketplace.canva.com/EAFqberfhMA/1/0/1600w/canva-black-gold-luxury-modern-diamond-brand-store-logo-VmwEPkcpqzE.jpg" alt="Diamond Valuation System" style="width: 100px; height: auto;">
+                        </div>
+                        <h2 style="color: #333; text-align: center;">Account Activation Code</h2>
+                        <p style="color: #555;">Hello ${firstName} ${lastName},</p>
+                        <p style="color: #555;">Thank you for registering with Diamond Valuation System. Please use the following code to activate your account:</p>
+                        <h3 style="color: #333; text-align: center;">${activationCode}</h3>
+                        <p style="color: #555;">This code will expire in 1 hour. If you did not request this code, please ignore this email or contact support if you have questions.</p>
+                        <p style="color: #555;">Thank you for choosing Diamond Valuation System!</p>
+                        <p style="color: #555;">Best regards,<br>The Diamond Valuation System Team</p>
+                    </div>
+                `,
             });
 
             resolve({ errCode: 0, message: "Register success" });
