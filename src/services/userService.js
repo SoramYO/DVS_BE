@@ -129,7 +129,7 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
             // Connect to the database
             const pool = await sql.connect(config);
             const request = pool.request();
-
+            const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
             // Prepare inputs for SQL query
             request.input("username", sql.NVarChar, username);
             request.input("password", sql.NVarChar, hashedPassword);
@@ -138,13 +138,29 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
             request.input("email", sql.NVarChar, email);
             request.input("phone", sql.NVarChar, phone);
             request.input("roleId", sql.Int, 5);
-            request.input("status", sql.Int, 1);
-
+            request.input("status", sql.Int, 0);
+            request.input("activationCode", sql.NVarChar, activationCode);
             // Execute the SQL query to insert new user
             const result = await request.query(`
+                BEGIN TRANSACTION;
+                DECLARE @userId INT;
                 INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status)
-                VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status)
+                VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status);
+
+                SET @userId = SCOPE_IDENTITY();
+                INSERT INTO PasswordResetTokens (userId, token, expiryDate)
+                VALUES (@userId, @activationCode, DATEADD(HOUR, 1, GETDATE()));
+
+                COMMIT;
             `);
+
+
+            await transporter.sendMail({
+                from: '"Diamond Valuation System" <no-reply@diamondvaluationsystem.com>',
+                to: email,
+                subject: 'Account Activation Code',
+                text: `Your activation code is: ${activationCode}`
+            });
 
             resolve({ errCode: 0, message: "Register success" });
         } catch (error) {
@@ -204,7 +220,7 @@ const forgotPassword = async (email) => {
                 .input("userId", sql.Int, userId)
                 .input("token", sql.NVarChar, token)
                 .query(
-                    "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, DATEADD(minute, 300, GETDATE()))"
+                    "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, DATEADD(HOUR, 1, GETDATE()))"
                 );
 
             const resetLink = `https://dvs-fe-soramyos-projects.vercel.app/reset-password?token=${token}&id=${userId}`;
@@ -1404,6 +1420,48 @@ const finishRequest = async (userId) => {
     }
 };
 
+const activeAccount = async (username, code) => {
+    try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        request.input('username', sql.NVarChar(255), username);
+        request.input('code', sql.NVarChar(255), code);
+
+        const result = await request.query(`
+            UPDATE Account
+            SET status = 1
+            WHERE username = @username
+            AND EXISTS (
+                SELECT 1
+                FROM PasswordResetTokens
+                WHERE userId = Account.id
+                AND token = @code
+                AND expiryDate > GETDATE()
+            );
+
+            IF @@ROWCOUNT = 0
+            BEGIN
+                THROW 50000, 'Invalid username or code', 1;
+            END
+
+            DELETE FROM PasswordResetTokens
+            WHERE userId = (SELECT id FROM Account WHERE username = @username)
+            AND token = @code;
+        `);
+
+        return { errCode: 0, message: "Account activated successfully" };
+    } catch (error) {
+        console.error('Error in activeAccount:', error);
+
+        // Handle specific error cases
+        if (error.message.includes('Invalid username or code')) {
+            return { errCode: 1, message: "Invalid username or code" };
+        }
+
+        return { errCode: 1, message: "Server error", error: error.message };
+    }
+};
+
 
 
 module.exports = {
@@ -1434,4 +1492,5 @@ module.exports = {
     getRequestByUser: getRequestByUser,
     finishRequest: finishRequest,
     notificationValuationSuccess: notificationValuationSuccess,
+    activeAccount: activeAccount
 };

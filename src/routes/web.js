@@ -3638,6 +3638,8 @@ let initWebRoutes = (app) => {
 
   router.get("/request-approved", verifyToken, managerController.handleGetRequestApproved);
 
+  router.post("/active-account", userController.handleActiveAccount);
+
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
   });
