@@ -328,6 +328,20 @@ const handleNotificationValuationSuccess = async (req, res) => {
   }
 };
 
+const handleActiveAccount = async (req, res) => {
+  try {
+    const { username, code } = req.body;
+    const result = await userService.activeAccount(username, code);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in handleActiveAccount controller:", error);
+    res.status(500).json({
+      errCode: 1,
+      message: 'Server error'
+    });
+  }
+};
+
 
 let handleCreateNewRequest = async (req, res) => {
   let data = req.body;
@@ -431,4 +445,5 @@ module.exports = {
   handleGetRequestByUser: handleGetRequestByUser,
   handleGetFinishRequestByUser: handleGetFinishRequestByUser,
   handleNotificationValuationSuccess: handleNotificationValuationSuccess,
+  handleActiveAccount: handleActiveAccount,
 };
