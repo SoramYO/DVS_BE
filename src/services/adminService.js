@@ -336,7 +336,7 @@ const getRequestById = (id) => {
             const pool = await sql.connect(config);
             const request = await pool.request().input("id", sql.Int, id)
                 .query(`
-                    SELECT req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus, 
+                    SELECT req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus,
                     ac.firstName, ac.lastName, ac.email, ac.phone,
                     pro.processStatus,
                     ser.serviceName

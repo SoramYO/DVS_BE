@@ -2,16 +2,12 @@ const sql = require("mssql");
 var bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 require("dotenv").config();
-const jwt = require("jsonwebtoken");
 var config = require("../config/dbconfig");
-let $ = require("jquery");
 const request = require("request");
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const paypal = require("paypal-rest-sdk");
-const { error } = require("console");
-const { resolve } = require("dns");
 
 let handleUserLogin = (usernameOrEmail, password) => {
     return new Promise(async (resolve, reject) => {
