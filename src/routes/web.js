@@ -3640,6 +3640,8 @@ let initWebRoutes = (app) => {
 
   router.post("/active-account", userController.handleActiveAccount);
 
+  router.get("/bill", verifyToken, managerController.handleGetBill);
+
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
   });
