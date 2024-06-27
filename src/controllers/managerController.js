@@ -59,6 +59,20 @@ const handleGetRequestApproved = async (req, res) => {
     }
 }
 
+const handleGetBill = async (req, res) => {
+    try {
+
+        let response = await managerService.getBill();
+        return res.status(200).json(response);
+    } catch (error) {
+        console.error('Error in managerController.handleGetBill:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server'
+        });
+    }
+}
+
 
 
 
@@ -66,4 +80,5 @@ module.exports = {
     handleGetStaff: handleGetStaff,
     handleApproveRequest: handleApproveRequest,
     handleGetRequestApproved: handleGetRequestApproved,
+    handleGetBill: handleGetBill,
 };

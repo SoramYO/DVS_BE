@@ -20,29 +20,15 @@ const getStaff = async () => {
     })
 };
 
-const approveRequest = async (receiver, approvalId, status) => {
+const approveRequest = async (receiver, requestId, status) => {
     try {
-
-        if (!['Approved', 'Rejected'].includes(status)) {
-            throw new Error('Invalid status');
-        }
 
         let pool = await sql.connect(config);
 
-        let requestProcessQuery = await pool.request()
-            .input('approvalId', sql.Int, approvalId)
-            .query('SELECT requestType, requestId, sender FROM RequestProcesses WHERE id = @approvalId');
 
-        if (!requestProcessQuery.recordset || requestProcessQuery.recordset.length === 0) {
-            throw new Error(`No requestType or requestId found for approvalId ${approvalId}`);
-        }
-
-        let { requestType, requestId, sender } = requestProcessQuery.recordset[0];
-
-        // Fetch processId based on requestType
         let processIdQuery = await pool.request()
-            .input('requestType', sql.NVarChar(255), requestType)
-            .query('SELECT id FROM Processes WHERE processStatus = @requestType');
+            .input('status', sql.NVarChar(50), status)
+            .query('SELECT id FROM Processes WHERE processStatus = @status');
 
         if (!processIdQuery.recordset || processIdQuery.recordset.length === 0) {
             throw new Error(`No processId found for requestType ${requestType}`);
@@ -50,9 +36,8 @@ const approveRequest = async (receiver, approvalId, status) => {
 
         let processId = processIdQuery.recordset[0].id;
 
-        // Update the specific approval request
         let result = await pool.request()
-            .input('approvalId', sql.Int, approvalId)
+            .input('requestId', sql.Int, requestId)
             .input('status', sql.NVarChar(50), status)
             .input('receiver', sql.Int, receiver)
             .input('processId', sql.Int, processId)
@@ -62,9 +47,15 @@ const approveRequest = async (receiver, approvalId, status) => {
                     receiver = @receiver,
                     finishDate = GETDATE(),
                     processId = @processId
-                WHERE id = @approvalId
-                AND staffId = @staffId;
+                WHERE requestId = @requestId
+                AND receiver IS NULL
+                AND requestType IN ('Sealing', 'Commitment')
+
+                UPDATE RequestProcesses
+                SET processId = @processId
+                WHERE requestId = @requestId
             `);
+
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -108,9 +99,38 @@ const getRequestApproved = async () => {
     })
 }
 
+const getBill = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let pool = await sql.connect(config);
+            let bill = await pool.request().query(`
+            SELECT r.id, r.paymentStatus,
+                    a.firstName, a.lastName, a.email, a.phone,
+                    p.paymentAmount, p.paymentDate,
+                    s.serviceName
+            FROM
+                Requests r
+            JOIN
+                Account a ON r.userId = a.id
+            JOIN
+                Payments p ON r.id = p.requestId
+            JOIN
+                Services s ON r.serviceId = s.id
+            ORDER BY
+                r.createdDate DESC;
+                `);
+            resolve({ errorCode: 0, message: 'Get bill successfully', data: bill.recordset });
+        } catch (error) {
+            console.error('Error in managerService.getBill:', error);
+            resolve({ errorCode: 1, message: 'Error from server' });
+        }
+    })
+}
+
 
 module.exports = {
     getStaff: getStaff,
     approveRequest: approveRequest,
-    getRequestApproved: getRequestApproved
+    getRequestApproved: getRequestApproved,
+    getBill: getBill
 };

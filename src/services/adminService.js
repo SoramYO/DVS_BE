@@ -301,7 +301,8 @@ const getResults = () => {
                         acc.email,
                         acc.phone,
                         pro.processStatus,
-                        ser.serviceName
+                        ser.serviceName,
+                        ser.price AS servicePrice
                     FROM
                         Results res
                     JOIN
@@ -312,22 +313,22 @@ const getResults = () => {
                         Account acc ON req.userId = acc.id
                     JOIN
                         (
-                            SELECT 
+                            SELECT
                                 rp.requestId,
                                 MAX(COALESCE(rp.finishDate, rp.createdDate)) AS maxFinishDate -- Lấy finishDate hoặc nếu null thì lấy createdDate
-                            FROM 
+                            FROM
                                 RequestProcesses rp
-                            GROUP BY 
+                            GROUP BY
                                 rp.requestId
                         ) rp_max ON req.id = rp_max.requestId
                     JOIN
                         RequestProcesses rp ON req.id = rp.requestId
-                        AND (rp.finishDate = rp_max.maxFinishDate OR (rp.finishDate IS NULL AND rp.createdDate = rp_max.maxFinishDate)) -- Điều kiện lấy ra dòng có finishDate hoặc createdDate là maxFinishDate
+                        AND (rp.finishDate = rp_max.maxFinishDate OR (rp.finishDate IS NULL AND rp.createdDate = rp_max.maxFinishDate))
                     JOIN
                         Processes pro ON rp.processId = pro.id
                     JOIN
                         Services ser ON req.serviceId = ser.id
-                    ORDER BY 
+                    ORDER BY
                         res.dateValued DESC;
             `);
             resolve(results.recordset);
