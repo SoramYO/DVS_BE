@@ -833,6 +833,11 @@ const createNewRequest = async (data) => {
 
             const requestId = requestResult.recordset[0].requestId;
 
+            await request.query(`
+                INSERT INTO Payments (paymentAmount, paymentDate, requestId)
+                VALUES (0, NULL, ${requestId});
+            `);
+
             // Step 3: Insert a new record into RequestProcesses table
             const insertRequestProcessQuery = `
                 INSERT INTO RequestProcesses (requestType, createdDate, status, requestId, sender, processId)
@@ -848,6 +853,8 @@ const createNewRequest = async (data) => {
 
             // Commit the transaction if all queries succeed
             await transaction.commit();
+
+
 
             return {
                 errCode: 0,
