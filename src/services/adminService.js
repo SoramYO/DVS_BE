@@ -233,32 +233,40 @@ const getRequests = async () => {
     try {
         let pool = await sql.connect(config);
         let requests = await pool.request().query(`
-                    SELECT
-                        req.id,
-                        req.requestImage,
-                        req.note,
-                        req.createdDate,
-                        req.paymentStatus,
-                        ac.firstName,
-                        ac.lastName,
-                        ac.email,
-                        ac.phone,
-                        serv.serviceName
+            SELECT req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus,
+                    ac.firstName, ac.lastName, ac.email, ac.phone,
+                    pro.processStatus,
+                    ser.serviceName
+            FROM
+                Requests req
+            JOIN
+                Account ac ON req.userId = ac.id
+            JOIN
+                (SELECT
+                        requestId,
+                        MAX(COALESCE(finishDate, createdDate)) AS maxFinishDate
                     FROM
-                        Requests req
-                    JOIN
-                        Account ac ON req.userId = ac.id
-                    JOIN
-                        Services serv ON req.serviceId = serv.id
-                    ORDER BY
-                        req.createdDate DESC;
+                        RequestProcesses
+                    GROUP BY
+                        requestId
+                ) rp_max ON req.id = rp_max.requestId
+            JOIN
+                RequestProcesses rp ON req.id = rp.requestId
+                AND (rp.finishDate = rp_max.maxFinishDate OR (rp.finishDate IS NULL AND rp.createdDate = rp_max.maxFinishDate))
+            JOIN
+                Processes pro ON rp.processId = pro.id
+            JOIN
+                Services ser ON req.serviceId = ser.id
+            ORDER BY
+                req.createdDate DESC;
         `);
         return requests.recordset;
     } catch (error) {
-        console.error('Error in managerService.getValuationRequests:', error);
+        console.error('Error in getRequests:', error);
         throw error;
     }
 };
+
 
 
 const getResults = () => {
@@ -338,6 +346,8 @@ const getRequestById = (id) => {
                 .query(`
                     SELECT req.id AS RequestID, req.requestImage, req.note, req.createdDate, req.appointmentDate, req.paymentStatus,
                     ac.firstName, ac.lastName, ac.email, ac.phone,
+                    dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish,
+                    dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
                     pro.processStatus,
                     ser.serviceName
                     FROM
@@ -362,6 +372,8 @@ const getRequestById = (id) => {
                         Processes pro ON rp.processId = pro.id
                     JOIN
                         Services ser ON req.serviceId = ser.id
+                    JOIN
+                        Diamonds dia ON req.diamondId = dia.id
                     WHERE
                         req.id = @id;
 
