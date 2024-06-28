@@ -886,7 +886,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Server error'
 */
-  router.delete("/service/:serviceId", verifyToken, adminController.handleDeleteService);
+  router.put("/service", verifyToken, adminController.handleDeleteService);
 
   /**
    * @swagger
