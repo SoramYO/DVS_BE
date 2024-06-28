@@ -520,15 +520,17 @@ const updateService = (data) => {
 };
 
 
-const deleteService = ( serviceId) => {
+const deleteService = ( serviceId, status) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             const request = pool.request();
-            request.input('serviceId', sql.Int, serviceId);
-            const result = await request.query(`
+            const result = await request
+            .input('serviceId', sql.Int, serviceId)
+            .input('status', sql.Int, status)
+            .query(`
                 UPDATE Services
-                SET status = 0
+                SET status = @status
                 WHERE id = @serviceId
             `);
 
