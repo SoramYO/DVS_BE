@@ -173,7 +173,7 @@ const handleUpdateService = async (req, res) => {
 
 const handleDeleteService = async (req, res) => {
     try {
-        const { serviceId } = req.body;
+        const { serviceId } = req.params;
         if (!serviceId) {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
         }
