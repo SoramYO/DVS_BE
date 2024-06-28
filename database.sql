@@ -125,6 +125,33 @@ CREATE TABLE RequestProcesses
     FOREIGN KEY (requestId) REFERENCES Requests(id)
 );
 
+CREATE TABLE SealingReports
+(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    customerId INT NOT NULL,
+    requestId INT NOT NULL,
+    sealingDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    sealedBy NVARCHAR(255) NOT NULL,
+    notes NVARCHAR(1000),
+    attachedFile NVARCHAR(255), -- Đường dẫn file đính kèm
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerId) REFERENCES Account(id),
+    FOREIGN KEY (requestId) REFERENCES Requests(id)
+);
+
+CREATE TABLE CommitmentForms
+(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    customerId INT NOT NULL,
+    requestId INT NOT NULL,
+    commitmentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    notes NVARCHAR(1000),
+    attachedFile NVARCHAR(255), -- Đường dẫn file đính kèm
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerId) REFERENCES Account(id),
+    FOREIGN KEY (requestId) REFERENCES Requests(id)
+);
+
 
 
 -- Initial data insertion for Role, Account, Diamonds, Processes, Services, Requests, Results, Payments, PasswordResetTokens, Feedback
