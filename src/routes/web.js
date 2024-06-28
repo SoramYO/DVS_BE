@@ -3642,6 +3642,8 @@ let initWebRoutes = (app) => {
 
   router.get("/bill", verifyToken, managerController.handleGetBill);
 
+  router.get("/user-service", verifyToken, userController.handleGetUserService);
+
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
   });
