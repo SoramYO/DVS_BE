@@ -126,7 +126,7 @@ let handleGetProfit = async (req, res) => {
 }
 const handleViewServices = async (req, res) => {
     try {
-        const services = await userService.getAllServices();
+        const services = await adminService.getAllServices();
 
         return res.status(200).json({
             errCode: 0,
@@ -146,7 +146,7 @@ const handleCreateNewService = async (req, res) => {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters' });
         }
 
-        let message = await userService.createNewService(req.body);
+        let message = await adminService.createNewService(req.body);
 
         return res.status(200).json(message);
 
@@ -163,7 +163,7 @@ const handleUpdateService = async (req, res) => {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
         }
 
-        let message = await userService.updateService(req.body);
+        let message = await adminService.updateService(req.body);
         return res.status(200).json(message);
     } catch (error) {
         console.error('Error in handleUpdateService controller:', error);
@@ -178,7 +178,7 @@ const handleDeleteService = async (req, res) => {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
         }
 
-        const message = await userService.deleteService(serviceId);
+        const message = await adminService.deleteService(serviceId);
 
         return res.status(200).json(message);
 
