@@ -452,7 +452,7 @@ const getAllServices = async () => {
     try {
         const pool = await sql.connect(config);
         const result = await pool.request().query(`
-            SELECT id as serviceId, serviceName, price
+            SELECT id as serviceId, serviceName, price , status
             FROM Services
         `);
 
@@ -472,8 +472,8 @@ const createNewService = (data) => {
             request.input('price', sql.Int, data.price);
 
             await request.query(`
-                INSERT INTO Services (serviceName, price)
-                VALUES (@serviceName, @price)
+                INSERT INTO Services (serviceName, price, status)
+                VALUES (@serviceName, @price, 1)
             `);
 
             resolve({
@@ -519,15 +519,16 @@ const updateService = (data) => {
     });
 };
 
-const deleteService = (serviceId) => {
+
+const deleteService = ( serviceId) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
             const request = pool.request();
             request.input('serviceId', sql.Int, serviceId);
-
             const result = await request.query(`
-                DELETE FROM Services
+                UPDATE Services
+                SET status = 0
                 WHERE id = @serviceId
             `);
 
@@ -542,6 +543,7 @@ const deleteService = (serviceId) => {
                 errCode: 0,
                 message: 'Service deleted successfully'
             });
+
         } catch (error) {
             reject(error);
         }
