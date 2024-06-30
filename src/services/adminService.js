@@ -474,7 +474,7 @@ const createNewService = (data) => {
 
             await request.query(`
                 INSERT INTO Services (serviceName, price, description, status)
-                VALUES (@serviceName, @price, 1)
+                VALUES (@serviceName, @price, @description, 1)
             `);
 
             resolve({

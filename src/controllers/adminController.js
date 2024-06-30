@@ -141,7 +141,7 @@ const handleViewServices = async (req, res) => {
 
 const handleCreateNewService = async (req, res) => {
     try {
-        const { serviceName, price, description } = req.body;
+        const { serviceName, price } = req.body;
         if (!serviceName || !price) {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters' });
         }
