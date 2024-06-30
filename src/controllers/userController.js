@@ -418,6 +418,21 @@ let handleGetRequestByUser = async (req, res) => {
   }
 }
 
+const handleGetUserService = async (req, res) => {
+  try {
+    const services = await userService.getAllServices();
+
+    return res.status(200).json({
+      errCode: 0,
+      message: 'Services retrieved successfully',
+      services
+    });
+  } catch (error) {
+    console.error('Error in handleGetUserService controller:', error);
+    return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+  }
+}
+
 module.exports = {
   handleLogin: handleLogin,
   handleRegister: handleRegister,
@@ -446,4 +461,5 @@ module.exports = {
   handleGetFinishRequestByUser: handleGetFinishRequestByUser,
   handleNotificationValuationSuccess: handleNotificationValuationSuccess,
   handleActiveAccount: handleActiveAccount,
+  handleGetUserService: handleGetUserService,
 };

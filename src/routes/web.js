@@ -886,7 +886,7 @@ let initWebRoutes = (app) => {
 *                   type: string
 *                   example: 'Server error'
 */
-  router.delete("/service/:serviceId", verifyToken, adminController.handleDeleteService);
+  router.put("/service/:serviceId", verifyToken, adminController.handleDeleteService);
 
   /**
    * @swagger
@@ -3641,6 +3641,8 @@ let initWebRoutes = (app) => {
   router.post("/active-account", userController.handleActiveAccount);
 
   router.get("/bill", verifyToken, managerController.handleGetBill);
+
+  router.get("/user-service", verifyToken, userController.handleGetUserService);
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');

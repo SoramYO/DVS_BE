@@ -1477,6 +1477,21 @@ const activeAccount = async (username, code) => {
     }
 };
 
+const getAllServices = async () => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request().query(`
+            SELECT id, serviceName, price
+            FROM Services
+            WHERE status = 1;
+        `);
+
+        return { errCode: 0, message: "Success", data: result.recordset };
+    } catch (error) {
+        console.error('Error in getAllServices:', error);
+        return { errCode: 1, message: "Server error", error: error.message };
+    }
+}
 
 
 module.exports = {
@@ -1507,5 +1522,6 @@ module.exports = {
     getRequestByUser: getRequestByUser,
     finishRequest: finishRequest,
     notificationValuationSuccess: notificationValuationSuccess,
-    activeAccount: activeAccount
+    activeAccount: activeAccount,
+    getAllServices: getAllServices,
 };
