@@ -150,8 +150,8 @@ const printValuationReport = async (requestId) => {
             .query(`
                 SELECT r.id AS requestId, r.requestImage, r.note, r.createdDate, r.appointmentDate, r.paymentStatus,
                     a.username AS customerUsername, a.firstName AS customerFirstName, a.lastName AS customerLastName,
-                    dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
-                    re.price, re.companyName, re.dateValued AS valuationDate
+                    dia.certificateId, dia.proportions, dia.diamondOrigin, dia.caratWeight, dia.measurements, dia.polish, dia.fluorescence, dia.color, dia.cut, dia.clarity, dia.symmetry, dia.shape,
+                    re.price AS diamondPrice, re.companyName, re.dateValued AS valuationDate
                 FROM Requests r
                 JOIN Account a ON r.userId = a.id
                 LEFT JOIN Diamonds dia ON r.diamondId = dia.id
