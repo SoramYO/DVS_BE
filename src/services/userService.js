@@ -118,6 +118,31 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
                 });
                 return;
             }
+            if (username.length < 6) {
+                resolve({
+                    errCode: 2,
+                    message: "Username must be at least 6 characters!",
+                });
+            }
+            if (username.length > 26) {
+                resolve({
+                    errCode: 2,
+                    message: "Username must be less than 26 characters!",
+                });
+            }
+
+            if (password.length < 6) {
+                resolve({
+                    errCode: 2,
+                    message: "Password must be at least 6 characters!",
+                });
+            }
+            if (password.length > 26) {
+                resolve({
+                    errCode: 2,
+                    message: "Password must be less than 26 characters!",
+                });
+            }
 
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(password, 10);
