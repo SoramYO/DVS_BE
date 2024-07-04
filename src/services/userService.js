@@ -143,6 +143,13 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
                     message: "Password must be less than 26 characters!",
                 });
             }
+            if (phone.length < 10 || phone.length > 11 || phone[0] != '0') {
+                resolve({
+                    errCode: 2,
+                    message: "Phone number is invalid!",
+                });
+            }
+
 
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(password, 10);
