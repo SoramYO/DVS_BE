@@ -118,6 +118,43 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
                 });
                 return;
             }
+            if (username.length < 6) {
+                resolve({
+                    errCode: 2,
+                    message: "Username must be at least 6 characters!",
+                });
+                return;
+            }
+            if (username.length > 26) {
+                resolve({
+                    errCode: 2,
+                    message: "Username must be less than 26 characters!",
+                });
+                return;
+            }
+
+            if (password.length < 6) {
+                resolve({
+                    errCode: 2,
+                    message: "Password must be at least 6 characters!",
+                });
+                return;
+            }
+            if (password.length > 26) {
+                resolve({
+                    errCode: 2,
+                    message: "Password must be less than 26 characters!",
+                });
+                return;
+            }
+            if (phone.length < 10 || phone.length > 11 || phone[0] != '0') {
+                resolve({
+                    errCode: 2,
+                    message: "Phone number is invalid!",
+                });
+                return;
+            }
+
 
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -220,6 +257,7 @@ const forgotPassword = async (email) => {
             );
             if (result.recordset.length === 0) {
                 resolve({ errCode: 2, message: "Email not found" });
+                return;
             }
 
             const token = generateToken();
@@ -275,6 +313,7 @@ const notificationValuationSuccess = async (requestId) => {
             );
             if (result.recordset.length === 0) {
                 resolve({ errCode: 2, message: "Email not found" });
+                return;
             }
             const email = result.recordset[0].email;
             await transporter.sendMail({

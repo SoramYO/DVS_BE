@@ -158,8 +158,8 @@ const handleCreateNewService = async (req, res) => {
 
 const handleUpdateService = async (req, res) => {
     try {
-        const { serviceId, serviceName, price } = req.body;
-        if (!serviceId || !serviceName || !price) {
+        const { serviceId, serviceName } = req.body;
+        if (!serviceId || !serviceName) {
             return res.status(400).json({ errCode: 1, message: 'Invalid input parameters or Service ID missing' });
         }
 
