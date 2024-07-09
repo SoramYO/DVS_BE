@@ -433,6 +433,22 @@ const handleGetUserService = async (req, res) => {
   }
 }
 
+const handleGetUserBill = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const userbills = await userService.getUserBill(userId);
+
+    return res.status(200).json({
+      errCode: 0,
+      message: 'Bills retrieved successfully',
+      bills
+    });
+  } catch (error) {
+    console.error('Error in handleGetUserBill controller:', error);
+    return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+  }
+}
 module.exports = {
   handleLogin: handleLogin,
   handleRegister: handleRegister,
@@ -462,4 +478,5 @@ module.exports = {
   handleNotificationValuationSuccess: handleNotificationValuationSuccess,
   handleActiveAccount: handleActiveAccount,
   handleGetUserService: handleGetUserService,
+  handleGetUserBill: handleGetUserBill,
 };
