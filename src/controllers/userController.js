@@ -442,7 +442,7 @@ const handleGetUserBill = async (req, res) => {
     return res.status(200).json({
       errCode: 0,
       message: 'Bills retrieved successfully',
-      bills
+      userbills
     });
   } catch (error) {
     console.error('Error in handleGetUserBill controller:', error);

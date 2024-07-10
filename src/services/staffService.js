@@ -561,8 +561,7 @@ const getFinishedRequest = async (consultingId) => {
                     JOIN
                         Services s ON r.serviceId = s.id
                     WHERE
-                        rp.requestType = 'Ready for return'
-                        AND p.processStatus = 'Sent to Consulting'
+                        p.processStatus = 'Sent to Consulting'
                         AND rp.receiver = @consultingId
                     ORDER BY
                         r.createdDate DESC;

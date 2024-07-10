@@ -3646,7 +3646,7 @@ let initWebRoutes = (app) => {
 
   router.get("/user-service", verifyToken, userController.handleGetUserService);
 
-  router.get("/staff-approval", staffController.handleGetStaffApproval);
+  router.get("/staff-approval", verifyToken, staffController.handleGetStaffApproval);
 
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
