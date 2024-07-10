@@ -145,7 +145,7 @@ const handleRequestApproval = async (req, res) => {
 
 const handleReceiveDiamond = async (req, res) => {
     try {
-        const { requestId } = req.body;
+        const { requestId, signatureUrl, signName } = req.body;
 
         if (!requestId) {
             return res.status(400).json({
@@ -154,7 +154,7 @@ const handleReceiveDiamond = async (req, res) => {
             });
         }
 
-        const result = await staffService.receiveDiamond(requestId, req.user.id);
+        const result = await staffService.receiveDiamond(requestId, signatureUrl, signName, req.user.id);
 
         if (result) {
             res.status(200).json({
@@ -441,7 +441,7 @@ const handleGetRequestTakenByValuation = async (req, res) => {
 
 const handleGetFinishedRequest = async (req, res) => {
     try {
-        const requests = await staffService.getFinishedRequest();
+        const requests = await staffService.getFinishedRequest(req.user.id);
 
         res.status(200).json({
             errCode: 0,

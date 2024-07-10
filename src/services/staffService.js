@@ -212,7 +212,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const receiveDiamond = async (requestId, receivedBy) => {
+const receiveDiamond = async (requestId, signatureUrl, signName, receivedBy) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -266,32 +266,38 @@ const receiveDiamond = async (requestId, receivedBy) => {
             to: receiptData.email,
             subject: "Receipt for Diamond Valuation Request",
             html: `
-                            <html>
+                <html>
                 <head>
-                    <title>Valuation Report</title>
+                    <title>Receipt Request</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.16.13/antd.min.css">
                     <style>
                         body {
                             font-family: Arial, sans-serif;
                             background-color: #f0f2f5;
-                            margin: 0;
+                            margin: 20px;
                             padding: 20px;
                         }
                         .container {
-                            max-width: 800px;
+                            width: 800px;
                             margin: auto;
                             padding: 20px;
-                            background-color: #fff;
+                            background: #fff;
                             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                            border-radius: 5px;
+                            border-radius: 10px;
+                            border: 1px solid #ccc;
                         }
                         .header, .footer {
                             text-align: center;
                             margin-bottom: 20px;
                         }
+                        .header img {
+                            max-width: 150px;
+                            margin-bottom: 10px;
+                        }
                         .header h1 {
-                            color: #ff0000;
+                            color: #333;
                             margin: 0;
+                            font-size: 28px;
                         }
                         .details {
                             display: flex;
@@ -348,6 +354,7 @@ const receiveDiamond = async (requestId, receivedBy) => {
                 <body>
                     <div class="container">
                         <div class="header">
+                            <img src="https://marketplace.canva.com/EAFqberfhMA/1/0/1600w/canva-black-gold-luxury-modern-diamond-brand-store-logo-VmwEPkcpqzE.jpg" alt="Logo"/>
                             <h1>Receipt Request</h1>
                         </div>
                         <div class="details">
@@ -364,14 +371,14 @@ const receiveDiamond = async (requestId, receivedBy) => {
                         </div>
                         <div class="signature">
                             <p>Authorized Signature:</p>
-                            <img src="https://clipground.com/images/make-signature-clipart-1.jpg" alt="Signature"/>
-                            <p class="sign">Brian</p>
-                            <p>Valuation Expert</p>
+                            <img src=${signatureUrl} alt="Signature"/>
+                            <p class="sign">${signName}</p>
+                            <p><strong>Date:</strong> ${new Date().toLocaleString("en-US")}</p>
                         </div>
                         <div class="footer">
                             <h3>Diamond Valuation</h3>
                             <p>VRG2+27 Dĩ An, Bình Dương, Việt Nam</p>
-                            <p>Phone: 0032-3-233-91-60</p>
+                            <p>Phone: 0976457150</p>
                             <p>Email: diamondvaluation@gmail.com</p>
                         </div>
                     </div>
@@ -406,8 +413,16 @@ const sendValuationResult = async (requestId, valuationResultId) => {
                     WHERE processStatus = 'Sent to Consulting'
                 );
 
-                INSERT INTO RequestProcesses (requestType, requestId, sender, processId)
-                VALUES ('Ready for return', @requestId, @valuationResultId, @processId);
+                DECLARE @receiver INT;
+
+                SET @receiver = (
+                SELECT sender
+                FROM RequestProcesses
+                WHERE requestId = @requestId AND receiver = @valuationResultId
+                );
+
+                INSERT INTO RequestProcesses (requestType, requestId, sender, receiver, processId)
+                VALUES ('Ready for return', @requestId, @valuationResultId, @receiver, @processId);
             `);
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -530,10 +545,11 @@ const getNewRequest = async () => {
     }
 }
 
-const getFinishedRequest = async () => {
+const getFinishedRequest = async (consultingId) => {
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
+            .input('consultingId', sql.Int, consultingId)
             .query(`
                     SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
                     FROM
@@ -545,9 +561,9 @@ const getFinishedRequest = async () => {
                     JOIN
                         Services s ON r.serviceId = s.id
                     WHERE
-                        rp.requestType = 'Ready for return' AND
-                        rp.receiver IS NULL
+                        rp.requestType = 'Ready for return'
                         AND p.processStatus = 'Sent to Consulting'
+                        AND rp.receiver = @consultingId
                     ORDER BY
                         r.createdDate DESC;
             `);
