@@ -1533,7 +1533,7 @@ const getAllServices = async () => {
 }
 
 const userbills = async (userId) => {
-    try{
+    try {
         const pool = await sql.connect(config);
         const result = await pool.request().query(`
             SELECT   r.paymentStatus, p.paymentAmount, p.paymentDate
@@ -1541,7 +1541,7 @@ const userbills = async (userId) => {
             JOIN Payments p ON r.id = p.requestId
             WHERE r.userId = ${userId}
             `);
-            return { errCode: 0, message: "Success", data: result.recordset };
+        return { errCode: 0, message: "Success", data: result.recordset };
 
     } catch (error) {
         console.error('Error in userbills:', error);
@@ -1580,5 +1580,5 @@ module.exports = {
     notificationValuationSuccess: notificationValuationSuccess,
     activeAccount: activeAccount,
     getAllServices: getAllServices,
-    userbills:userbills,
+    userbills: userbills,
 };

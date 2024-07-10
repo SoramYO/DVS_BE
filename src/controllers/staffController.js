@@ -369,7 +369,7 @@ const handleGetTakeRequest = async (req, res) => {
             data: requests
         });
     } catch (error) {
-        console.error('Error in managerController.handleTakeRequest:', error);
+        console.error('Error in managerController.handleGetTakeRequest:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
@@ -387,7 +387,7 @@ const handleGetRequestReadyForValuation = async (req, res) => {
             data: requests
         });
     } catch (error) {
-        console.error('Error in managerController.handleTakeRequest:', error);
+        console.error('Error in managerController.handleGetRequestReadyForValuation:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
@@ -413,7 +413,7 @@ const handleTakeRequestForValuation = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('Error in managerController.handleApproveValuationRequest:', error);
+        console.error('Error in managerController.handleTakeRequestForValuation:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
@@ -431,7 +431,7 @@ const handleGetRequestTakenByValuation = async (req, res) => {
             data: requests
         });
     } catch (error) {
-        console.error('Error in managerController.handleTakeRequest:', error);
+        console.error('Error in managerController.handleGetRequestTakenByValuation:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
@@ -449,7 +449,7 @@ const handleGetFinishedRequest = async (req, res) => {
             data: requests
         });
     } catch (error) {
-        console.error('Error in managerController.handleTakeRequest:', error);
+        console.error('Error in managerController.handleGetFinishedRequest:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
@@ -493,13 +493,14 @@ const handleGetStaffApproval = async (req, res) => {
     try {
         const requests = await staffService.getStaffApproval(req.user.id);
 
+
         res.status(200).json({
             errCode: 0,
             message: 'Get new request successfully',
             data: requests
         });
     } catch (error) {
-        console.error('Error in managerController.handleTakeRequest:', error);
+        console.error('Error in managerController.handleGetStaffApproval:', error);
         return res.status(500).json({
             errCode: -1,
             message: 'Error from server',
