@@ -489,6 +489,23 @@ const handleCustomerTookSample = async (req, res) => {
         });
     }
 }
+const handleGetStaffApproval = async (req, res) => {
+    try {
+        const requests = await staffService.getStaffApproval(req.user.id);
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get new request successfully',
+            data: requests
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleTakeRequest:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
 
 
 module.exports = {
@@ -509,6 +526,7 @@ module.exports = {
     handleTakeRequestForValuation: handleTakeRequestForValuation,
     handleGetRequestTakenByValuation: handleGetRequestTakenByValuation,
     handleGetFinishedRequest: handleGetFinishedRequest,
-    handleCustomerTookSample: handleCustomerTookSample
+    handleCustomerTookSample: handleCustomerTookSample,
+    handleGetStaffApproval: handleGetStaffApproval,
 
 }

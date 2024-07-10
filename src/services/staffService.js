@@ -702,6 +702,41 @@ const customerTookSample = async (requestId) => {
     }
 }
 
+const getStaffApproval = async (staffId) => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .input('staffId', sql.Int, staffId)
+            .query(`
+            SELECT rp.id AS RequestProcessID, rp.requestId, rp.sender, rp.receiver, rp.status,
+                rp.createdDate, rp.finishDate, rp.requestType, rp.description,
+                r.requestImage, r.note, r.createdDate AS RequestCreatedDate, r.appointmentDate,
+                a.firstName, a.lastName, a.email, a.phone, p.processStatus,
+                b.firstName AS staffFirstName, b.lastName AS staffLastName
+            FROM
+                RequestProcesses rp
+            JOIN
+                Requests r ON rp.requestId = r.id
+            JOIN
+                Processes p ON rp.processId = p.id
+            JOIN
+                Account a ON r.userId = a.id
+            JOIN
+                Account b ON rp.sender = b.id
+            WHERE
+                rp.requestType IN ('Sealing', 'Commitment')
+                AND
+                    rp.sender = @staffId
+            ORDER BY
+                rp.finishDate DESC;
+            `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getStaffApproval:', error);
+        throw error;
+    }
+}
 module.exports = {
     takeRequest: takeRequest,
     getRequestTakenByValuation: getRequestTakenByValuation,
@@ -720,6 +755,7 @@ module.exports = {
     getTakenRequestByStaff: getTakenRequestByStaff,
     takeRequestForValuation: takeRequestForValuation,
     getFinishedRequest: getFinishedRequest,
-    customerTookSample: customerTookSample
+    customerTookSample: customerTookSample,
+    getStaffApproval: getStaffApproval,
 
 }
