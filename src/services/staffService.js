@@ -551,7 +551,7 @@ const getFinishedRequest = async (consultingId) => {
         let result = await pool.request()
             .input('consultingId', sql.Int, consultingId)
             .query(`
-                    SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
+                    SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus 
                     FROM
                         Requests r
                     JOIN
@@ -563,6 +563,7 @@ const getFinishedRequest = async (consultingId) => {
                     WHERE
                         p.processStatus = 'Sent to Consulting'
                         AND rp.receiver = @consultingId
+                        AND rp.requestType = 'Ready for return'
                     ORDER BY
                         r.createdDate DESC;
             `);
