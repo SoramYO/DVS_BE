@@ -1532,7 +1532,7 @@ const getAllServices = async () => {
     }
 }
 
-const userbills = async (userId) => {
+const getUserBill = async (userId) => {
     try {
         const pool = await sql.connect(config);
         const result = await pool.request().query(`
@@ -1580,5 +1580,5 @@ module.exports = {
     notificationValuationSuccess: notificationValuationSuccess,
     activeAccount: activeAccount,
     getAllServices: getAllServices,
-    userbills: userbills,
+    getUserBill: getUserBill,
 };
