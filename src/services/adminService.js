@@ -553,6 +553,71 @@ const deleteService = (serviceId, status) => {
     });
 };
 
+const getValuationStaffStatic = async () => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .query(`
+                SELECT
+                    A.id AS StaffID,
+                    A.firstName + ' ' + A.lastName AS StaffName,
+                    COUNT(RP.id) AS TotalRequests,
+                    SUM(CASE WHEN RP.processId = P.id AND P.processStatus = 'Done' THEN 1 ELSE 0 END) AS CompletedRequests
+                FROM
+                    Account A
+                LEFT JOIN
+                    RequestProcesses RP ON A.id = RP.receiver
+                LEFT JOIN
+                    Processes P ON RP.processId = P.id
+                LEFT JOIN
+                    Role R ON A.roleId = R.id
+                WHERE
+                    R.name IN ('Valuation Staff')
+                GROUP BY
+                    A.id, A.firstName, A.lastName
+                ORDER BY
+                    TotalRequests DESC;
+                `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getValuationStaffStatic:', error);
+        throw new Error('Error retrieving valuation staff');
+    }
+}
+
+const getConsultingStaffStatic = async () => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .query(`
+                SELECT
+                    A.id AS StaffID,
+                    A.firstName + ' ' + A.lastName AS StaffName,
+                    COUNT(RP.id) AS TotalRequests,
+                    SUM(CASE WHEN RP.processId = P.id AND P.processStatus = 'Done' THEN 1 ELSE 0 END) AS CompletedRequests
+                FROM
+                    Account A
+                LEFT JOIN
+                    RequestProcesses RP ON A.id = RP.receiver
+                LEFT JOIN
+                    Processes P ON RP.processId = P.id
+                LEFT JOIN
+                    Role R ON A.roleId = R.id
+                WHERE
+                    R.name IN ('Consulting Staff')
+                GROUP BY
+                    A.id, A.firstName, A.lastName
+                ORDER BY
+                    TotalRequests DESC;
+                `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getConsultingStaffStatic:', error);
+        throw new Error('Error retrieving consulting staff');
+    }
+}
 module.exports = {
     checkUserName: checkUserName,
     getUserById: getUserById,
@@ -573,4 +638,6 @@ module.exports = {
     createNewService: createNewService,
     updateService: updateService,
     deleteService: deleteService,
+    getValuationStaffStatic: getValuationStaffStatic,
+    getConsultingStaffStatic: getConsultingStaffStatic
 }

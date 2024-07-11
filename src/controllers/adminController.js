@@ -189,6 +189,36 @@ const handleDeleteService = async (req, res) => {
     }
 };
 
+const handleGetValuationStaffStatic = async (req, res) => {
+    try {
+        const staff = await adminService.getValuationStaffStatic();
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Valuation staff retrieved successfully',
+            staff
+        });
+    } catch (error) {
+        console.error('Error in handleGetValuationStaffStatic controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+}
+
+const handleGetConsultingStaffStatic = async (req, res) => {
+    try {
+        const staff = await adminService.getConsultingStaffStatic();
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Consulting staff retrieved successfully',
+            staff
+        });
+    } catch (error) {
+        console.error('Error in handleGetConsultingStaffStatic controller:', error);
+        return res.status(500).json({ errCode: 1, message: 'Server error', error: error.message });
+    }
+}
+
 module.exports = {
     handleGetAllUsers: handleGetAllUsers,
     handleGetUserById: handleGetUserById,
@@ -207,4 +237,7 @@ module.exports = {
     handleCreateNewService: handleCreateNewService,
     handleUpdateService: handleUpdateService,
     handleDeleteService: handleDeleteService,
+    handleGetValuationStaffStatic: handleGetValuationStaffStatic,
+    handleGetConsultingStaffStatic: handleGetConsultingStaffStatic
+
 }

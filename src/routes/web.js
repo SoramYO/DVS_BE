@@ -3648,6 +3648,10 @@ let initWebRoutes = (app) => {
 
   router.get("/staff-approval", verifyToken, staffController.handleGetStaffApproval);
 
+  router.get("/consultingStaff-static", verifyToken, adminController.handleGetConsultingStaffStatic);
+
+  router.get("/valuationStaff-static", verifyToken, adminController.handleGetValuationStaffStatic);
+
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
   });
