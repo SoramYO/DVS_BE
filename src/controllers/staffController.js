@@ -59,7 +59,7 @@ const handleValuation = async (req, res) => {
         }
 
 
-        let result = await staffService.valuation(req.body, req.params);
+        let result = await staffService.valuation(req.body, req.params, req.user.id);
 
         if (result) {
             res.status(200).json({

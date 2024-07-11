@@ -34,7 +34,7 @@ const takeRequestForValuation = async (staffId, requestId) => {
                 UPDATE RequestProcesses
                 SET requestType = 'Valuated',
                     receiver = @staffId, finishDate = GETDATE(),
-                    processId = (SELECT id FROM Processes WHERE processStatus = 'Valuated'),
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Start Valuated'),
                     status = 'TakeByValuation'
                 WHERE requestId = @requestId AND receiver IS NULL AND requestType = 'Ready for valuation';
             `);
@@ -69,7 +69,7 @@ let changeProcess = (body, params) => {
     });
 }
 
-const valuation = (body, params) => {
+const valuation = (body, params, staffId) => {
     return new Promise(async (resolve, reject) => {
         try {
             const pool = await sql.connect(config);
@@ -127,6 +127,19 @@ const valuation = (body, params) => {
                 INSERT INTO Results (price, companyName, requestId, dateValued)
                 VALUES (${body.price}, 'Diamond Valuation', @id, GETDATE());
             `);
+
+            let result = await pool.request()
+                .input('requestId', sql.Int, params.id)
+                .input('staffId', sql.Int, staffId)
+                .query(`
+                UPDATE RequestProcesses
+                SET requestType = 'Valuated',
+                    finishDate = GETDATE(),
+                    processId = (SELECT id FROM Processes WHERE processStatus = 'Valuated'),
+                    status = 'TakeByValuation'
+                WHERE requestId = @requestId AND receiver = @staffId;
+            `);
+
 
             resolve({
                 errCode: 0,
@@ -458,7 +471,6 @@ const sendValuationResultToCustomer = async (requestId, staffId) => {
                     AND receiver IS NULL
                     AND status IS NULL;
             `);
-        console.log(result);
         return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error('Error in consultingService.sendValuationResultToCustomer:', error);
