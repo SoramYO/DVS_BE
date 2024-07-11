@@ -455,6 +455,8 @@ const sendValuationResultToCustomer = async (requestId, staffId) => {
                     status = 'TakeByCustomer'
                 WHERE
                     requestId = @requestId
+                    AND receiver IS NULL
+                    AND status IS NULL;
             `);
         console.log(result);
         return result.rowsAffected[0] > 0;
