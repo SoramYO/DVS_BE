@@ -1450,7 +1450,7 @@ const finishRequest = async (userId) => {
     if (!userId) {
         throw new Error('userId is required and must be an integer');
     }
-
+    console.log(userId);
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -1462,8 +1462,8 @@ const finishRequest = async (userId) => {
                 JOIN Processes p ON rp.processId = p.id
                 JOIN Services s ON r.serviceId = s.id
                 JOIN Account a ON a.id = rp.receiver
-                WHERE rp.status = 'TakeByCustomer'
-                    AND a.roleId = 5
+                WHERE rp.processId = 16
+                    AND rp.sender = @userId
                     AND r.userId = @userId
                 ORDER BY r.createdDate DESC;
             `);
