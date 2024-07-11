@@ -379,7 +379,7 @@ const getRequestById = (id) => {
                         req.id = @id;
 
                 `);
-            resolve(request.recordset);
+            resolve(request.recordset[0]);
         } catch (error) {
             reject(error);
         }
