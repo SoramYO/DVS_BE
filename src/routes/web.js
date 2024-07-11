@@ -659,7 +659,7 @@ let initWebRoutes = (app) => {
    *                   type: string
    *                   example: 'Server error'
    */
-  router.get('/services', verifyToken, adminController.handleViewServices);
+  router.get('/services', adminController.handleViewServices);
 
   /**
    * @swagger
