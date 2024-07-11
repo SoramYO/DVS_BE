@@ -88,6 +88,7 @@ const getRequestApproved = async () => {
                 Account b ON rp.sender = b.id
             WHERE
                 rp.requestType IN ('Sealing', 'Commitment')
+                
             ORDER BY
                 rp.finishDate DESC;
                 `);
