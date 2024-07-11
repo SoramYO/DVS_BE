@@ -437,7 +437,7 @@ const handleGetUserBill = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const userbills = await userService.getUserBill(userId);
+    const userbills = await userService.userbills(userId);
 
     return res.status(200).json({
       errCode: 0,

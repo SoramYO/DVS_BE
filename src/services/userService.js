@@ -920,9 +920,10 @@ let payment = (body) => {
             const pool = await sql.connect(config);
             const request = pool.request();
             request.input("requestId", sql.Int, body.requestId);
+            request.input("amount", sql.Int, body.amount);
             await request.query(`
                 UPDATE Payments
-                SET paymentAmount = 100, paymentDate = GETDATE()
+                SET paymentAmount = @amount, paymentDate = GETDATE()
                 WHERE requestId = @requestId;
 
                 UPDATE Requests
