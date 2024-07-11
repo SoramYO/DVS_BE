@@ -70,27 +70,27 @@ const getRequestApproved = async () => {
     return new Promise(async (resolve, reject) => {
         try {
             let pool = await sql.connect(config);
-            let requestApproved = await pool.request().query(`
-            SELECT rp.id AS RequestProcessID, rp.requestId, rp.sender, rp.receiver, rp.status,
-                rp.createdDate, rp.finishDate, rp.requestType, rp.description,
-                r.requestImage, r.note, r.createdDate AS RequestCreatedDate, r.appointmentDate,
-                a.firstName, a.lastName, a.email, a.phone, p.processStatus,
-                b.firstName AS staffFirstName, b.lastName AS staffLastName
-            FROM
-                RequestProcesses rp
-            JOIN
-                Requests r ON rp.requestId = r.id
-            JOIN
-                Processes p ON rp.processId = p.id
-            JOIN
-                Account a ON r.userId = a.id
-            JOIN
-                Account b ON rp.sender = b.id
-            WHERE
-                rp.requestType IN ('Sealing', 'Commitment')
-                
-            ORDER BY
-                rp.finishDate DESC;
+            let requestApproved = await pool.request()
+                .query(`
+                SELECT rp.id AS RequestProcessID, rp.requestId, rp.sender, rp.receiver, rp.status,rp.createdDate, rp.finishDate, rp.requestType, rp.description,
+                        r.requestImage, r.note, r.createdDate AS RequestCreatedDate, r.appointmentDate,
+                        a.firstName, a.lastName, a.email, a.phone, p.processStatus,
+                        b.firstName AS staffFirstName, b.lastName AS staffLastName
+                FROM
+                    RequestProcesses rp
+                JOIN
+                    Requests r ON rp.requestId = r.id
+                JOIN
+                    Processes p ON rp.processId = p.id
+                JOIN
+                    Account a ON r.userId = a.id
+                JOIN
+                    Account b ON rp.sender = b.id
+                WHERE
+                    rp.requestType IN ('Sealing', 'Commitment')
+                    AND rp.processId NOT IN (SELECT id FROM Processes WHERE processStatus = 'Done')
+                ORDER BY
+                    rp.finishDate DESC;
                 `);
             resolve({ errorCode: 0, message: 'Get request approved successfully', data: requestApproved.recordset });
         } catch (error) {
