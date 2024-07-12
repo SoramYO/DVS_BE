@@ -576,7 +576,7 @@ const getValuationStaffStatic = async () => {
                     LEFT JOIN
                         Role R2 ON A2.roleId = R2.id
                     WHERE
-                        R.name = 'Consulting Staff'
+                        R.name = 'Valuation Staff'
                         AND R2.name = 'Customer'
                     GROUP BY
                         A.id, A.firstName, A.lastName
