@@ -558,31 +558,28 @@ const getValuationStaffStatic = async () => {
         const pool = await sql.connect(config);
         const result = await pool.request()
             .query(`
-                    SELECT
-                        A.id AS StaffID,
-                        A.firstName + ' ' + A.lastName AS StaffName,
-                        COUNT(RP.id) AS TotalRequests,
-                        SUM(CASE WHEN P.processStatus = 'Done' THEN 1 ELSE 0 END) AS CompletedRequests
-                    FROM
-                        Account A
-                    LEFT JOIN
-                        RequestProcesses RP ON A.id = RP.receiver
-                    LEFT JOIN
-                        Processes P ON RP.processId = P.id
-                    LEFT JOIN
-                        Account A2 ON A2.id = RP.sender
-                    LEFT JOIN
-                        Role R ON A.roleId = R.id
-                    LEFT JOIN
-                        Role R2 ON A2.roleId = R2.id
-                    WHERE
-                        R.name = 'Consulting Staff'
-                        AND R2.name = 'Customer'
-                    GROUP BY
-                        A.id, A.firstName, A.lastName
-                    ORDER BY
-                        TotalRequests DESC;
-                `);
+                SELECT
+                    A.id AS StaffID,
+                    A.firstName + ' ' + A.lastName AS StaffName,
+                    COUNT(RP.id) AS TotalRequests,
+                    SUM(CASE WHEN P.processStatus = 'Done' THEN 1 ELSE 0 END) AS CompletedRequests
+                FROM
+                    Account A
+                        LEFT JOIN
+                    RequestProcesses RP ON A.id = RP.receiver
+                        LEFT JOIN
+                    Processes P ON RP.processId = P.id
+                        LEFT JOIN
+                    Account A2 ON A2.id = RP.sender
+                        LEFT JOIN
+                    Role R ON A.roleId = R.id
+                WHERE
+                    R.name = 'Valuation Staff'
+                GROUP BY
+                    A.id, A.firstName, A.lastName
+                ORDER BY
+                    TotalRequests DESC;
+                                `);
 
         return result.recordset;
     } catch (error) {

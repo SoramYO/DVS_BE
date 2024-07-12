@@ -761,11 +761,11 @@ const estimateDiamondValueByCertificate = async (certificateId) => {
     try {
         const pool = await sql.connect(config);
         const request = pool.request();
-        console.log(certificateId);
+
         request.input('certificateId', sql.NVarChar(255), certificateId);
 
         const queryResult = await request.query(`
-            SELECT Results.price AS estimatedPrice
+            SELECT Results.price AS estimatedPrice , Requests.requestImage AS image
             FROM Diamonds
             JOIN Requests ON Diamonds.id = Requests.diamondId
             JOIN Results ON Requests.id = Results.requestId
@@ -1450,7 +1450,7 @@ const finishRequest = async (userId) => {
     if (!userId) {
         throw new Error('userId is required and must be an integer');
     }
-    console.log(userId);
+
     try {
         let pool = await sql.connect(config);
         let result = await pool.request()
@@ -1541,6 +1541,8 @@ const getUserBill = async (userId) => {
             FROM Requests r
             JOIN Payments p ON r.id = p.requestId
             WHERE r.userId = ${userId}
+            ORDER BY
+                p.paymentDate DESC
             `);
         return { errCode: 0, message: "Success", data: result.recordset };
 
