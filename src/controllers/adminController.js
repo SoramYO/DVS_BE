@@ -207,7 +207,6 @@ const handleGetValuationStaffStatic = async (req, res) => {
 const handleGetConsultingStaffStatic = async (req, res) => {
     try {
         const staff = await adminService.getConsultingStaffStatic();
-
         return res.status(200).json({
             errCode: 0,
             message: 'Consulting staff retrieved successfully',
