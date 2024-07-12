@@ -1541,6 +1541,8 @@ const getUserBill = async (userId) => {
             FROM Requests r
             JOIN Payments p ON r.id = p.requestId
             WHERE r.userId = ${userId}
+            ORDER BY
+                p.paymentDate DESC
             `);
         return { errCode: 0, message: "Success", data: result.recordset };
 
