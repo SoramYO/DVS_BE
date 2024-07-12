@@ -765,7 +765,7 @@ const estimateDiamondValueByCertificate = async (certificateId) => {
         request.input('certificateId', sql.NVarChar(255), certificateId);
 
         const queryResult = await request.query(`
-            SELECT Results.price AS estimatedPrice
+            SELECT Results.price AS estimatedPrice , Requests.requestImage AS image
             FROM Diamonds
             JOIN Requests ON Diamonds.id = Requests.diamondId
             JOIN Results ON Requests.id = Results.requestId
