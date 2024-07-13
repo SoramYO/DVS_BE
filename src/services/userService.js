@@ -1537,7 +1537,7 @@ const getUserBill = async (userId) => {
     try {
         const pool = await sql.connect(config);
         const result = await pool.request().query(`
-            SELECT   r.paymentStatus, p.paymentAmount, p.paymentDate
+            SELECT   r.paymentStatus, p.paymentAmount, p.paymentDate, r.id
             FROM Requests r
             JOIN Payments p ON r.id = p.requestId
             WHERE r.userId = ${userId}
