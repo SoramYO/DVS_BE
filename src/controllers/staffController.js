@@ -126,7 +126,7 @@ const handleRequestApproval = async (req, res) => {
         if (result) {
             res.status(200).json({
                 errCode: 0,
-                message: 'Approval request submitted successfully'
+                message: message
             });
         } else {
             res.status(500).json({
