@@ -198,7 +198,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .query(existingQuery);
 
         if (existingResult.recordset[0].Count > 0) {
-            return { message: 'You have sent the request' };
+            return { message: 'You have already sent the request' };
         }
 
         // Get the latest processId
@@ -219,7 +219,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             INSERT INTO RequestProcesses (requestType, description, status, sender, processId, requestId)
             VALUES (@requestType, @description, @status, @sender, @processId, @requestId)
         `;
-        let result = await pool.request()
+        await pool.request()
             .input('requestId', sql.Int, requestId)
             .input('requestType', sql.NVarChar(255), requestType)
             .input('description', sql.NVarChar(1000), description)
@@ -228,7 +228,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .input('processId', sql.Int, processId)
             .query(insertQuery);
 
-        return { message: 'You have sent the request success' };
+        return { message: 'Approval request submitted successfully' };
     } catch (error) {
         console.error('Error in requestApproval:', error);
         throw error;
