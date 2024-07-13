@@ -889,9 +889,15 @@ const createNewRequest = async (data) => {
             // Commit the transaction if all queries succeed
             await transaction.commit();
 
-            await request.query(`
+            const paymentAmount = await request.query(`
+                SELECT s.price FROM Service s WHERE s.id = ${serviceId};
+            `);
+
+            await request
+                .input("paymentAmount", sql.Int, paymentAmount.recordset[0].price)
+                .query(`
                 INSERT INTO Payments (paymentAmount, paymentDate, requestId)
-                VALUES (0, GETDATE(), ${requestId});
+                VALUES (@paymentAmount, GETDATE(), ${requestId});
             `);
 
             return {
