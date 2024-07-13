@@ -72,10 +72,13 @@ const getRequestApproved = async () => {
             let pool = await sql.connect(config);
             let requestApproved = await pool.request()
                 .query(`
-                SELECT rp.id AS RequestProcessID, rp.requestId, rp.sender, rp.receiver, rp.status,rp.createdDate, rp.finishDate, rp.requestType, rp.description,
-                        r.requestImage, r.note, r.createdDate AS RequestCreatedDate, r.appointmentDate,
-                        a.firstName, a.lastName, a.email, a.phone, p.processStatus,
-                        b.firstName AS staffFirstName, b.lastName AS staffLastName
+                WITH RankedRequests AS (
+                SELECT  rp.id AS RequestProcessID,  rp.requestId,  rp.sender,  rp.receiver,  rp.status,
+                        rp.createdDate,  rp.finishDate,  rp.requestType,  rp.description, r.requestImage,
+                        r.note,  r.createdDate AS RequestCreatedDate,  r.appointmentDate, a.firstName,
+                        a.lastName,  a.email,  a.phone,  p.processStatus, b.firstName AS staffFirstName,
+                        b.lastName AS staffLastName,
+                    ROW_NUMBER() OVER (PARTITION BY rp.requestId ORDER BY rp.finishDate DESC) AS row_num
                 FROM
                     RequestProcesses rp
                 JOIN
@@ -89,8 +92,16 @@ const getRequestApproved = async () => {
                 WHERE
                     rp.requestType IN ('Sealing', 'Commitment')
                     AND rp.processId NOT IN (SELECT id FROM Processes WHERE processStatus = 'Done')
+                )
+                SELECT  RequestProcessID,  requestId,  sender,  receiver,  status, createdDate,
+                        finishDate,  requestType,  description, requestImage,  note,  RequestCreatedDate,
+                        appointmentDate, firstName,  lastName,  email,  phone,  processStatus, staffFirstName,  staffLastName
+                FROM
+                    RankedRequests
+                WHERE
+                    row_num = 1
                 ORDER BY
-                    rp.finishDate DESC;
+                    finishDate DESC;
                 `);
             resolve({ errorCode: 0, message: 'Get request approved successfully', data: requestApproved.recordset });
         } catch (error) {

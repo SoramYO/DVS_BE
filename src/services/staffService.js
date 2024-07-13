@@ -182,7 +182,26 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
     try {
         let pool = await sql.connect(config);
 
+        // Check for existing similar request
+        let existingQuery = `
+            SELECT COUNT(*) AS Count
+            FROM RequestProcesses
+            WHERE requestId = @requestId
+            AND requestType = @requestType
+            AND sender = @sender
+            AND status = 'Pending'
+        `;
+        let existingResult = await pool.request()
+            .input('requestId', sql.Int, requestId)
+            .input('requestType', sql.NVarChar(255), requestType)
+            .input('sender', sql.Int, staffId)
+            .query(existingQuery);
 
+        if (existingResult.recordset[0].Count > 0) {
+            return { message: 'You have sent the request' };
+        }
+
+        // Get the latest processId
         let processQuery = `
             SELECT TOP 1 processId
             FROM RequestProcesses
@@ -195,7 +214,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
 
         let processId = processResult.recordset[0].processId;
 
-
+        // Insert the new request process
         let insertQuery = `
             INSERT INTO RequestProcesses (requestType, description, status, sender, processId, requestId)
             VALUES (@requestType, @description, @status, @sender, @processId, @requestId)
@@ -215,6 +234,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
         throw error;
     }
 };
+
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
