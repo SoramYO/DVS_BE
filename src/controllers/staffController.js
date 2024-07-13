@@ -110,7 +110,6 @@ const handlePrintValuationReport = async (req, res) => {
         });
     }
 };
-
 const handleRequestApproval = async (req, res) => {
     try {
         const { requestId, requestType, description } = req.body;
@@ -121,12 +120,20 @@ const handleRequestApproval = async (req, res) => {
                 message: 'Invalid input parameters or Request ID or Request Type missing'
             });
         }
+
         let result = await staffService.requestApproval(req.user.id, requestId, requestType, description);
 
-        if (result) {
-            res.status(200).json({
+        if (result.message === 'You have already sent the request') {
+            return res.status(200).json({
                 errCode: 0,
-                message: message
+                message: result.message
+            });
+        }
+
+        if (result.message === 'Approval request submitted successfully') {
+            return res.status(200).json({
+                errCode: 0,
+                message: result.message
             });
         } else {
             res.status(500).json({
