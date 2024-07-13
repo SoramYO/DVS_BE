@@ -228,7 +228,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .input('processId', sql.Int, processId)
             .query(insertQuery);
 
-        return result.rowsAffected[0] > 0;
+        return { message: 'You have sent the request success' };
     } catch (error) {
         console.error('Error in requestApproval:', error);
         throw error;
