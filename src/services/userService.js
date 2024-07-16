@@ -384,10 +384,6 @@ let sendSubscriptionEmail = async (body) => {
                     color: #666666;
                     line-height: 1.6;
                 }
-                .content a {
-                    color: #4CAF50;
-                    text-decoration: none;
-                }
                 .footer {
                     text-align: center;
                     padding: 10px;
@@ -399,9 +395,13 @@ let sendSubscriptionEmail = async (body) => {
                     padding: 10px 20px;
                     margin: 20px 0;
                     background-color: #4CAF50;
-                    color: #ffffff;
+                    color: #000000;
                     text-decoration: none;
                     border-radius: 5px;
+                }
+                .button a {
+                    color: #000000;
+                    text-decoration: none;
                 }
             </style>
         </head>
@@ -416,7 +416,7 @@ let sendSubscriptionEmail = async (body) => {
                     <p>We are thrilled to have you on board. By subscribing to our newsletter, you will receive the latest updates, exclusive offers, and expert advice on diamonds directly to your inbox. Stay tuned for exciting news and promotions!</p>
                     <p>As a token of our appreciation, here's a special offer just for you:</p>
                     <p><a href="https://dvs-fe-soramyos-projects.vercel.app" class="button">Get Your Exclusive Offer</a></p>
-                    <p>If you have any questions, feel free to <a href="mailto:support@diamondvaluation.com">contact us</a>. We're here to help you find the perfect diamond.</p>
+                    <p>If you have any questions, feel free to <a href="mailto:diamondvaluation@gmail.com">contact us</a>. We're here to help you find the perfect diamond.</p>
                     <p>Best regards,<br>The Diamond Valuation Team</p>
                 </div>
                 <div class="footer">
