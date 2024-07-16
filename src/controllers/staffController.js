@@ -24,7 +24,7 @@ const handleApproveValuationRequest = async (req, res) => {
         if (isApproved) {
             return res.status(200).json({
                 errCode: 0,
-                message: 'Valuation request approved successfully',
+                message: 'Taken request successfully',
             });
         } else {
             return res.status(404).json({
