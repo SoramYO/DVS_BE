@@ -24,7 +24,8 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true
   },
-  path: '/socket.io/'
+  path: '/socket.io/',
+  addTrailingSlash: false,
 });
 
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
@@ -87,7 +88,7 @@ app.use(
 
 chat(io);
 
-initWebRoutes(app);
+initWebRoutes(app, io);
 
 // Database connection
 sql.connect(config).then(pool => {

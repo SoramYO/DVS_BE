@@ -4,8 +4,6 @@ module.exports = function (io) {
     let staff = new Set();
 
     io.on('connection', (socket) => {
-
-
         socket.on('initiate_chat', (user) => {
             socket.user = user;
             const chatId = socket.id;
