@@ -399,10 +399,6 @@ let sendSubscriptionEmail = async (body) => {
                     text-decoration: none;
                     border-radius: 5px;
                 }
-                .button a {
-                    color: #000000;
-                    text-decoration: none;
-                }
             </style>
         </head>
         <body>
@@ -415,13 +411,13 @@ let sendSubscriptionEmail = async (body) => {
                     <p>Dear Valued Customer,</p>
                     <p>We are thrilled to have you on board. By subscribing to our newsletter, you will receive the latest updates, exclusive offers, and expert advice on diamonds directly to your inbox. Stay tuned for exciting news and promotions!</p>
                     <p>As a token of our appreciation, here's a special offer just for you:</p>
-                    <p><a href="https://dvs-fe-soramyos-projects.vercel.app" class="button">Get Your Exclusive Offer</a></p>
-                    <p>If you have any questions, feel free to <a href="mailto:diamondvaluation@gmail.com">contact us</a>. We're here to help you find the perfect diamond.</p>
+                    <p><a style=" color: #ffffff; background-color: #007bff; padding: 10px 20px;" href="https://dvs-fe-soramyos-projects.vercel.app" class="button">Get Your Exclusive Offer</a></p>
+                    <p>If you have any questions, feel free to <a  href="mailto:diamondvaluation@gmail.com">contact us</a>. We're here to help you find the perfect diamond.</p>
                     <p>Best regards,<br>The Diamond Valuation Team</p>
                 </div>
                 <div class="footer">
                     <p>&copy; 2024 Diamond Valuation System. All rights reserved.</p>
-                    <p>123 Diamond Street, Suite 100, Jewelry City, Country</p>
+                    <p>D1 Street Saigon Hi-tech Park, Ho Chi Minh City, Vietnam</p>
                 </div>
             </div>
         </body>
