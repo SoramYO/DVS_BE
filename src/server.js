@@ -82,7 +82,7 @@ const io = new Server(server, {
     credentials: true
   },
   addTrailingSlash: false,
-  path: '/socket.io',
+  path: '/socket.io/',
 });
 
 
