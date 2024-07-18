@@ -76,13 +76,15 @@ app.use(
 );
 
 const io = new Server(server, {
-  path: '/socket',
+  path: '/socket.io',
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  addTrailingSlash: false,
 });
+
 
 chat(io);
 
