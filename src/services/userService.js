@@ -1523,7 +1523,7 @@ const getAllServices = async () => {
     try {
         const pool = await sql.connect(config);
         const result = await pool.request().query(`
-            SELECT id, serviceName, price
+            SELECT id as serviceId, serviceName, description, price
             FROM Services
             WHERE status = 1;
         `);
