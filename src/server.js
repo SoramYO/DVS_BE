@@ -8,27 +8,12 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('swagger-jsdoc');
 var config = require('../src/config/dbconfig');
 const sql = require('mssql');
-const http = require('http');
-const { Server } = require('socket.io');
-const chat = require('./common/socket'); // Import chat module
-
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-  path: '/socket.io/',
-  addTrailingSlash: false,
-});
-
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
+const CSS_URL =
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -53,11 +38,20 @@ const swaggerOptions = {
   apis: ['./src/routes/web.js'],
 };
 
+// app.use(function (req, res, next) {
+//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000/');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+//   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+//   res.setHeader('Access-Control-Allow-Credentials', true);
+//   next();
+// })
+
 const swaggerDocs = swaggerDocument(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
 
 const allowedOrigins = [
   'http://localhost:3000',
@@ -85,10 +79,7 @@ app.use(
   })
 );
 
-
-chat(io);
-
-initWebRoutes(app, io);
+initWebRoutes(app);
 
 // Database connection
 sql.connect(config).then(pool => {
@@ -101,10 +92,7 @@ sql.connect(config).then(pool => {
   console.error('Database connection failed: ', err);
 });
 
-// Initialize chat functionality
-
-
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log('Diamond API is running at ' + PORT);
 });
 

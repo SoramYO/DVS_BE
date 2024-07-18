@@ -1,11 +1,36 @@
-module.exports = function (io) {
-    var users = [];
+const { Server } = require('socket.io');
+
+const SocketHandler = (req, res) => {
+    if (res.socket.server.io) {
+        console.log('Socket is already running');
+        res.end();
+        return;
+    }
+
+    const io = new Server(res.socket.server, {
+        path: '/api/socket',
+        addTrailingSlash: false,
+        cors: {
+            origin: [
+                'http://localhost:3000',
+                'https://diamond-dashboard-one.vercel.app',
+                'https://dvs-fe-soramyos-projects.vercel.app',
+                'https://dvs-be-sooty.vercel.app',
+                'https://dvs-fe.vercel.app',
+                'https://dvs-fe-git-main-soramyos-projects.vercel.app',
+                'http://localhost:8080',
+            ],
+            methods: ["GET", "POST"],
+            credentials: true,
+        }
+    });
+
+    res.socket.server.io = io;
+
     let activeChats = new Map();
     let staff = new Set();
 
     io.on('connection', (socket) => {
-
-
         socket.on('initiate_chat', (user) => {
             socket.user = user;
             const chatId = socket.id;
@@ -40,7 +65,6 @@ module.exports = function (io) {
                 socket.join(chatId);
                 const chatData = activeChats.get(chatId);
                 io.to(chatId).emit('staff_joined', { message: `${staffData.firstName} has joined the chat` });
-                // Send chat history to staff
                 socket.emit('chat_history', { chatId, messages: chatData.messages });
             }
         });
@@ -51,7 +75,6 @@ module.exports = function (io) {
                 const chatData = activeChats.get(chatId);
                 chatData.messages.push({ sender, message });
                 io.to(chatId).emit('chat_message', { sender, message });
-                // Update message count for staff
                 io.to('staffRoom').emit('update_message_count', { chatId, count: chatData.messages.length });
             }
         });
@@ -81,4 +104,9 @@ module.exports = function (io) {
             }
         });
     });
+
+    console.log('Setting up socket');
+    res.end();
 };
+
+module.exports = SocketHandler;

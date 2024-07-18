@@ -8,23 +8,6 @@
     ],
     "routes": [
         {
-            "src": "/socket.io/(.*)",
-            "dest": "/src/server.js",
-            "methods": [
-                "GET",
-                "POST"
-            ],
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-            }
-        },
-        {
-            "src": "/api/(.*)",
-            "dest": "src/server.js"
-        },
-        {
             "src": "/(.*)",
             "dest": "/src/server.js",
             "methods": [
@@ -36,7 +19,7 @@
                 "OPTIONS"
             ],
             "headers": {
-                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Origin": "http://localhost:3000",
                 "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
             }
