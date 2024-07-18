@@ -76,6 +76,7 @@ app.use(
 );
 
 const io = new Server(server, {
+  path: '/socket',
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
