@@ -423,8 +423,6 @@ const handleGetUserService = async (req, res) => {
     const services = await userService.getAllServices();
 
     return res.status(200).json({
-      errCode: 0,
-      message: 'Services retrieved successfully',
       services
     });
   } catch (error) {
