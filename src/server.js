@@ -17,6 +17,7 @@ dotenv.config();
 const PORT = process.env.PORT || 8080;
 const app = express();
 const server = http.createServer(app);
+var io = require('socket.io')(server)
 
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
 
@@ -75,15 +76,14 @@ app.use(
   })
 );
 
-const io = new Server(server, {
-  path: '/socket.io',
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-  addTrailingSlash: false,
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: allowedOrigins,
+//     methods: ["GET", "POST"],
+//     credentials: true
+//   },
+//   addTrailingSlash: false,
+// });
 
 
 chat(io);
