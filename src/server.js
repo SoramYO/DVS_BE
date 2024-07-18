@@ -16,7 +16,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-const server = app.listen(process.env.PORT || 8080);
+const server = http.createServer(app);
 
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
 
@@ -75,7 +75,7 @@ app.use(
   })
 );
 
-io = new Server(server, {
+const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
@@ -104,8 +104,8 @@ sql.connect(config).then(pool => {
 // Initialize chat functionality
 
 
-// server.listen(PORT, () => {
-//   console.log('Diamond API is running at ' + PORT);
-// });
+server.listen(PORT, () => {
+  console.log('Diamond API is running at ' + PORT);
+});
 
 module.exports = app;
