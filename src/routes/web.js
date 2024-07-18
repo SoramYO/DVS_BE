@@ -3644,7 +3644,7 @@ let initWebRoutes = (app) => {
 
   router.get("/user-bill", verifyToken, userController.handleGetUserBill)
 
-  router.get("/user-service", verifyToken, userController.handleGetUserService);
+  router.get("/user-service", userController.handleGetUserService);
 
   router.get("/staff-approval", verifyToken, staffController.handleGetStaffApproval);
 
