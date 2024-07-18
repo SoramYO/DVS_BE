@@ -80,8 +80,12 @@ const io = new Server(server, {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  addTrailingSlash: false
+
 });
+
+chat(io);
 
 initWebRoutes(app);
 
@@ -97,7 +101,7 @@ sql.connect(config).then(pool => {
 });
 
 // Initialize chat functionality
-chat(io);
+
 
 server.listen(PORT, () => {
   console.log('Diamond API is running at ' + PORT);
