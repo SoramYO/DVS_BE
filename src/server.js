@@ -75,18 +75,14 @@ app.use(
   })
 );
 
-// const io = new Server(server, {
-//   path: '/socket',
-//   cors: {
-//     origin: allowedOrigins,
-//     methods: ["GET", "POST"],
-//     credentials: true
-//   },
-//   addTrailingSlash: false
-
-// });
-const io = new Server(res.socket.server, { path: '/socket', addTrailingSlash: false });
-res.socket.server.io = io;
+const io = new Server(server, {
+  path: '/socket',
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 chat(io);
 
