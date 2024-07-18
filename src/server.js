@@ -18,6 +18,15 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const server = http.createServer(app);
 
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  path: '/socket.io/'
+});
+
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.9/swagger-ui.min.css";
 
 const swaggerOptions = {
@@ -74,16 +83,6 @@ app.use(
     methods: "GET,POST,PUT,DELETE",
   })
 );
-
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-  addTrailingSlash: false,
-  path: '/socket.io/',
-});
 
 
 chat(io);
