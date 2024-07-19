@@ -50,10 +50,7 @@ const approveRequest = async (receiver, requestId, status) => {
                 WHERE requestId = @requestId
                 AND receiver IS NULL
                 AND requestType IN ('Sealing', 'Commitment')
-
-                UPDATE RequestProcesses
-                SET processId = @processId
-                WHERE requestId = @requestId
+                AND processId NOT IN (SELECT id FROM Processes WHERE processStatus = 'Done');
             `);
 
 

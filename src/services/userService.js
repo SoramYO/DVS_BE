@@ -829,9 +829,16 @@ const createNewRequest = async (data) => {
             serviceId
         } = data;
 
+        if (!userId || !serviceId) {
+            return {
+                errCode: 2,
+                message: 'Missing required fields'
+            };
+        }
+
         // Connect to the database
         const pool = await sql.connect(config);
-        const request = pool.request();
+
 
         // Start a transaction
         const transaction = new sql.Transaction(pool);
@@ -882,20 +889,18 @@ const createNewRequest = async (data) => {
                 .query(insertRequestProcessQuery);
             const requestProcessId = requestProcessResult.recordset[0].requestProcessId;
 
-            // Commit the transaction if all queries succeed
-            await transaction.commit();
-
-            const paymentAmount = await request.query(`
-                SELECT s.price FROM Service s WHERE s.id = ${serviceId};
+            const paymentAmountResult = await transaction.request().query(`
+                SELECT price FROM Services WHERE id = ${serviceId};
             `);
+            const paymentAmount = paymentAmountResult.recordset[0].price;
 
-            await request
-                .input("paymentAmount", sql.Int, paymentAmount.recordset[0].price)
+            await transaction.request()
+                .input("paymentAmount", sql.Int, paymentAmount)
                 .query(`
                 INSERT INTO Payments (paymentAmount, paymentDate, requestId)
                 VALUES (@paymentAmount, GETDATE(), ${requestId});
-            `);
-
+                `);
+            await transaction.commit();
             return {
                 errCode: 0,
                 message: "Create new request success",

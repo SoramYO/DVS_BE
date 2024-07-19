@@ -201,23 +201,10 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             return { message: 'You have already sent the request' };
         }
 
-        // Get the latest processId
-        let processQuery = `
-            SELECT TOP 1 processId
-            FROM RequestProcesses
-            WHERE requestId = @requestId
-            ORDER BY COALESCE(finishDate, createdDate) DESC
-        `;
-        let processResult = await pool.request()
-            .input('requestId', sql.Int, requestId)
-            .query(processQuery);
-
-        let processId = processResult.recordset[0].processId;
-
         // Insert the new request process
         let insertQuery = `
             INSERT INTO RequestProcesses (requestType, description, status, sender, processId, requestId)
-            VALUES (@requestType, @description, @status, @sender, @processId, @requestId)
+            VALUES (@requestType, @description, @status, @sender, 19, @requestId)
         `;
         await pool.request()
             .input('requestId', sql.Int, requestId)
@@ -225,7 +212,6 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .input('description', sql.NVarChar(1000), description)
             .input('status', sql.NVarChar(50), 'Pending')
             .input('sender', sql.Int, staffId)
-            .input('processId', sql.Int, processId)
             .query(insertQuery);
 
         return { message: 'Approval request submitted successfully' };
