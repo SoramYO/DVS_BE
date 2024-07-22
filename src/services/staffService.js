@@ -651,9 +651,35 @@ const getTakenRequestByStaff = async (staffId) => {
         let result = await pool.request()
             .input('staffId', sql.Int, staffId)
             .query(`
-                SELECT  r.id AS requestId,  r.requestImage,  r.note,  r.createdDate,
-                    (SELECT MAX(finishDate)   FROM RequestProcesses   WHERE requestId = r.id)
-                    AS finishDate,  r.paymentStatus,  s.serviceName,  rp.status,  p.processStatus
+                WITH LatestRequestProcesses AS (
+                    SELECT
+                        rp.requestId,
+                        MAX(rp.createdDate) AS latestCreatedDate
+                    FROM
+                        RequestProcesses rp
+                    WHERE rp.requestType like 'Valuated'
+                    GROUP BY
+                        rp.requestId
+                ),
+                LatestFinishDates AS (
+                    SELECT
+                        rp.requestId,
+                        rp.finishDate
+                    FROM
+                        RequestProcesses rp
+                    INNER JOIN
+                        LatestRequestProcesses lrp ON rp.requestId = lrp.requestId AND rp.createdDate = lrp.latestCreatedDate
+                )
+                SELECT
+                    r.id AS requestId,
+                    r.requestImage,
+                    r.note,
+                    r.createdDate,
+                    lfd.finishDate,
+                    r.paymentStatus,
+                    s.serviceName,
+                    rp.status,
+                    p.processStatus
                 FROM
                     Requests r
                 JOIN
@@ -662,8 +688,10 @@ const getTakenRequestByStaff = async (staffId) => {
                     Processes p ON rp.processId = p.id
                 JOIN
                     Services s ON r.serviceId = s.id
+                JOIN
+                    LatestFinishDates lfd ON r.id = lfd.requestId
                 WHERE
-                    rp.receiver = 4
+                    rp.receiver = @staffId
                     AND rp.status = 'TakeByConsulting'
                 ORDER BY
                     r.createdDate DESC;
