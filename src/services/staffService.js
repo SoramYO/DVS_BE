@@ -785,6 +785,25 @@ const getStaffApproval = async (staffId) => {
         throw error;
     }
 }
+
+const getFeedback = async () => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query(`
+                SELECT f.id AS feedbackId, f.customerName, f.email ,f.feedbackText, f.createdAt
+                FROM
+                    Feedback f
+                ORDER BY
+                    f.createdAt DESC;
+            `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getFeedback:', error);
+        throw error;
+    }
+}
 module.exports = {
     takeRequest: takeRequest,
     getRequestTakenByValuation: getRequestTakenByValuation,
@@ -805,5 +824,6 @@ module.exports = {
     getFinishedRequest: getFinishedRequest,
     customerTookSample: customerTookSample,
     getStaffApproval: getStaffApproval,
+    getFeedback: getFeedback
 
 }

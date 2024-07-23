@@ -515,6 +515,24 @@ const handleGetStaffApproval = async (req, res) => {
     }
 }
 
+const handleGetFeedback = async (req, res) => {
+    try {
+        const feedbacks = await staffService.getFeedback();
+
+        res.status(200).json({
+            errCode: 0,
+            message: 'Get feedback successfully',
+            data: feedbacks
+        });
+    } catch (error) {
+        console.error('Error in managerController.handleGetFeedback:', error);
+        return res.status(500).json({
+            errCode: -1,
+            message: 'Error from server',
+        });
+    }
+}
+
 
 module.exports = {
     handleApproveValuationRequest: handleApproveValuationRequest,
@@ -536,5 +554,5 @@ module.exports = {
     handleGetFinishedRequest: handleGetFinishedRequest,
     handleCustomerTookSample: handleCustomerTookSample,
     handleGetStaffApproval: handleGetStaffApproval,
-
+    handleGetFeedback: staffService.getFeedback
 }
