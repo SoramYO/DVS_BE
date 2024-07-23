@@ -554,5 +554,5 @@ module.exports = {
     handleGetFinishedRequest: handleGetFinishedRequest,
     handleCustomerTookSample: handleCustomerTookSample,
     handleGetStaffApproval: handleGetStaffApproval,
-    handleGetFeedback: staffService.getFeedback
+    handleGetFeedback: handleGetFeedback
 }
