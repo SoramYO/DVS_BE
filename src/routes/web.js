@@ -3652,6 +3652,7 @@ let initWebRoutes = (app) => {
 
   router.get("/valuationStaff-static", verifyToken, adminController.handleGetValuationStaffStatic);
 
+  router.get("/get-feedback", verifyToken, staffController.handleGetFeedback);
   router.get("/icon", (req, res) => {
     res.send('😀😃😄😁😆😅🤣😂');
   });
