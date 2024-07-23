@@ -201,10 +201,23 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             return { message: 'You have already sent the request' };
         }
 
+        // Get the latest processId
+        let processQuery = `
+            SELECT TOP 1 processId
+            FROM RequestProcesses
+            WHERE requestId = @requestId
+            ORDER BY COALESCE(finishDate, createdDate) DESC
+        `;
+        let processResult = await pool.request()
+            .input('requestId', sql.Int, requestId)
+            .query(processQuery);
+
+        let processId = processResult.recordset[0].processId;
+
         // Insert the new request process
         let insertQuery = `
             INSERT INTO RequestProcesses (requestType, description, status, sender, processId, requestId)
-            VALUES (@requestType, @description, @status, @sender, 19, @requestId)
+            VALUES (@requestType, @description, @status, @sender, @processId, @requestId)
         `;
         await pool.request()
             .input('requestId', sql.Int, requestId)
@@ -212,6 +225,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .input('description', sql.NVarChar(1000), description)
             .input('status', sql.NVarChar(50), 'Pending')
             .input('sender', sql.Int, staffId)
+            .input('processId', sql.Int, processId)
             .query(insertQuery);
 
         return { message: 'Approval request submitted successfully' };
@@ -651,35 +665,7 @@ const getTakenRequestByStaff = async (staffId) => {
         let result = await pool.request()
             .input('staffId', sql.Int, staffId)
             .query(`
-                WITH LatestRequestProcesses AS (
-                    SELECT
-                        rp.requestId,
-                        MAX(rp.createdDate) AS latestCreatedDate
-                    FROM
-                        RequestProcesses rp
-                    WHERE rp.requestType like 'Valuated'
-                    GROUP BY
-                        rp.requestId
-                ),
-                LatestFinishDates AS (
-                    SELECT
-                        rp.requestId,
-                        rp.finishDate
-                    FROM
-                        RequestProcesses rp
-                    INNER JOIN
-                        LatestRequestProcesses lrp ON rp.requestId = lrp.requestId AND rp.createdDate = lrp.latestCreatedDate
-                )
-                SELECT
-                    r.id AS requestId,
-                    r.requestImage,
-                    r.note,
-                    r.createdDate,
-                    lfd.finishDate,
-                    r.paymentStatus,
-                    s.serviceName,
-                    rp.status,
-                    p.processStatus
+                SELECT r.id AS requestId, r.requestImage,  r.note,  r.createdDate,rp.finishDate,  r.paymentStatus, s.serviceName, rp.status, p.processStatus
                 FROM
                     Requests r
                 JOIN
@@ -688,8 +674,6 @@ const getTakenRequestByStaff = async (staffId) => {
                     Processes p ON rp.processId = p.id
                 JOIN
                     Services s ON r.serviceId = s.id
-                JOIN
-                    LatestFinishDates lfd ON r.id = lfd.requestId
                 WHERE
                     rp.receiver = @staffId
                     AND rp.status = 'TakeByConsulting'
