@@ -1,5 +1,0 @@
-// .babelrc
-{
-    "presets": ["@babel/preset-env"]
-    // Thêm các cấu hình khác nếu cần thiết
-}
