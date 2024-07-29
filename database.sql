@@ -15,7 +15,7 @@ CREATE TABLE Account
     phone NVARCHAR(255) NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     status INT NOT NULL,
-    roleId INT,
+    roleId INT NOT NULL,
     FOREIGN KEY (roleId) REFERENCES Role(id)
 );
 
@@ -39,8 +39,7 @@ CREATE TABLE Diamonds
 CREATE TABLE Processes
 (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    processStatus NVARCHAR(255) NOT NULL,
-    actor NVARCHAR(255) NOT NULL
+    processStatus NVARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Services
@@ -58,9 +57,9 @@ CREATE TABLE Requests
     createdDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     appointmentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     paymentStatus NVARCHAR(255) NOT NULL,
-    userId INT,
-    diamondId INT,
-    serviceId INT,
+    userId INT NOT NULL,
+    diamondId INT NOT NULL,
+    serviceId INT NOT NULL,
     FOREIGN KEY (userId) REFERENCES Account(id),
     FOREIGN KEY (diamondId) REFERENCES Diamonds(id),
     FOREIGN KEY (serviceId) REFERENCES Services(id)
@@ -71,7 +70,7 @@ CREATE TABLE Results
     id INT IDENTITY(1,1) PRIMARY KEY,
     price FLOAT NOT NULL,
     companyName NVARCHAR(255) NOT NULL,
-    requestId INT,
+    requestId INT NOT NULL UNIQUE,
     dateValued DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (requestId) REFERENCES Requests(id)
 );
@@ -85,7 +84,7 @@ CREATE TABLE Payments
     FOREIGN KEY (requestId) REFERENCES Requests(id)
 );
 
-CREATE TABLE PasswordResetTokens
+CREATE TABLE AccountTokens
 (
     id INT IDENTITY(1,1) PRIMARY KEY,
     userId INT,
@@ -125,36 +124,7 @@ CREATE TABLE RequestProcesses
     FOREIGN KEY (requestId) REFERENCES Requests(id)
 );
 
-CREATE TABLE SealingReports
-(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    customerId INT NOT NULL,
-    requestId INT NOT NULL,
-    sealingDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    sealedBy NVARCHAR(255) NOT NULL,
-    notes NVARCHAR(1000),
-    attachedFile NVARCHAR(255), -- Đường dẫn file đính kèm
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customerId) REFERENCES Account(id),
-    FOREIGN KEY (requestId) REFERENCES Requests(id)
-);
-
-CREATE TABLE CommitmentForms
-(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    customerId INT NOT NULL,
-    requestId INT NOT NULL,
-    commitmentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    notes NVARCHAR(1000),
-    attachedFile NVARCHAR(255), -- Đường dẫn file đính kèm
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customerId) REFERENCES Account(id),
-    FOREIGN KEY (requestId) REFERENCES Requests(id)
-);
-
-
-
--- Initial data insertion for Role, Account, Diamonds, Processes, Services, Requests, Results, Payments, PasswordResetTokens, Feedback
+-- Insert data
 INSERT INTO Role
     (name)
 VALUES
@@ -168,75 +138,38 @@ VALUES
 INSERT INTO Account
     (username, password, firstName, lastName, email, phone, createdAt, status, roleId)
 VALUES
-    ('admin', 'admin@123', 'Admin', 'User', 'admin@example.com', '123456789', GETDATE(), 1, 1),
-    ('manager', 'manager@123', 'Manager', 'User', 'manager@example.com', '987654321', GETDATE(), 1, 2),
-    ('consultant1', 'consultant1@123', 'Consultant', 'One', 'consultant1@example.com', '111222333', GETDATE(), 1, 3),
-    ('consultant2', 'consultant2@123', 'Consultant', 'Two', 'consultant2@example.com', '444555666', GETDATE(), 1, 3),
-    ('valuator1', 'valuator1@123', 'Valuator', 'One', 'valuator1@example.com', '777888999', GETDATE(), 1, 4),
-    ('valuator2', 'valuator2@123', 'Valuator', 'Two', 'valuator2@example.com', '000111222', GETDATE(), 1, 4),
-    ('customer1', 'customer1@123', 'Customer', 'One', 'customer1@example.com', '333444555', GETDATE(), 1, 5),
-    ('customer2', 'customer2@123', 'Customer', 'Two', 'customer2@example.com', '666777888', GETDATE(), 1, 5),
-    ('guest1', 'guest1@123', 'Guest', 'One', 'guest1@example.com', '999000111', GETDATE(), 1, 6),
-    ('guest2', 'guest2@123', 'Guest', 'Two', 'guest2@example.com', '222333444', GETDATE(), 1, 6);
+    ('admin', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Admin', 'User', 'admin@example.com', '123456789', GETDATE(), 1, 1),
+    ('manager', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Manager', 'User', 'manager@example.com', '987654321', GETDATE(), 1, 2),
+    ('con1', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Consultant', 'One', 'consultant1@example.com', '111222333', GETDATE(), 1, 3),
+    ('con2', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Consultant', 'Two', 'consultant2@example.com', '444555666', GETDATE(), 1, 3),
+    ('val1', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Valuator', 'One', 'valuator1@example.com', '777888999', GETDATE(), 1, 4),
+    ('val2', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Valuator', 'Two', 'valuator2@example.com', '000111222', GETDATE(), 1, 4),
+    ('customer1', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Customer', 'One', 'customer1@example.com', '333444555', GETDATE(), 1, 5),
+    ('customer2', '$2a$10$cR7d7r7RjUd6XyxumHnz/uIP56jic4SBDOJKC0GEtqjg.EWmPmtba', 'Customer', 'Two', 'customer2@example.com', '666777888', GETDATE(), 1, 5);
 
-INSERT INTO Diamonds
-    (certificateId, proportions, diamondOrigin, caratWeight, measurements, polish, fluorescence, color, cut, clarity, symmetry, shape)
-VALUES
-    ('CER001', 'Ideal', 'Africa', 1.5, '6.5x6.5x4.2 mm', 'Excellent', 'None', 'D', 'Round', 'IF', 'Excellent', 'Round'),
-    ('CER002', 'Good', 'South America', 2.1, '7.2x7.2x4.5 mm', 'Very Good', 'Faint', 'E', 'Princess', 'VVS1', 'Very Good', 'Princess'),
-    ('CER003', 'Very Good', 'Australia', 1.8, '6.8x6.8x4.3 mm', 'Good', 'Medium', 'F', 'Emerald', 'VS2', 'Good', 'Emerald');
+INSERT INTO Processes (processStatus) VALUES ( N'Booked Appointment');
+INSERT INTO Processes (processStatus) VALUES ( N'Received');
+INSERT INTO Processes (processStatus) VALUES ( N'Approved');
+INSERT INTO Processes (processStatus) VALUES ( N'Ready for valuation');
+INSERT INTO Processes (processStatus) VALUES ( N'Sent to Valuation');
+INSERT INTO Processes (processStatus) VALUES ( N'Completed');
+INSERT INTO Processes (processStatus) VALUES ( N'Start Valuated');
+INSERT INTO Processes (processStatus) VALUES ( N'Valuated');
+INSERT INTO Processes (processStatus) VALUES ( N'Commitment');
+INSERT INTO Processes (processStatus) VALUES ( N'Sealing');
+INSERT INTO Processes (processStatus) VALUES ( N'Result Sent to Customer');
+INSERT INTO Processes (processStatus) VALUES ( N'Received for Valuation');
+INSERT INTO Processes (processStatus) VALUES ( N'Sent to Consulting');
+INSERT INTO Processes (processStatus) VALUES ( N'Unprocessed');
+INSERT INTO Processes (processStatus) VALUES ( N'Done');
+INSERT INTO Processes (processStatus) VALUES ( N'Rejected Commitment');
+INSERT INTO Processes (processStatus) VALUES ( N'Rejected Sealing');
+INSERT INTO Processes (processStatus) VALUES ( N'Wait Manager Response');
 
-INSERT INTO Processes
-    (processStatus, actor)
-VALUES
-    ('Called', 'Consulting Staff'),
-    ('Received', 'Consulting Staff'),
-    ('Approved', 'Consulting Staff'),
-    ('In Progress', 'Valuation Staff'),
-    ('Sent to Valuation', 'Consulting Staff'),
-    ('Completed', 'Manager'),
-    ('Start Valuated', 'Valuation Staff'),
-    ('Valuated', 'Valuation Staff'),
-    ('Commitment', 'Consulting Staff'),
-    ('Sealing', 'Consulting Staff'),
-    ('Result Sent to Customer', 'Consulting Staff'),
-    ('Received for Valuation', 'Valuation Staff'),
-    ('Sent to Consulting', 'Valuation Staff');
-
-INSERT INTO Services
-    (price, serviceName)
-VALUES
-    ('$100', 'Basic Valuation'),
-    ('$200', 'Advanced Valuation'),
-    ('$50', 'Diamond Inspection');
-
-INSERT INTO Requests
-    (requestImage, note, createdDate, appointmentDate, paymentStatus, userId, diamondId, serviceId)
-VALUES
-    ('image1.jpg', 'Urgent request', GETDATE(), GETDATE(), 'Pending', 7, 1, 2),
-    ('image2.jpg', 'Standard request', GETDATE(), GETDATE(), 'Paid', 8, 2, 3),
-    ('image3.jpg', 'Regular request', GETDATE(), GETDATE(), 'Pending', 9, 3, 1);
-
-INSERT INTO Results
-    (price, companyName, requestId)
-VALUES
-    (150.0, 'Diamond Valuations Inc.', 1),
-    (220.0, 'Gem Experts Ltd.', 2),
-    (90.0, 'Certified Diamonds', 3);
-
-INSERT INTO Payments
-    (paymentAmount, paymentDate, requestId)
-VALUES
-    (100.0, GETDATE(), 1),
-    (200.0, GETDATE(), 2),
-    (50.0, GETDATE(), 3);
-INSERT INTO PasswordResetTokens
-    (userId, token, expiryDate)
-VALUES
-    (7, 'abc123xyz', DATEADD(DAY, 1, GETDATE())),
-    (8, 'def456uvw', DATEADD(DAY, 1, GETDATE())),
-    (9, 'ghi789rst', DATEADD(DAY, 1, GETDATE()));
-
+INSERT INTO Services (price, serviceName, status, description) VALUES (100, N'Basic Valuation', 1, N'Standard diamond valuation service suitable for most diamonds in the world.');
+INSERT INTO Services (price, serviceName, status, description) VALUES (200, N'Advanced Valuation', 1, N'Comprehensive valuation service including detailed analysis and report.');
+INSERT INTO Services (price, serviceName, status, description) VALUES (50, N'Diamond Inspection', 1, N'Quick inspection service to assess diamond quality and characteristics.');
+INSERT INTO Services (price, serviceName, status, description) VALUES (1000, N'Diamond Valuation Request', 1, N'Service for specific or complex valuation requests.');
 
 INSERT INTO Feedback
     (userId, requestId, customerName, email, feedbackText, createdAt)
@@ -245,15 +178,7 @@ VALUES
     (2, 2, 'Jane Smith', 'jane.smith@example.com', 'Very satisfied with the diamond cleaning service.', GETDATE()),
     (null , null, 'Son', 'ngoxuanson121@gmail.com', N'làm ăn tốt đấy', GETDATE())
 
-INSERT INTO RequestProcesses
-    (requestType, createdDate, finishDate, description, status, requestId, staffId, receiver, processId)
-VALUES
-    ('Valuation', GETDATE(), GETDATE(), 'Basic valuation service', 'Completed', 1, 5, 2, 6),
-    ('Inspection', GETDATE(), GETDATE(), 'Diamond inspection service', 'Completed', 2, 6, 2, 6),
-    ('Valuation', GETDATE(), GETDATE(), 'Advanced valuation service', 'Completed', 3, 5, 2, 6);
-
-CREATE TABLE diamond_price
-(
+CREATE TABLE diamond_price (
     weightRange VARCHAR(20) NOT NULL,
     color CHAR(1) NOT NULL,
     [IF] DECIMAL(4, 2),
@@ -280,10 +205,8 @@ CREATE TABLE diamond_price
     PRIMARY KEY
     (weightRange, color)
 );
-INSERT
-INTO diamond_price
-    (weightRange, color, [IF], VVS1, VVS2, VS1, VS2, SI1, SI2, SI3, I1, I2, I3)
-VALUES
+
+INSERT INTO diamond_price (weightRange, color, [IF], VVS1, VVS2, VS1, VS2, SI1, SI2, SI3, I1, I2, I3) VALUES
     ('0.01-0.03' , 'D'  , 6.5, 6.3, 6.1, 5.9, 5.7, 5.5, 5.3, 5.1, 4.9, 4.7, 4.5 ),
     ('0.01-0.03' , 'E'  , 6.4, 6.2, 6.0, 5.8, 5.6, 5.4, 5.2, 5.0, 4.8, 4.6, 4.4 ),
     ('0.01-0.03' , 'F'  , 6.3, 6.1, 5.9, 5.7, 5.5, 5.3, 5.1, 4.9, 4.7, 4.5, 4.3 ),

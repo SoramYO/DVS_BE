@@ -201,18 +201,10 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             return { message: 'You have already sent the request' };
         }
 
-        // Get the latest processId
-        let processQuery = `
-            SELECT TOP 1 processId
-            FROM RequestProcesses
-            WHERE requestId = @requestId
-            ORDER BY COALESCE(finishDate, createdDate) DESC
-        `;
-        let processResult = await pool.request()
-            .input('requestId', sql.Int, requestId)
-            .query(processQuery);
+        let processId = await pool.request()
+            .query(`SELECT id FROM Processes WHERE processStatus = 'Wait Manager Response'`);
 
-        let processId = processResult.recordset[0].processId;
+
 
         // Insert the new request process
         let insertQuery = `
@@ -225,7 +217,7 @@ const requestApproval = async (staffId, requestId, requestType, description) => 
             .input('description', sql.NVarChar(1000), description)
             .input('status', sql.NVarChar(50), 'Pending')
             .input('sender', sql.Int, staffId)
-            .input('processId', sql.Int, processId)
+            .input('processId', sql.Int, processId.recordset[0].id)
             .query(insertQuery);
 
         return { message: 'Approval request submitted successfully' };
@@ -769,6 +761,25 @@ const getStaffApproval = async (staffId) => {
         throw error;
     }
 }
+
+const getFeedback = async () => {
+    try {
+        let pool = await sql.connect(config);
+        let result = await pool.request()
+            .query(`
+                SELECT f.id AS feedbackId, f.customerName, f.email ,f.feedbackText, f.createdAt
+                FROM
+                    Feedback f
+                ORDER BY
+                    f.createdAt DESC;
+            `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in staffService.getFeedback:', error);
+        throw error;
+    }
+}
 module.exports = {
     takeRequest: takeRequest,
     getRequestTakenByValuation: getRequestTakenByValuation,
@@ -789,5 +800,6 @@ module.exports = {
     getFinishedRequest: getFinishedRequest,
     customerTookSample: customerTookSample,
     getStaffApproval: getStaffApproval,
+    getFeedback: getFeedback
 
 }
