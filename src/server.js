@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const initWebRoutes = require('./routes/web');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('swagger-jsdoc');
+const swaggerDocument = require('./swagger-output.json');
 var config = require('../src/config/dbconfig');
 const sql = require('mssql');
 dotenv.config();
@@ -46,8 +46,8 @@ const swaggerOptions = {
 //   next();
 // })
 
-const swaggerDocs = swaggerDocument(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL }));
+// const swaggerDocs = swaggerDocument(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { customCssUrl: CSS_URL }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
