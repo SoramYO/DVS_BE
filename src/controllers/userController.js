@@ -25,7 +25,7 @@ let handleLogin = async (req, res) => {
       });
     } else {
       const accessToken = jwt.sign(
-        { id: userData.user.id, role: userData.user.role },
+        { id: userData.user._id, role: userData.user.roleId.name },
         process.env.ACCESS_TOKEN_SECRET
       );
 
@@ -91,6 +91,7 @@ let handleRegister = async (req, res) => {
 
 let handleForgotPassword = async (req, res) => {
   let email = req.body.email;
+  
   if (!email) {
     return res.status(400).json({
       errCode: 1,

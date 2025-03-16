@@ -81,16 +81,27 @@ app.use(
 
 initWebRoutes(app);
 
-// Database connection
-sql.connect(config).then(pool => {
-  if (pool.connected) {
-    console.log('Connected to database');
-  } else {
-    console.log('Failed to connect to database');
-  }
-}).catch(err => {
-  console.error('Database connection failed: ', err);
-});
+// // Database connection
+// sql.connect(config).then(pool => {
+//   if (pool.connected) {
+//     console.log('Connected to database');
+//   } else {
+//     console.log('Failed to connect to database');
+//   }
+// }).catch(err => {
+//   console.error('Database connection failed: ', err);
+// });
+
+//CONNECT TO DATABASE MONGODB
+const mongoose = require('mongoose');
+const uri = process.env.MONGO_URI;
+mongoose.connect(uri, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+})
+.then(() => console.log('MongoDB database connection established successfully'))
+.catch(err => console.error('MongoDB connection error:', err));
+
 
 app.listen(PORT, () => {
   console.log('Diamond API is running at ' + PORT);

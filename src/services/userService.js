@@ -8,48 +8,34 @@ const moment = require("moment");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const paypal = require("paypal-rest-sdk");
+const Account = require("../models/Account");
+const Role = require("../models/Role");
+const AccountToken = require("../models/AccountToken");
 
 let handleUserLogin = (usernameOrEmail, password) => {
     return new Promise(async (resolve, reject) => {
         try {
             let userData = {};
-            const pool = await sql.connect(config);
+            //const pool = await sql.connect(config);
             let isExist = await checkUserCredential(usernameOrEmail);
 
             // Determine if input is username or email
             let queryField = isEmail(usernameOrEmail) ? "email" : "username";
 
-            if (isExist) {
-                let user = await pool
-                    .request()
-                    .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
-                    .query(`
-                        SELECT ac.id, ac.password, ac.firstName, ac.lastName, ac.status, r.name AS role
-                        FROM Account AS ac
-                        JOIN Role AS r ON ac.roleId = r.id
-                        WHERE ac.${queryField} = @usernameOrEmail
-                    `);
-
-                userData = user.recordset[0];
-
-                if (user.recordset.length > 0) {
+            if(isExist){
+                //include role
+                let user = await Account.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] }).populate("roleId");
+                userData = user;
+                if (user) {
                     // Compare password
                     let check = await bcrypt.compare(password, userData.password);
-
                     if (userData.status === 1) {
                         if (check) {
                             userData.errCode = 0;
                             userData.errMessage = "OK";
-
-                            const {
-                                password,
-                                status,
-                                errCode,
-                                errMessage,
-                                ...userWithoutPassword
-                            } = userData;
-
-                            userData.user = userWithoutPassword;
+                            console.log(user);
+                            userData.user = user;
+                            
                         } else {
                             userData.errCode = 1;
                             userData.errMessage = "Username or password is incorrect";
@@ -66,6 +52,54 @@ let handleUserLogin = (usernameOrEmail, password) => {
                 userData.errCode = 3;
                 userData.errMessage = "Username or email is incorrect";
             }
+
+            // if (isExist) {
+            //     let user = await pool
+            //         .request()
+            //         .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
+            //         .query(`
+            //             SELECT ac.id, ac.password, ac.firstName, ac.lastName, ac.status, r.name AS role
+            //             FROM Account AS ac
+            //             JOIN Role AS r ON ac.roleId = r.id
+            //             WHERE ac.${queryField} = @usernameOrEmail
+            //         `);
+
+            //     userData = user.recordset[0];
+
+            //     if (user.recordset.length > 0) {
+            //         // Compare password
+            //         let check = await bcrypt.compare(password, userData.password);
+
+            //         if (userData.status === 1) {
+            //             if (check) {
+            //                 userData.errCode = 0;
+            //                 userData.errMessage = "OK";
+
+            //                 const {
+            //                     password,
+            //                     status,
+            //                     errCode,
+            //                     errMessage,
+            //                     ...userWithoutPassword
+            //                 } = userData;
+
+            //                 userData.user = userWithoutPassword;
+            //             } else {
+            //                 userData.errCode = 1;
+            //                 userData.errMessage = "Username or password is incorrect";
+            //             }
+            //         } else {
+            //             userData.errCode = 4;
+            //             userData.errMessage = "Account has been locked";
+            //         }
+            //     } else {
+            //         userData.errCode = 2;
+            //         userData.errMessage = "User not found";
+            //     }
+            // } else {
+            //     userData.errCode = 3;
+            //     userData.errMessage = "Username or email is incorrect";
+            // }
 
             resolve(userData);
         } catch (error) {
@@ -84,21 +118,30 @@ function isEmail(input) {
 let checkUserCredential = (usernameOrEmail) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await sql.connect(config);
-            let user = await pool
-                .request()
-                .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
-                .query(`
-                    SELECT username, email
-                    FROM Account
-                    WHERE username = @usernameOrEmail OR email = @usernameOrEmail
-                `);
+            const user = await Account.findOne({
+                $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+            });
 
-            if (user.recordset.length > 0) {
+            if (user) {
                 resolve(true);
             } else {
                 resolve(false);
             }
+            // const pool = await sql.connect(config);
+            // let user = await pool
+            //     .request()
+            //     .input("usernameOrEmail", sql.NVarChar, usernameOrEmail)
+            //     .query(`
+            //         SELECT username, email
+            //         FROM Account
+            //         WHERE username = @usernameOrEmail OR email = @usernameOrEmail
+            //     `);
+
+            // if (user.recordset.length > 0) {
+            //     resolve(true);
+            // } else {
+            //     resolve(false);
+            // }
         } catch (error) {
             console.error("Error in checkUserCredential:", error);
             resolve({ errCode: 1, message: "Server error", error });
@@ -159,33 +202,58 @@ let handleUserRegister = (username, password, firstName, lastName, email, phone)
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Connect to the database
-            const pool = await sql.connect(config);
-            const request = pool.request();
+            const role = await Role.findOne({ name: "User" });
+
+
+            const user = new Account({
+                username,
+                password: hashedPassword,
+                firstName,
+                lastName,
+                email,
+                phone,
+                roleId: role._id,
+                status: 0,
+            });
+            await user.save();
+
             const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
-            // Prepare inputs for SQL query
-            request.input("username", sql.NVarChar, username);
-            request.input("password", sql.NVarChar, hashedPassword);
-            request.input("firstName", sql.NVarChar, firstName);
-            request.input("lastName", sql.NVarChar, lastName);
-            request.input("email", sql.NVarChar, email);
-            request.input("phone", sql.NVarChar, phone);
-            request.input("roleId", sql.Int, 5);
-            request.input("status", sql.Int, 0);
-            request.input("activationCode", sql.NVarChar, activationCode);
-            // Execute the SQL query to insert new user
-            const result = await request.query(`
-                BEGIN TRANSACTION;
-                DECLARE @userId INT;
-                INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status)
-                VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status);
 
-                SET @userId = SCOPE_IDENTITY();
-                INSERT INTO PasswordResetTokens (userId, token, expiryDate)
-                VALUES (@userId, @activationCode, DATEADD(HOUR, 1, GETDATE()));
+            const token = new AccountToken({
+                userId: user._id,
+                token: activationCode,
+                tokenType: "EmailVerification",
+                expiryDate: moment().add(1, "hour"),
+            });
+            await token.save();
 
-                COMMIT;
-            `);
+            // // Connect to the database
+            // const pool = await sql.connect(config);
+            // const request = pool.request();
+
+            // // Prepare inputs for SQL query
+            // request.input("username", sql.NVarChar, username);
+            // request.input("password", sql.NVarChar, hashedPassword);
+            // request.input("firstName", sql.NVarChar, firstName);
+            // request.input("lastName", sql.NVarChar, lastName);
+            // request.input("email", sql.NVarChar, email);
+            // request.input("phone", sql.NVarChar, phone);
+            // request.input("roleId", sql.Int, 5);
+            // request.input("status", sql.Int, 0);
+            // request.input("activationCode", sql.NVarChar, activationCode);
+            // // Execute the SQL query to insert new user
+            // const result = await request.query(`
+            //     BEGIN TRANSACTION;
+            //     DECLARE @userId INT;
+            //     INSERT INTO Account (username, password, firstName, lastName, email, phone, roleId, status)
+            //     VALUES (@username, @password, @firstName, @lastName, @email, @phone, @roleId, @status);
+
+            //     SET @userId = SCOPE_IDENTITY();
+            //     INSERT INTO PasswordResetTokens (userId, token, expiryDate)
+            //     VALUES (@userId, @activationCode, DATEADD(HOUR, 1, GETDATE()));
+
+            //     COMMIT;
+            // `);
 
 
             await transporter.sendMail({
@@ -249,28 +317,43 @@ const generateToken = () => {
 const forgotPassword = async (email) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const pool = await sql.connect(config);
-            const request = pool.request();
-            request.input("email", sql.NVarChar, email);
-            const result = await request.query(
-                "SELECT id FROM Account WHERE email = @email"
-            );
-            if (result.recordset.length === 0) {
+            // const pool = await sql.connect(config);
+            // const request = pool.request();
+            // request.input("email", sql.NVarChar, email);
+            // const result = await request.query(
+            //     "SELECT id FROM Account WHERE email = @email"
+            // );
+            // if (result.recordset.length === 0) {
+            //     resolve({ errCode: 2, message: "Email not found" });
+            //     return;
+            // }
+            const user = await Account.findOne({ email: email });
+            if (!user) {
                 resolve({ errCode: 2, message: "Email not found" });
                 return;
             }
+            
 
             const token = generateToken();
-            const userId = result.recordset[0].id;
+            //const userId = result.recordset[0].id;
 
-            await request
-                .input("userId", sql.Int, userId)
-                .input("token", sql.NVarChar, token)
-                .query(
-                    "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, DATEADD(HOUR, 1, GETDATE()))"
-                );
+            // await request
+            //     .input("userId", sql.Int, userId)
+            //     .input("token", sql.NVarChar, token)
+            //     .query(
+            //         "INSERT INTO PasswordResetTokens (userId, token, expiryDate) VALUES (@userId, @token, DATEADD(HOUR, 1, GETDATE()))"
+            //     );
 
-            const resetLink = `https://dvs-fe-soramyos-projects.vercel.app/reset-password?token=${token}&id=${userId}`;
+
+            const newToken = new AccountToken({
+                userId: user._id,
+                token: token,
+                tokenType: "ResetPassword",
+                expiryDate: moment().add(1, "hour"),
+            });
+            await newToken.save();
+
+            const resetLink = `https://dvs-fe-soramyos-projects.vercel.app/reset-password?token=${token}&id=${user._id}`;
             await transporter.sendMail({
                 from: '"Diamond Valuation System" <no-reply@diamondvaluationsystem.com>',
                 to: email,
@@ -294,6 +377,7 @@ const forgotPassword = async (email) => {
             });
             resolve({ errCode: 0, message: "Email sent successfully" });
         } catch (error) {
+            console.error("Error in forgotPassword:", error);
             resolve({ errCode: 1, message: "Server error", error });
         }
     });
